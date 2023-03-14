@@ -64,15 +64,19 @@ func TestManyRecords(t *testing.T) {
 	givenRecordsToRead(reader, records)
 
 	// Then
+	expectRecordsToWrite(writer, records)
+
+	// When
+	useCase.Run(ctx)
+}
+
+func expectRecordsToWrite(writer *MockChatRecordWriter, records []*business.ChatRecord) {
 	for _, r := range records {
 		writer.
 			EXPECT().
 			Write(gomock.Eq(r)).
 			Times(1)
 	}
-
-	// When
-	useCase.Run(ctx)
 }
 
 func givenRecordsToRead(reader *MockChatRecordReader, records []*business.ChatRecord) {
