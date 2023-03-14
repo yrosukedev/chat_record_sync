@@ -70,6 +70,30 @@ func TestManyRecords(t *testing.T) {
 	useCase.Run(ctx)
 }
 
+func TestReaderError_beforeReading(t *testing.T) {
+	// Given
+	ctx := context.Background()
+	ctrl := gomock.NewController(t)
+	reader := NewMockChatRecordReader(ctrl)
+	writer := NewMockChatRecordWriter(ctrl)
+	useCase := NewSyncChatRecordUseCase(reader, writer)
+
+	reader.
+		EXPECT().
+		Read().
+		Return(nil, io.ErrUnexpectedEOF).
+		Times(1)
+
+	// Then
+	writer.
+		EXPECT().
+		Write(gomock.Any()).
+		Times(0)
+
+	// When
+	useCase.Run(ctx)
+}
+
 func expectRecordsToWrite(writer *MockChatRecordWriter, records []*business.ChatRecord) {
 	for _, r := range records {
 		writer.
@@ -93,3 +117,4 @@ func givenRecordsToRead(reader *MockChatRecordReader, records []*business.ChatRe
 		}).
 		AnyTimes()
 }
+
