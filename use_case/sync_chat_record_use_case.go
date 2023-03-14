@@ -30,7 +30,7 @@ func (u *SyncChatRecordUseCase) Run(ctx context.Context) error {
 		}
 
 		if err := u.writer.Write(record); err != nil {
-			return err
+			continue
 		}
 	}
 
