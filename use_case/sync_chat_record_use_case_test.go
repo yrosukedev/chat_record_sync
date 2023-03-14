@@ -48,6 +48,33 @@ func TestOneRecord(t *testing.T) {
 	useCase.Run(ctx)
 }
 
+func TestManyRecords(t *testing.T) {
+	// Given
+	ctx := context.Background()
+	ctrl := gomock.NewController(t)
+	reader := NewMockChatRecordReader(ctrl)
+	writer := NewMockChatRecordWriter(ctrl)
+	useCase := NewSyncChatRecordUseCase(reader, writer)
+
+	records := []*business.ChatRecord{
+		&business.ChatRecord{},
+		&business.ChatRecord{},
+		&business.ChatRecord{},
+	}
+	givenRecordsToRead(reader, records)
+
+	// Then
+	for _, r := range records {
+		writer.
+			EXPECT().
+			Write(gomock.Eq(r)).
+			Times(1)
+	}
+
+	// When
+	useCase.Run(ctx)
+}
+
 func givenRecordsToRead(reader *MockChatRecordReader, records []*business.ChatRecord) {
 	idx := 0
 	reader.
