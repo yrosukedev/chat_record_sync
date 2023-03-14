@@ -33,10 +33,23 @@ func TestOneRecord(t *testing.T) {
 	writer := NewMockChatRecordWriter(ctrl)
 	useCase := NewSyncChatRecordUseCase(reader, writer)
 
-	idx := 0
 	records := []*business.ChatRecord{
 		&business.ChatRecord{},
 	}
+	givenRecordsToRead(reader, records)
+
+	// Then
+	writer.
+		EXPECT().
+		Write(gomock.Eq(records[0])).
+		Times(1)
+
+	// When
+	useCase.Run(ctx)
+}
+
+func givenRecordsToRead(reader *MockChatRecordReader, records []*business.ChatRecord) {
+	idx := 0
 	reader.
 		EXPECT().
 		Read().
@@ -48,13 +61,4 @@ func TestOneRecord(t *testing.T) {
 			return records[idx], nil
 		}).
 		AnyTimes()
-
-	// Then
-	writer.
-		EXPECT().
-		Write(gomock.Eq(records[0])).
-		Times(1)
-
-	// When
-	useCase.Run(ctx)
 }
