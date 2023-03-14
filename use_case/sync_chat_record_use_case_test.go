@@ -3,6 +3,7 @@ package use_case
 import (
 	"context"
 	"github.com/golang/mock/gomock"
+	"github.com/yrosukedev/chat_record_sync/business"
 	"io"
 	"testing"
 )
@@ -19,6 +20,40 @@ func TestZeroRecord(t *testing.T) {
 
 	// Then
 	writer.EXPECT().Write(gomock.Any()).Times(0)
+
+	// When
+	useCase.Run(ctx)
+}
+
+func TestOneRecord(t *testing.T) {
+	// Given
+	ctx := context.Background()
+	ctrl := gomock.NewController(t)
+	reader := NewMockChatRecordReader(ctrl)
+	writer := NewMockChatRecordWriter(ctrl)
+	useCase := NewSyncChatRecordUseCase(reader, writer)
+
+	idx := 0
+	records := []*business.ChatRecord{
+		&business.ChatRecord{},
+	}
+	reader.
+		EXPECT().
+		Read().
+		DoAndReturn(func() (*business.ChatRecord, error) {
+			if idx >= len(records) {
+				return nil, io.EOF
+			}
+			defer func() { idx += 1 }()
+			return records[idx], nil
+		}).
+		AnyTimes()
+
+	// Then
+	writer.
+		EXPECT().
+		Write(gomock.Eq(records[0])).
+		Times(1)
 
 	// When
 	useCase.Run(ctx)
