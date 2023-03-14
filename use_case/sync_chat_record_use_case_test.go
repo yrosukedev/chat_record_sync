@@ -138,6 +138,30 @@ func TestWriterError_firstRecord(t *testing.T) {
 	useCase.Run(ctx)
 }
 
+func TestWriterError_recordInTheMiddle(t *testing.T) {
+	// Given
+	ctx := context.Background()
+	ctrl := gomock.NewController(t)
+	reader := NewMockChatRecordReader(ctrl)
+	writer := NewMockChatRecordWriter(ctrl)
+	useCase := NewSyncChatRecordUseCase(reader, writer)
+
+	records := []*business.ChatRecord{
+		&business.ChatRecord{},
+		&business.ChatRecord{},
+		&business.ChatRecord{},
+	}
+	givenRecordsToRead(reader, records)
+
+	// Then
+	writer.EXPECT().Write(gomock.Eq(records[0])).Times(1).Return(nil)
+	writer.EXPECT().Write(gomock.Eq(records[1])).Times(1).Return(io.ErrNoProgress)
+	writer.EXPECT().Write(gomock.Eq(records[2])).Times(1).Return(nil)
+
+	// When
+	useCase.Run(ctx)
+}
+
 func expectRecordsToWrite(writer *MockChatRecordWriter, records []*business.ChatRecord) {
 	for _, r := range records {
 		writer.
