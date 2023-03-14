@@ -32,6 +32,7 @@ func (u *SyncChatRecordUseCase) Run(ctx context.Context) []*SyncError {
 		}
 
 		if err := u.writer.Write(record); err != nil {
+			errs = append(errs, NewWriterError(err, record))
 			continue
 		}
 	}

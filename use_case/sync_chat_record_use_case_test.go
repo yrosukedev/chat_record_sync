@@ -193,6 +193,37 @@ func TestAccumulateErrors_readerError(t *testing.T) {
 	}
 }
 
+func TestAccumulatedErrors_writeError(t *testing.T) {
+	// Given
+	ctx := context.Background()
+	ctrl := gomock.NewController(t)
+	reader := NewMockChatRecordReader(ctrl)
+	writer := NewMockChatRecordWriter(ctrl)
+	useCase := NewSyncChatRecordUseCase(reader, writer)
+
+	records := []*business.ChatRecord{
+		&business.ChatRecord{},
+		&business.ChatRecord{},
+		&business.ChatRecord{},
+	}
+	givenRecordsToRead(reader, records)
+
+	// Then
+	writer.EXPECT().Write(gomock.Eq(records[0])).Times(1).Return(nil)
+	writer.EXPECT().Write(gomock.Eq(records[1])).Times(1).Return(io.ErrShortBuffer)
+	writer.EXPECT().Write(gomock.Eq(records[2])).Times(1).Return(io.ErrShortWrite)
+
+	// When
+	errs := useCase.Run(ctx)
+	expectedErrs := []*SyncError{
+		NewWriterError(io.ErrShortBuffer, records[1]),
+		NewWriterError(io.ErrShortWrite, records[2]),
+	}
+	if !reflect.DeepEqual(errs, expectedErrs) {
+		t.Errorf("accumulated errors are not equal, expected: %+v, actual: %+v", expectedErrs, errs)
+	}
+}
+
 func expectRecordsToWrite(writer *MockChatRecordWriter, records []*business.ChatRecord) {
 	for _, r := range records {
 		writer.
