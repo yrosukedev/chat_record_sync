@@ -6,6 +6,7 @@ import (
 	"github.com/yrosukedev/chat_record_sync/business"
 	"golang.org/x/exp/slices"
 	"io"
+	"reflect"
 	"testing"
 )
 
@@ -161,6 +162,35 @@ func TestWriterError_recordInTheMiddle(t *testing.T) {
 
 	// When
 	useCase.Run(ctx)
+}
+
+func TestAccumulateErrors_readerError(t *testing.T) {
+	// Given
+	ctx := context.Background()
+	ctrl := gomock.NewController(t)
+	reader := NewMockChatRecordReader(ctrl)
+	writer := NewMockChatRecordWriter(ctrl)
+	useCase := NewSyncChatRecordUseCase(reader, writer)
+
+	records := []*business.ChatRecord{
+		&business.ChatRecord{},
+		&business.ChatRecord{},
+		&business.ChatRecord{},
+	}
+	encounterErrorWhileReadingRecords(reader, records, []int{0, 2}, io.ErrClosedPipe)
+
+	// Then
+	writer.EXPECT().Write(gomock.Eq(records[1])).Times(1).Return(nil)
+
+	// When
+	errs := useCase.Run(ctx)
+	expectedErrs := []*SyncError{
+		NewReaderError(io.ErrClosedPipe),
+		NewReaderError(io.ErrClosedPipe),
+	}
+	if !reflect.DeepEqual(errs, expectedErrs) {
+		t.Errorf("accumulated errors are not equal, expected: %+v, actual: %+v", expectedErrs, errs)
+	}
 }
 
 func expectRecordsToWrite(writer *MockChatRecordWriter, records []*business.ChatRecord) {

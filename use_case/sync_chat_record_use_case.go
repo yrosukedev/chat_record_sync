@@ -17,7 +17,8 @@ func NewSyncChatRecordUseCase(reader ChatRecordReader, writer ChatRecordWriter) 
 	}
 }
 
-func (u *SyncChatRecordUseCase) Run(ctx context.Context) error {
+func (u *SyncChatRecordUseCase) Run(ctx context.Context) []*SyncError {
+	var errs []*SyncError
 
 	for {
 		record, err := u.reader.Read()
@@ -26,6 +27,7 @@ func (u *SyncChatRecordUseCase) Run(ctx context.Context) error {
 		}
 
 		if err != nil {
+			errs = append(errs, NewReaderError(err))
 			continue
 		}
 
@@ -34,5 +36,5 @@ func (u *SyncChatRecordUseCase) Run(ctx context.Context) error {
 		}
 	}
 
-	return nil
+	return errs
 }
