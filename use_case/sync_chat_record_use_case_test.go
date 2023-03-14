@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/golang/mock/gomock"
 	"github.com/yrosukedev/chat_record_sync/business"
+	"golang.org/x/exp/slices"
 	"io"
 	"testing"
 )
@@ -82,7 +83,7 @@ func TestReaderError_beforeReading(t *testing.T) {
 		&business.ChatRecord{},
 		&business.ChatRecord{},
 	}
-	encounterErrorWhileReadingRecords(reader, records, 0, io.ErrClosedPipe)
+	encounterErrorWhileReadingRecords(reader, records, []int{0}, io.ErrClosedPipe)
 
 	// Then
 	writer.EXPECT().Write(records[1]).Times(1)
@@ -104,7 +105,7 @@ func TestReaderError_whileReading(t *testing.T) {
 		&business.ChatRecord{},
 		&business.ChatRecord{},
 	}
-	encounterErrorWhileReadingRecords(reader, records, 1, io.ErrClosedPipe)
+	encounterErrorWhileReadingRecords(reader, records, []int{1}, io.ErrClosedPipe)
 
 	// Then
 	writer.EXPECT().Write(gomock.Eq(records[0])).Times(1)
@@ -186,7 +187,7 @@ func givenRecordsToRead(reader *MockChatRecordReader, records []*business.ChatRe
 		AnyTimes()
 }
 
-func encounterErrorWhileReadingRecords(reader *MockChatRecordReader, records []*business.ChatRecord, errIdx int, err error) {
+func encounterErrorWhileReadingRecords(reader *MockChatRecordReader, records []*business.ChatRecord, errIdxs []int, err error) {
 	idx := 0
 	reader.
 		EXPECT().
@@ -196,7 +197,7 @@ func encounterErrorWhileReadingRecords(reader *MockChatRecordReader, records []*
 				return nil, io.EOF
 			}
 			defer func() { idx += 1 }()
-			if idx == errIdx {
+			if slices.Contains(errIdxs, idx) {
 				return nil, err
 			}
 			return records[idx], nil
