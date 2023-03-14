@@ -78,17 +78,37 @@ func TestReaderError_beforeReading(t *testing.T) {
 	writer := NewMockChatRecordWriter(ctrl)
 	useCase := NewSyncChatRecordUseCase(reader, writer)
 
-	reader.
-		EXPECT().
-		Read().
-		Return(nil, io.ErrUnexpectedEOF).
-		Times(1)
+	records := []*business.ChatRecord{
+		&business.ChatRecord{},
+		&business.ChatRecord{},
+	}
+	encounterErrorWhileReadingRecords(reader, records, 0, io.ErrClosedPipe)
 
 	// Then
-	writer.
-		EXPECT().
-		Write(gomock.Any()).
-		Times(0)
+	writer.EXPECT().Write(records[1]).Times(1)
+
+	// When
+	useCase.Run(ctx)
+}
+
+func TestReaderError_whileReading(t *testing.T) {
+	// Given
+	ctx := context.Background()
+	ctrl := gomock.NewController(t)
+	reader := NewMockChatRecordReader(ctrl)
+	writer := NewMockChatRecordWriter(ctrl)
+	useCase := NewSyncChatRecordUseCase(reader, writer)
+
+	records := []*business.ChatRecord{
+		&business.ChatRecord{},
+		&business.ChatRecord{},
+		&business.ChatRecord{},
+	}
+	encounterErrorWhileReadingRecords(reader, records, 1, io.ErrClosedPipe)
+
+	// Then
+	writer.EXPECT().Write(gomock.Eq(records[0])).Times(1)
+	writer.EXPECT().Write(gomock.Eq(records[2])).Times(1)
 
 	// When
 	useCase.Run(ctx)
@@ -118,3 +138,20 @@ func givenRecordsToRead(reader *MockChatRecordReader, records []*business.ChatRe
 		AnyTimes()
 }
 
+func encounterErrorWhileReadingRecords(reader *MockChatRecordReader, records []*business.ChatRecord, errIdx int, err error) {
+	idx := 0
+	reader.
+		EXPECT().
+		Read().
+		DoAndReturn(func() (*business.ChatRecord, error) {
+			if idx >= len(records) {
+				return nil, io.EOF
+			}
+			defer func() { idx += 1 }()
+			if idx == errIdx {
+				return nil, err
+			}
+			return records[idx], nil
+		}).
+		AnyTimes()
+}
