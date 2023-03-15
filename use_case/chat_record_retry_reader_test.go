@@ -89,18 +89,7 @@ func TestOneSequenceOfConsecutiveErrors_oneError_errorCountsLessThanMaxRetryTime
 	encounterErrorWhileReadingRecords(reader, records)
 
 	// Then
-	if _, err := proxyReader.Read(); err != nil {
-		t.Errorf("error should not happen here, expected: %+v, actual: %+v", nil, err)
-	}
-	if _, err := proxyReader.Read(); err != io.ErrShortBuffer {
-		t.Errorf("error should happen here, expected: %+v, actual: %+v", io.ErrShortBuffer, err)
-	}
-	if _, err := proxyReader.Read(); err != nil {
-		t.Errorf("error should not happen here, expected: %+v, actual: %+v", nil, err)
-	}
-	if _, err := proxyReader.Read(); err != io.EOF {
-		t.Errorf("io.EOF should be returned here, expected: %+v, actual: %+v", io.EOF, err)
-	}
+	expectReaderToReadRecordsOrErrors(t, proxyReader, records)
 }
 
 func TestOneSequenceOfConsecutiveErrors_oneError_errorCountsEqualToMaxRetryTimes(t *testing.T) {
@@ -119,16 +108,24 @@ func TestOneSequenceOfConsecutiveErrors_oneError_errorCountsEqualToMaxRetryTimes
 	encounterErrorWhileReadingRecords(reader, records)
 
 	// Then
-	if _, err := proxyReader.Read(); err != nil {
-		t.Errorf("error should not happen here, expected: %+v, actual: %+v", nil, err)
+	expectReaderToReadRecordsOrErrors(t, proxyReader, records)
+}
+
+func expectReaderToReadRecordsOrErrors(t *testing.T, reader ChatRecordReader, records []*recordOrError) {
+	for _, record := range records {
+		switch record.theType {
+		case recordOrErrorTypeError:
+			if _, err := reader.Read(); err != record.err {
+				t.Errorf("error should happen here, expected: %+v, actual: %+v", record.err, err)
+			}
+		case recordOrErrorTypeRecord:
+			if _, err := reader.Read(); err != nil {
+				t.Errorf("error should not happen here, expected: %+v, actual: %+v", nil, err)
+			}
+		}
 	}
-	if _, err := proxyReader.Read(); err != io.ErrShortBuffer {
-		t.Errorf("error should happen here, expected: %+v, actual: %+v", io.ErrShortBuffer, err)
-	}
-	if _, err := proxyReader.Read(); err != nil {
-		t.Errorf("error should not happen here, expected: %+v, actual: %+v", nil, err)
-	}
-	if _, err := proxyReader.Read(); err != io.EOF {
+
+	if _, err := reader.Read(); err != io.EOF {
 		t.Errorf("io.EOF should be returned here, expected: %+v, actual: %+v", io.EOF, err)
 	}
 }
