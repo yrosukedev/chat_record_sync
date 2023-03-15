@@ -268,6 +268,48 @@ func TestManySequencesOfConsecutiveErrors_errorCountEqualToMaxRetryTimes(t *test
 	expectReaderToReadRecordsOrErrors(t, proxyReader, records)
 }
 
+func TestManySequencesOfConsecutiveErrors_errorCountGreaterThanMaxRetryTimes(t *testing.T) {
+	// Given
+	ctrl := gomock.NewController(t)
+	reader := NewMockChatRecordReader(ctrl)
+	maxRetryTimes := uint(3)
+	proxyReader := NewChatRecordRetryReader(reader, maxRetryTimes)
+
+	// When
+	records := []*recordOrError{
+		newRecordOrErrorWithRecord(&business.ChatRecord{}),
+		newRecordOrErrorWithRecord(&business.ChatRecord{}),
+		newRecordOrErrorWithError(io.ErrUnexpectedEOF),
+		newRecordOrErrorWithError(io.ErrClosedPipe),
+		newRecordOrErrorWithRecord(&business.ChatRecord{}),
+		newRecordOrErrorWithError(io.ErrNoProgress),
+		newRecordOrErrorWithRecord(&business.ChatRecord{}),
+		newRecordOrErrorWithError(io.ErrShortBuffer),
+		newRecordOrErrorWithError(io.ErrUnexpectedEOF),
+		newRecordOrErrorWithError(io.ErrClosedPipe),
+		newRecordOrErrorWithError(io.ErrShortWrite),
+		newRecordOrErrorWithRecord(&business.ChatRecord{}),
+		newRecordOrErrorWithRecord(&business.ChatRecord{}),
+	}
+	encounterErrorWhileReadingRecords(reader, records)
+
+	// Then
+	expectedRecordsOrErrors := []*recordOrError{
+		newRecordOrErrorWithRecord(&business.ChatRecord{}),
+		newRecordOrErrorWithRecord(&business.ChatRecord{}),
+		newRecordOrErrorWithError(io.ErrUnexpectedEOF),
+		newRecordOrErrorWithError(io.ErrClosedPipe),
+		newRecordOrErrorWithRecord(&business.ChatRecord{}),
+		newRecordOrErrorWithError(io.ErrNoProgress),
+		newRecordOrErrorWithRecord(&business.ChatRecord{}),
+		newRecordOrErrorWithError(io.ErrShortBuffer),
+		newRecordOrErrorWithError(io.ErrUnexpectedEOF),
+		newRecordOrErrorWithError(io.ErrClosedPipe),
+		newRecordOrErrorWithError(io.EOF),
+	}
+	expectReaderToReadRecordsOrErrors(t, proxyReader, expectedRecordsOrErrors)
+}
+
 func expectReaderToReadRecordsOrErrors(t *testing.T, reader ChatRecordReader, records []*recordOrError) {
 	for _, record := range records {
 		switch record.theType {
