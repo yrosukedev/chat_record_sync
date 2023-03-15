@@ -111,6 +111,33 @@ func TestOneSequenceOfConsecutiveErrors_oneError_errorCountsEqualToMaxRetryTimes
 	expectReaderToReadRecordsOrErrors(t, proxyReader, records)
 }
 
+func TestOneSequenceOfConsecutiveErrors_oneError_errorCountsGreaterThanMaxRetryTimes(t *testing.T) {
+	// Given
+	ctrl := gomock.NewController(t)
+	reader := NewMockChatRecordReader(ctrl)
+	maxRetryTimes := uint(0)
+	proxyReader := NewChatRecordRetryReader(reader, maxRetryTimes)
+
+	// When
+	records := []*recordOrError{
+		newRecordOrErrorWithRecord(&business.ChatRecord{}),
+		newRecordOrErrorWithError(io.ErrShortBuffer),
+		newRecordOrErrorWithRecord(&business.ChatRecord{}),
+	}
+	encounterErrorWhileReadingRecords(reader, records)
+
+	// Then
+	expectedRecordsOrErrors := []*recordOrError{
+		newRecordOrErrorWithRecord(&business.ChatRecord{}),
+		newRecordOrErrorWithError(io.ErrShortBuffer),
+		newRecordOrErrorWithError(io.EOF), // terminated from here
+		newRecordOrErrorWithError(io.EOF),
+		newRecordOrErrorWithError(io.EOF),
+		newRecordOrErrorWithError(io.EOF),
+	}
+	expectReaderToReadRecordsOrErrors(t, proxyReader, expectedRecordsOrErrors)
+}
+
 func expectReaderToReadRecordsOrErrors(t *testing.T, reader ChatRecordReader, records []*recordOrError) {
 	for _, record := range records {
 		switch record.theType {
