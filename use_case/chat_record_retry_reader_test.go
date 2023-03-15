@@ -18,9 +18,8 @@ func TestZeroSequenceOfConsecutiveErrors_zeroRead(t *testing.T) {
 	reader.EXPECT().Read().Return(nil, io.EOF).Times(1)
 
 	// Then
-	_, err := proxyReader.Read()
-	if err != io.EOF {
-		t.Error("io.EOF should be returned here")
+	if _, err := proxyReader.Read(); err != io.EOF {
+		t.Errorf("io.EOF should be returned here, expected: %+v, actual: %+v", io.EOF, err)
 	}
 }
 
@@ -39,12 +38,11 @@ func TestZeroSequenceOfConsecutiveErrors_oneRead(t *testing.T) {
 
 	// Then
 	if _, err := proxyReader.Read(); err != nil {
-		t.Error("error should not happen here")
+		t.Errorf("error should not happen here, expected: %+v, actual: %+v", nil, err)
 	}
 
-	_, err := proxyReader.Read()
-	if err != io.EOF {
-		t.Error("io.EOF should be returned here")
+	if _, err := proxyReader.Read(); err != io.EOF {
+		t.Errorf("io.EOF should be returned here, expected: %+v, actual: %+v", io.EOF, err)
 	}
 }
 
@@ -66,13 +64,12 @@ func TestZeroSequenceOfConsecutiveErrors_manyReads(t *testing.T) {
 	// Then
 	for i := 0; i < len(records); i++ {
 		if _, err := proxyReader.Read(); err != nil {
-			t.Error("error should not happen here")
+			t.Errorf("error should not happen here, expected: %+v, actual: %+v", nil, err)
 		}
 	}
 
-	_, err := proxyReader.Read()
-	if err != io.EOF {
-		t.Error("io.EOF should be returned here")
+	if _, err := proxyReader.Read(); err != io.EOF {
+		t.Errorf("io.EOF should be returned here, expected: %+v, actual: %+v", io.EOF, err)
 	}
 }
 
@@ -92,14 +89,46 @@ func TestOneSequenceOfConsecutiveErrors_oneError_errorCountsLessThanMaxRetryTime
 	encounterErrorWhileReadingRecords(reader, records)
 
 	// Then
-	for i := 0; i < 2; i++ {
-		if _, err := proxyReader.Read(); err != nil {
-			t.Error("error should not happen here")
-		}
+	if _, err := proxyReader.Read(); err != nil {
+		t.Errorf("error should not happen here, expected: %+v, actual: %+v", nil, err)
 	}
+	if _, err := proxyReader.Read(); err != io.ErrShortBuffer {
+		t.Errorf("error should happen here, expected: %+v, actual: %+v", io.ErrShortBuffer, err)
+	}
+	if _, err := proxyReader.Read(); err != nil {
+		t.Errorf("error should not happen here, expected: %+v, actual: %+v", nil, err)
+	}
+	if _, err := proxyReader.Read(); err != io.EOF {
+		t.Errorf("io.EOF should be returned here, expected: %+v, actual: %+v", io.EOF, err)
+	}
+}
 
-	_, err := proxyReader.Read()
-	if err != io.EOF {
-		t.Error("io.EOF should be returned here")
+func TestOneSequenceOfConsecutiveErrors_oneError_errorCountsEqualToMaxRetryTimes(t *testing.T) {
+	// Given
+	ctrl := gomock.NewController(t)
+	reader := NewMockChatRecordReader(ctrl)
+	maxRetryTimes := uint(1)
+	proxyReader := NewChatRecordRetryReader(reader, maxRetryTimes)
+
+	// When
+	records := []*recordOrError{
+		newRecordOrErrorWithRecord(&business.ChatRecord{}),
+		newRecordOrErrorWithError(io.ErrShortBuffer),
+		newRecordOrErrorWithRecord(&business.ChatRecord{}),
+	}
+	encounterErrorWhileReadingRecords(reader, records)
+
+	// Then
+	if _, err := proxyReader.Read(); err != nil {
+		t.Errorf("error should not happen here, expected: %+v, actual: %+v", nil, err)
+	}
+	if _, err := proxyReader.Read(); err != io.ErrShortBuffer {
+		t.Errorf("error should happen here, expected: %+v, actual: %+v", io.ErrShortBuffer, err)
+	}
+	if _, err := proxyReader.Read(); err != nil {
+		t.Errorf("error should not happen here, expected: %+v, actual: %+v", nil, err)
+	}
+	if _, err := proxyReader.Read(); err != io.EOF {
+		t.Errorf("io.EOF should be returned here, expected: %+v, actual: %+v", io.EOF, err)
 	}
 }

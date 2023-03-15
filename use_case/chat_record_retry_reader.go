@@ -6,31 +6,32 @@ import (
 )
 
 type ChatRecordRetryReader struct {
-	reader        ChatRecordReader
-	maxRetryTimes uint
-	retriedTimes  uint
+	reader                  ChatRecordReader
+	maxRetryTimes           uint
+	consecutiveFailureTimes uint
 }
 
 func NewChatRecordRetryReader(reader ChatRecordReader, maxRetryTimes uint) *ChatRecordRetryReader {
 	return &ChatRecordRetryReader{
-		reader:        reader,
-		maxRetryTimes: maxRetryTimes,
-		retriedTimes:  0,
+		reader:                  reader,
+		maxRetryTimes:           maxRetryTimes,
+		consecutiveFailureTimes: 0,
 	}
 }
 
+// Read from the proxy reader and forward the result.
+// If the number of proxy reader consecutive failure exceeds maxRetryTimes,
+// stop forwarding the result and append io.EOF to indicate the end.
 func (c *ChatRecordRetryReader) Read() (record *business.ChatRecord, err error) {
-	for c.retriedTimes < c.maxRetryTimes {
-		record, err := c.reader.Read()
-
-		if err == nil || err == io.EOF {
-			return record, err
-		}
-
-		c.retriedTimes += 1
-
-		// TODO: log the error
+	if c.consecutiveFailureTimes > c.maxRetryTimes {
+		return nil, io.EOF
 	}
 
-	return nil, io.EOF
+	record, err = c.reader.Read()
+
+	if err != nil && err != io.EOF {
+		c.consecutiveFailureTimes += 1
+	}
+
+	return record, err
 }
