@@ -214,7 +214,7 @@ func TestManySequencesOfConsecutiveErrors_errorCountLessThanMaxRetryTimes(t *tes
 	// Given
 	ctrl := gomock.NewController(t)
 	reader := NewMockChatRecordReader(ctrl)
-	maxRetryTimes := uint(10)
+	maxRetryTimes := uint(5)
 	proxyReader := NewChatRecordRetryReader(reader, maxRetryTimes)
 
 	// When
@@ -232,6 +232,35 @@ func TestManySequencesOfConsecutiveErrors_errorCountLessThanMaxRetryTimes(t *tes
 		newRecordOrErrorWithRecord(&business.ChatRecord{}),
 		newRecordOrErrorWithError(io.ErrUnexpectedEOF),
 		newRecordOrErrorWithError(io.ErrClosedPipe),
+	}
+	encounterErrorWhileReadingRecords(reader, records)
+
+	// Then
+	expectReaderToReadRecordsOrErrors(t, proxyReader, records)
+}
+
+func TestManySequencesOfConsecutiveErrors_errorCountEqualToMaxRetryTimes(t *testing.T) {
+	// Given
+	ctrl := gomock.NewController(t)
+	reader := NewMockChatRecordReader(ctrl)
+	maxRetryTimes := uint(4)
+	proxyReader := NewChatRecordRetryReader(reader, maxRetryTimes)
+
+	// When
+	records := []*recordOrError{
+		newRecordOrErrorWithRecord(&business.ChatRecord{}),
+		newRecordOrErrorWithRecord(&business.ChatRecord{}),
+		newRecordOrErrorWithError(io.ErrUnexpectedEOF),
+		newRecordOrErrorWithError(io.ErrClosedPipe),
+		newRecordOrErrorWithRecord(&business.ChatRecord{}),
+		newRecordOrErrorWithError(io.ErrNoProgress),
+		newRecordOrErrorWithRecord(&business.ChatRecord{}),
+		newRecordOrErrorWithError(io.ErrShortBuffer),
+		newRecordOrErrorWithError(io.ErrUnexpectedEOF),
+		newRecordOrErrorWithError(io.ErrClosedPipe),
+		newRecordOrErrorWithError(io.ErrShortWrite),
+		newRecordOrErrorWithRecord(&business.ChatRecord{}),
+		newRecordOrErrorWithRecord(&business.ChatRecord{}),
 	}
 	encounterErrorWhileReadingRecords(reader, records)
 

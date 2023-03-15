@@ -27,11 +27,15 @@ func NewChatRecordRetryReader(reader ChatRecordReader, maxRetryTimes uint) *Chat
 // If the number of proxy reader consecutive failure exceeds maxRetryTimes,
 // stop forwarding the result and append io.EOF to indicate the end.
 func (c *ChatRecordRetryReader) Read() (record *business.ChatRecord, err error) {
-	if c.consecutiveFailureTimes <= c.maxRetryTimes {
-		record, err = c.reader.Read()
+	if c.consecutiveFailureTimes > c.maxRetryTimes {
+		return nil, io.EOF
 	}
 
-	if err != nil && err != io.EOF {
+	record, err = c.reader.Read()
+
+	if err == nil || err == io.EOF {
+		c.consecutiveFailureTimes = 0
+	} else {
 		c.consecutiveFailureTimes += 1
 	}
 
