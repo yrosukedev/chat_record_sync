@@ -130,10 +130,7 @@ func TestOneSequenceOfConsecutiveErrors_oneError_errorCountsGreaterThanMaxRetryT
 	expectedRecordsOrErrors := []*recordOrError{
 		newRecordOrErrorWithRecord(&business.ChatRecord{}),
 		newRecordOrErrorWithError(io.ErrShortBuffer),
-		newRecordOrErrorWithError(io.EOF), // terminated from here
-		newRecordOrErrorWithError(io.EOF),
-		newRecordOrErrorWithError(io.EOF),
-		newRecordOrErrorWithError(io.EOF),
+		newRecordOrErrorWithRecord(&business.ChatRecord{}),
 	}
 	expectReaderToReadRecordsOrErrors(t, proxyReader, expectedRecordsOrErrors)
 }
@@ -179,6 +176,38 @@ func TestOneSequenceOfConsecutiveErrors_manyErrors_errorCountsEqualToMaxRetryTim
 
 	// Then
 	expectReaderToReadRecordsOrErrors(t, proxyReader, records)
+}
+
+func TestOneSequenceOfConsecutiveErrors_manyErrors_errorCountsGreaterThanMaxRetryTimes(t *testing.T) {
+	// Given
+	ctrl := gomock.NewController(t)
+	reader := NewMockChatRecordReader(ctrl)
+	maxRetryTimes := uint(3)
+	proxyReader := NewChatRecordRetryReader(reader, maxRetryTimes)
+
+	// When
+	records := []*recordOrError{
+		newRecordOrErrorWithRecord(&business.ChatRecord{}),
+		newRecordOrErrorWithError(io.ErrShortBuffer),
+		newRecordOrErrorWithError(io.ErrUnexpectedEOF),
+		newRecordOrErrorWithError(io.ErrClosedPipe),
+		newRecordOrErrorWithError(io.ErrShortWrite),
+		newRecordOrErrorWithRecord(&business.ChatRecord{}),
+	}
+	encounterErrorWhileReadingRecords(reader, records)
+
+	// Then
+	expectedRecordsOrErrors := []*recordOrError{
+		newRecordOrErrorWithRecord(&business.ChatRecord{}),
+		newRecordOrErrorWithError(io.ErrShortBuffer),
+		newRecordOrErrorWithError(io.ErrUnexpectedEOF),
+		newRecordOrErrorWithError(io.ErrClosedPipe),
+		newRecordOrErrorWithError(io.EOF), // terminated from here
+		newRecordOrErrorWithError(io.EOF),
+		newRecordOrErrorWithError(io.EOF),
+		newRecordOrErrorWithError(io.EOF),
+	}
+	expectReaderToReadRecordsOrErrors(t, proxyReader, expectedRecordsOrErrors)
 }
 
 func expectReaderToReadRecordsOrErrors(t *testing.T, reader ChatRecordReader, records []*recordOrError) {
