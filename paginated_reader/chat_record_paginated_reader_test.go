@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/golang/mock/gomock"
 	"github.com/yrosukedev/chat_record_sync/business"
+	"io"
 	"reflect"
 	"testing"
 )
@@ -206,6 +207,50 @@ func TestDetermineEnd_requestPageSizeEqualToResponsePageSize(t *testing.T) {
 	}
 }
 
+func TestDetermineEnd_requestPageSizeGreaterThanResponsePageSize(t *testing.T) {
+	// Given
+	ctrl := gomock.NewController(t)
+	bufferedReader := NewMockChatRecordPaginatedBufferedReader(ctrl)
+	paginationStorage := NewMockChatRecordPaginationStorage(ctrl)
+	pageSize := uint64(10)
+	paginatedReader := NewChatRecordPaginatedReader(bufferedReader, paginationStorage, pageSize)
+
+	records := []*business.ChatRecord{
+		{},
+		{},
+		{},
+		{},
+		{},
+		{},
+	}
+
+	// Then
+	givenPaginationStoragePageTokens(paginationStorage, []PageToken{PageToken(2000), PageToken(2006)})
+
+	bufferedReader.EXPECT().Read(gomock.Eq(PageToken(2000)), gomock.Eq(pageSize)).Return(records, nil).Times(1)
+	bufferedReader.EXPECT().Read(gomock.Eq(PageToken(2006)), gomock.Eq(pageSize)).Return(records, nil).Times(0)
+
+	paginationStorage.EXPECT().Set(gomock.Eq(PageToken(2006))).Return(nil).Times(1)
+	paginationStorage.EXPECT().Set(gomock.Eq(PageToken(2012))).Return(nil).Times(0)
+
+	// When
+
+	// 1st reading operation
+	forwardingResults, err := paginatedReader.Read()
+	if err != nil {
+		t.Errorf("error should not happen here, err: %v", err)
+	}
+	if !reflect.DeepEqual(records, forwardingResults) {
+		t.Errorf("the results should not be changed when forwarding it, expetecd: %+v, actual: %+v", records, forwardingResults)
+	}
+
+	// 2nd reading operation
+	_, err = paginatedReader.Read()
+	if err != io.EOF {
+		t.Errorf("io.EOF should be returned here, expected: %v, actual: %v", io.EOF, err)
+	}
+}
+
 func givenPaginationStoragePageTokens(paginationStorage *MockChatRecordPaginationStorage, pageTokens []PageToken) {
 	idx := 0
 	paginationStorage.
@@ -218,6 +263,5 @@ func givenPaginationStoragePageTokens(paginationStorage *MockChatRecordPaginatio
 			}
 			return PageToken(0), fmt.Errorf("page token out of range, index: %v, length of token array: %v", idx, len(pageTokens))
 		}).
-		Times(len(pageTokens))
+		AnyTimes()
 }
-
