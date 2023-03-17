@@ -122,3 +122,32 @@ func TestForwardResults_oneRecord(t *testing.T) {
 		t.Errorf("the results should not be changed when forwarding it, expetecd: %+v, actual: %+v", records, forwardingResults)
 	}
 }
+
+func TestForwardResults_manyRecords(t *testing.T) {
+	// Given
+	ctrl := gomock.NewController(t)
+	bufferedReader := NewMockChatRecordPaginatedBufferedReader(ctrl)
+	paginationStorage := NewMockChatRecordPaginationStorage(ctrl)
+	paginatedReader := NewChatRecordPaginatedReader(bufferedReader, paginationStorage)
+
+	// Then
+	paginationStorage.EXPECT().Get().Return(PageToken(10), nil).Times(1)
+
+	records := []*business.ChatRecord{
+		{},
+		{},
+		{},
+	}
+	bufferedReader.EXPECT().Read(gomock.Eq(PageToken(10))).Return(records, nil).Times(1)
+
+	paginationStorage.EXPECT().Set(gomock.Eq(PageToken(13))).Return(nil).Times(1)
+
+	// When
+	forwardingResults, err := paginatedReader.Read()
+	if err != nil {
+		t.Errorf("error should not happen here, err: %v", err)
+	}
+	if !reflect.DeepEqual(records, forwardingResults) {
+		t.Errorf("the results should not be changed when forwarding it, expetecd: %+v, actual: %+v", records, forwardingResults)
+	}
+}
