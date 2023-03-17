@@ -7,12 +7,17 @@ import (
 type ChatRecordPaginatedReader struct {
 	paginatedBufferedReader ChatRecordPaginatedBufferedReader
 	paginationStorage       ChatRecordPaginationStorage
+	pageSize                uint64
 }
 
-func NewChatRecordPaginatedReader(paginatedBufferedReader ChatRecordPaginatedBufferedReader, paginationStorage ChatRecordPaginationStorage) *ChatRecordPaginatedReader {
+func NewChatRecordPaginatedReader(
+	paginatedBufferedReader ChatRecordPaginatedBufferedReader,
+	paginationStorage ChatRecordPaginationStorage,
+	pageSize uint64) *ChatRecordPaginatedReader {
 	return &ChatRecordPaginatedReader{
 		paginatedBufferedReader: paginatedBufferedReader,
 		paginationStorage:       paginationStorage,
+		pageSize:                pageSize,
 	}
 }
 
@@ -22,7 +27,7 @@ func (r *ChatRecordPaginatedReader) Read() (records []*business.ChatRecord, err 
 		return nil, err
 	}
 
-	records, err = r.paginatedBufferedReader.Read(pageToken)
+	records, err = r.paginatedBufferedReader.Read(pageToken, r.pageSize)
 	if err != nil {
 		return nil, err
 	}
