@@ -16,5 +16,10 @@ func NewChatRecordBufferedReaderAdapter(bufferedReader ChatRecordBufferedReader)
 
 func (c *ChatRecordBufferedReaderAdapter) Read() (record *business.ChatRecord, err error) {
 	records, err := c.bufferedReader.Read()
+
+	if len(records) == 0 {
+		return nil, err
+	}
+
 	return records[0], err
 }
