@@ -67,6 +67,21 @@ func TestBufferSize_greaterThanOne(t *testing.T) {
 	expectReaderToReadRecords(t, readerAdapter, records)
 }
 
+func TestBufferSize_error(t *testing.T) {
+	// Given
+	ctrl := gomock.NewController(t)
+	bufferedReader := NewMockChatRecordBufferedReader(ctrl)
+	readerAdapter := NewChatRecordBufferedReaderAdapter(bufferedReader)
+
+	// Then
+	bufferedReader.EXPECT().Read().Return(nil, io.ErrShortBuffer).Times(1)
+
+	// When
+	if _, err := readerAdapter.Read(); err != io.ErrShortBuffer {
+		t.Errorf("error should happen here, expected: %+v, actual: %+v", io.ErrShortBuffer, err)
+	}
+}
+
 func expectReaderToReadRecords(t *testing.T, reader *ChatRecordBufferedReaderAdapter, records []*business.ChatRecord) {
 	for _, expected := range records {
 		actual, err := reader.Read()
