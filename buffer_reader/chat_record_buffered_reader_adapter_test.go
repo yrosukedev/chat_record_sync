@@ -192,6 +192,41 @@ func TestRefill_manyTimes(t *testing.T) {
 	expectReaderToReadRecords(t, readerAdapter, append(append(append(recordsGroup1, recordsGroup2...), recordsGroup3...), recordsGroup4...))
 }
 
+func TestRefill_error(t *testing.T) {
+	// Given
+	ctrl := gomock.NewController(t)
+	bufferedReader := NewMockChatRecordBufferedReader(ctrl)
+	readerAdapter := NewChatRecordBufferedReaderAdapter(bufferedReader)
+
+	// Then
+	records := []*business.ChatRecord{
+		{
+			MsgId: "1",
+		},
+		{
+			MsgId: "2",
+		},
+		{
+			MsgId: "3",
+		},
+	}
+
+	groupIdx := 0
+	bufferedReader.EXPECT().Read().DoAndReturn(func() ([]*business.ChatRecord, error) {
+		defer func() { groupIdx += 1 }()
+		if groupIdx == 0 {
+			return records, nil
+		}
+		return nil, io.ErrUnexpectedEOF
+	}).Times(2)
+
+	// When
+	expectReaderToReadRecords(t, readerAdapter, records)
+	if _, err := readerAdapter.Read(); err != io.ErrUnexpectedEOF {
+		t.Errorf("error should happen here, expected: %+v, actual: %+v", io.ErrUnexpectedEOF, err)
+	}
+}
+
 func givenRecordsToRefill(bufferedReader *MockChatRecordBufferedReader, recordsGroups [][]*business.ChatRecord) {
 	groupIdx := 0
 	bufferedReader.EXPECT().Read().DoAndReturn(func() ([]*business.ChatRecord, error) {
