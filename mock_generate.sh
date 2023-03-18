@@ -5,3 +5,6 @@ mockgen -source use_case/chat_record_writer.go -package use_case -destination us
 # package: paginated_reader
 mockgen -source paginated_reader/paginated_buffered_reader.go -package paginated_reader -destination paginated_reader/mock_paginated_buffered_reader.go
 mockgen -source paginated_reader/pagination_storage.go -package paginated_reader -destination paginated_reader/mock_pagination_storage.go
+
+# package: buffer_reader
+mockgen -source buffer_reader/chat_record_buffered_reader.go -package buffer_reader -destination buffer_reader/mock_chat_record_buffered_reader.go
