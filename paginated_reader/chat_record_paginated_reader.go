@@ -35,7 +35,7 @@ func (r *ChatRecordPaginatedReader) Read() (records []*business.ChatRecord, err 
 	}
 
 	records, outPageToken, err := r.paginatedBufferedReader.Read(inPageToken, r.pageSize)
-	if err != nil {
+	if err != nil && err != io.EOF {
 		return nil, err
 	}
 

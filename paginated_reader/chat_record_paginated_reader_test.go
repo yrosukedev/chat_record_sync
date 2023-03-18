@@ -203,6 +203,28 @@ func TestForwardResults_error(t *testing.T) {
 	}
 }
 
+func TestForwardResults_EOF(t *testing.T) {
+	// Given
+	ctrl := gomock.NewController(t)
+	bufferedReader := NewMockChatRecordPaginatedBufferedReader(ctrl)
+	paginationStorage := NewMockChatRecordPaginationStorage(ctrl)
+	pageSize := uint64(10)
+	paginatedReader := NewChatRecordPaginatedReader(bufferedReader, paginationStorage, pageSize)
+
+	// Then
+	paginationStorage.EXPECT().Get().Return(PageToken(10), nil).Times(1)
+
+	bufferedReader.EXPECT().Read(gomock.Eq(PageToken(10)), gomock.Eq(pageSize)).Return(nil, PageToken(3467), io.EOF).Times(1)
+
+	paginationStorage.EXPECT().Set(gomock.Eq(PageToken(3467))).Return(nil).Times(1)
+
+	// When
+	_, err := paginatedReader.Read()
+	if err != io.EOF {
+		t.Errorf("error should happen here, expected: %+v, actual: %+v", io.EOF, err)
+	}
+}
+
 func TestUpdatePageToken_error(t *testing.T) {
 	// Given
 	ctrl := gomock.NewController(t)
