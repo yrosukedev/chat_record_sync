@@ -82,6 +82,42 @@ func TestBufferSize_error(t *testing.T) {
 	}
 }
 
+func TestRefill_zeroRecord(t *testing.T) {
+	// Given
+	ctrl := gomock.NewController(t)
+	bufferedReader := NewMockChatRecordBufferedReader(ctrl)
+	readerAdapter := NewChatRecordBufferedReaderAdapter(bufferedReader)
+
+	// Then
+	recordsGroup1 := []*business.ChatRecord{
+		{
+			MsgId: "1",
+		},
+		{
+			MsgId: "2",
+		},
+		{
+			MsgId: "3",
+		},
+	}
+	var recordsGroup2 []*business.ChatRecord
+	givenRecordsToRefill(bufferedReader, [][]*business.ChatRecord{recordsGroup1, recordsGroup2})
+
+	// When
+	expectReaderToReadRecords(t, readerAdapter, append(recordsGroup1))
+	if _, err := readerAdapter.Read(); err != io.EOF {
+		t.Errorf("end should happen here, expected: %+v, actual: %+v", io.EOF, err)
+	}
+}
+
+func givenRecordsToRefill(bufferedReader *MockChatRecordBufferedReader, recordsGroups [][]*business.ChatRecord) {
+	groupIdx := 0
+	bufferedReader.EXPECT().Read().DoAndReturn(func() ([]*business.ChatRecord, error) {
+		defer func() { groupIdx += 1 }()
+		return recordsGroups[groupIdx], nil
+	}).Times(len(recordsGroups))
+}
+
 func expectReaderToReadRecords(t *testing.T, reader *ChatRecordBufferedReaderAdapter, records []*business.ChatRecord) {
 	for _, expected := range records {
 		actual, err := reader.Read()
