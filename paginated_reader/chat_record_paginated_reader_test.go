@@ -77,6 +77,26 @@ func TestFetchPageToken_ALot(t *testing.T) {
 	paginatedReader.Read()
 }
 
+func TestFetchPageToken_error(t *testing.T) {
+	// Given
+	ctrl := gomock.NewController(t)
+	bufferedReader := NewMockChatRecordPaginatedBufferedReader(ctrl)
+	paginationStorage := NewMockChatRecordPaginationStorage(ctrl)
+	pageSize := uint64(10)
+	paginatedReader := NewChatRecordPaginatedReader(bufferedReader, paginationStorage, pageSize)
+
+	// Then
+	paginationStorage.EXPECT().Get().Return(PageToken(0), io.ErrUnexpectedEOF).Times(1)
+	bufferedReader.EXPECT().Read(gomock.Any(), gomock.Any()).Times(0)
+	paginationStorage.EXPECT().Set(gomock.Any()).Times(0)
+
+	// When
+	_, err := paginatedReader.Read()
+	if err != io.ErrUnexpectedEOF {
+		t.Errorf("error should happen here, expected: %+v, actual: %+v", io.ErrUnexpectedEOF, err)
+	}
+}
+
 func TestForwardResults_zeroRecord(t *testing.T) {
 	// Given
 	ctrl := gomock.NewController(t)
