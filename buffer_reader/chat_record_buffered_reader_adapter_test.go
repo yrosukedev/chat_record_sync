@@ -3,6 +3,7 @@ package buffer_reader
 import (
 	"github.com/golang/mock/gomock"
 	"github.com/yrosukedev/chat_record_sync/business"
+	"io"
 	"testing"
 )
 
@@ -36,7 +37,9 @@ func TestBufferSize_zero(t *testing.T) {
 
 	// When
 	for i := 0; i < 10; i++ {
-		_, _ = readerAdapter.Read()
+		if _, err := readerAdapter.Read(); err != io.EOF {
+			t.Errorf("end should happen here, expected: %+v, actual: %+v", io.EOF, err)
+		}
 	}
 }
 
