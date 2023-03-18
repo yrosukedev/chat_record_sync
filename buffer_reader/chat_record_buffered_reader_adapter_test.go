@@ -139,6 +139,59 @@ func TestRefill_oneTime(t *testing.T) {
 	expectReaderToReadRecords(t, readerAdapter, append(recordsGroup1, recordsGroup2...))
 }
 
+func TestRefill_manyTimes(t *testing.T) {
+	// Given
+	ctrl := gomock.NewController(t)
+	bufferedReader := NewMockChatRecordBufferedReader(ctrl)
+	readerAdapter := NewChatRecordBufferedReaderAdapter(bufferedReader)
+
+	// Then
+	recordsGroup1 := []*business.ChatRecord{
+		{
+			MsgId: "1",
+		},
+		{
+			MsgId: "2",
+		},
+	}
+	recordsGroup2 := []*business.ChatRecord{
+		{
+			MsgId: "3",
+		},
+		{
+			MsgId: "4",
+		},
+		{
+			MsgId: "5",
+		},
+	}
+	recordsGroup3 := []*business.ChatRecord{
+		{
+			MsgId: "6",
+		},
+	}
+	recordsGroup4 := []*business.ChatRecord{
+		{
+			MsgId: "7",
+		},
+		{
+			MsgId: "8",
+		},
+	}
+	givenRecordsToRefill(
+		bufferedReader,
+		[][]*business.ChatRecord{
+			recordsGroup1,
+			recordsGroup2,
+			recordsGroup3,
+			recordsGroup4,
+		},
+	)
+
+	// When
+	expectReaderToReadRecords(t, readerAdapter, append(append(append(recordsGroup1, recordsGroup2...), recordsGroup3...), recordsGroup4...))
+}
+
 func givenRecordsToRefill(bufferedReader *MockChatRecordBufferedReader, recordsGroups [][]*business.ChatRecord) {
 	groupIdx := 0
 	bufferedReader.EXPECT().Read().DoAndReturn(func() ([]*business.ChatRecord, error) {
