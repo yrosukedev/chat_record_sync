@@ -104,10 +104,39 @@ func TestRefill_zeroRecord(t *testing.T) {
 	givenRecordsToRefill(bufferedReader, [][]*business.ChatRecord{recordsGroup1, recordsGroup2})
 
 	// When
-	expectReaderToReadRecords(t, readerAdapter, append(recordsGroup1))
+	expectReaderToReadRecords(t, readerAdapter, recordsGroup1)
 	if _, err := readerAdapter.Read(); err != io.EOF {
 		t.Errorf("end should happen here, expected: %+v, actual: %+v", io.EOF, err)
 	}
+}
+
+func TestRefill_oneTime(t *testing.T) {
+	// Given
+	ctrl := gomock.NewController(t)
+	bufferedReader := NewMockChatRecordBufferedReader(ctrl)
+	readerAdapter := NewChatRecordBufferedReaderAdapter(bufferedReader)
+
+	// Then
+	recordsGroup1 := []*business.ChatRecord{
+		{
+			MsgId: "1",
+		},
+		{
+			MsgId: "2",
+		},
+		{
+			MsgId: "3",
+		},
+	}
+	recordsGroup2 := []*business.ChatRecord{
+		{
+			MsgId: "4",
+		},
+	}
+	givenRecordsToRefill(bufferedReader, [][]*business.ChatRecord{recordsGroup1, recordsGroup2})
+
+	// When
+	expectReaderToReadRecords(t, readerAdapter, append(recordsGroup1, recordsGroup2...))
 }
 
 func givenRecordsToRefill(bufferedReader *MockChatRecordBufferedReader, recordsGroups [][]*business.ChatRecord) {
@@ -123,10 +152,12 @@ func expectReaderToReadRecords(t *testing.T, reader *ChatRecordBufferedReaderAda
 		actual, err := reader.Read()
 		if err != nil {
 			t.Errorf("error should not happen here, expected: %+v, actual: %+v", nil, err)
+			return
 		}
 
 		if expected != actual {
 			t.Errorf("records are not matched, expected: %+v, actual: %+v", expected, actual)
+			return
 		}
 	}
 }

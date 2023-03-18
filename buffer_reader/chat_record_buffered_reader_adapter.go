@@ -33,6 +33,7 @@ func (c *ChatRecordBufferedReaderAdapter) refillBufferIfNeeded() error {
 
 	var err error
 	c.bufferedRecords, err = c.bufferedReader.Read()
+	c.idx = 0
 	return err
 }
 
