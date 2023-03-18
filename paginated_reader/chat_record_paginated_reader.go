@@ -29,12 +29,12 @@ func (r *ChatRecordPaginatedReader) Read() (records []*business.ChatRecord, err 
 		return nil, io.EOF
 	}
 
-	pageToken, err := r.paginationStorage.Get()
+	inPageToken, err := r.paginationStorage.Get()
 	if err != nil {
 		return nil, err
 	}
 
-	records, err = r.paginatedBufferedReader.Read(pageToken, r.pageSize)
+	records, outPageToken, err := r.paginatedBufferedReader.Read(inPageToken, r.pageSize)
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +43,7 @@ func (r *ChatRecordPaginatedReader) Read() (records []*business.ChatRecord, err 
 		r.noMoreData = true
 	}
 
-	if err := r.paginationStorage.Set(pageToken + PageToken(len(records))); err != nil {
+	if err := r.paginationStorage.Set(outPageToken); err != nil {
 		return nil, err
 	}
 
