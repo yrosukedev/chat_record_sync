@@ -7,7 +7,6 @@ import (
 	larkbitable "github.com/larksuite/oapi-sdk-go/v3/service/bitable/v1"
 	"github.com/yrosukedev/chat_record_sync/consts"
 	"github.com/yrosukedev/chat_record_sync/paginated_reader"
-	"io"
 	"net/http"
 	"strconv"
 )
@@ -30,11 +29,11 @@ func NewPaginationStorageAdapter(ctx context.Context, larkClient *lark.Client, a
 
 func (p *PaginationStorageAdapter) Get() (pageToken *paginated_reader.PageToken, err error) {
 
-	req := p.buildRequestByFetchingLatestRecord()
+	req := p.buildRequestOfFetchingLatestRecord()
 
 	resp, err := p.larkClient.Bitable.AppTableRecord.List(p.ctx, req)
 
-	if err := p.checkErrors(err, resp); err != nil {
+	if err := p.checkListRecordsErrors(err, resp); err != nil {
 		return nil, err
 	}
 
@@ -69,7 +68,7 @@ func (p *PaginationStorageAdapter) pageTokenFrom(pageTokenField interface{}) (*p
 	}
 }
 
-func (p *PaginationStorageAdapter) checkErrors(err error, resp *larkbitable.ListAppTableRecordResp) error {
+func (p *PaginationStorageAdapter) checkListRecordsErrors(err error, resp *larkbitable.ListAppTableRecordResp) error {
 	if err != nil {
 		return err
 	}
@@ -85,7 +84,7 @@ func (p *PaginationStorageAdapter) checkErrors(err error, resp *larkbitable.List
 	return nil
 }
 
-func (p *PaginationStorageAdapter) buildRequestByFetchingLatestRecord() *larkbitable.ListAppTableRecordReq {
+func (p *PaginationStorageAdapter) buildRequestOfFetchingLatestRecord() *larkbitable.ListAppTableRecordReq {
 	req := larkbitable.
 		NewListAppTableRecordReqBuilder().
 		AppToken(p.appToken).
@@ -99,6 +98,55 @@ func (p *PaginationStorageAdapter) buildRequestByFetchingLatestRecord() *larkbit
 }
 
 func (p *PaginationStorageAdapter) Set(pageToken *paginated_reader.PageToken) error {
-	// TODO:
-	return io.ErrClosedPipe
+	if pageToken == nil { // append nothing
+		return nil
+	}
+
+	req := p.buildRequestOfAppendingPageToken(pageToken)
+
+	resp, err := p.larkClient.Bitable.AppTableRecord.Create(p.ctx, req)
+
+	if err := p.checkCreateRecordErrors(err, resp); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (p *PaginationStorageAdapter) buildRequestOfAppendingPageToken(pageToken *paginated_reader.PageToken) *larkbitable.CreateAppTableRecordReq {
+	fields := p.tableFieldsFrom(pageToken)
+
+	tableRecord := larkbitable.NewAppTableRecordBuilder().
+		Fields(fields).
+		Build()
+
+	req := larkbitable.
+		NewCreateAppTableRecordReqBuilder().
+		AppToken(p.appToken).
+		TableId(p.tableId).
+		UserIdType(larkbitable.UserIdTypeUserId).
+		AppTableRecord(tableRecord).
+		Build()
+	return req
+}
+
+func (p *PaginationStorageAdapter) checkCreateRecordErrors(err error, resp *larkbitable.CreateAppTableRecordResp) error {
+	if err != nil {
+		return err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("fails to create lark bitable table record, statusCode: %v, code: %v, msg: %v", resp.StatusCode, resp.Code, resp.Msg)
+	}
+
+	if resp.Code != 0 {
+		return fmt.Errorf("fails to create lark bitable table record, statusCode: %v, code: %v, msg: %v", resp.StatusCode, resp.Code, resp.Msg)
+	}
+	return nil
+}
+
+func (p *PaginationStorageAdapter) tableFieldsFrom(pageToken *paginated_reader.PageToken) map[string]interface{} {
+	return map[string]interface{}{
+		consts.BitableFieldPaginationPageToken: fmt.Sprintf("%d", pageToken.Value),
+	}
 }
