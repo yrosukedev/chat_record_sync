@@ -35,11 +35,11 @@ func (m *MockChatRecordPaginatedBufferedReader) EXPECT() *MockChatRecordPaginate
 }
 
 // Read mocks base method.
-func (m *MockChatRecordPaginatedBufferedReader) Read(inPageToken PageToken, pageSize uint64) ([]*business.ChatRecord, PageToken, error) {
+func (m *MockChatRecordPaginatedBufferedReader) Read(inPageToken *PageToken, pageSize uint64) ([]*business.ChatRecord, *PageToken, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Read", inPageToken, pageSize)
 	ret0, _ := ret[0].([]*business.ChatRecord)
-	ret1, _ := ret[1].(PageToken)
+	ret1, _ := ret[1].(*PageToken)
 	ret2, _ := ret[2].(error)
 	return ret0, ret1, ret2
 }

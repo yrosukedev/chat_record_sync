@@ -28,44 +28,44 @@ func NewPaginationStorageAdapter(ctx context.Context, larkClient *lark.Client, a
 	}
 }
 
-func (p *PaginationStorageAdapter) Get() (pageToken paginated_reader.PageToken, err error) {
+func (p *PaginationStorageAdapter) Get() (pageToken *paginated_reader.PageToken, err error) {
 
 	req := p.buildRequestByFetchingLatestRecord()
 
 	resp, err := p.larkClient.Bitable.AppTableRecord.List(p.ctx, req)
 
 	if err := p.checkErrors(err, resp); err != nil {
-		return 0, err
+		return paginated_reader.NewPageToken(0), err
 	}
 
 	return p.handleResponse(resp)
 }
 
-func (p *PaginationStorageAdapter) handleResponse(resp *larkbitable.ListAppTableRecordResp) (paginated_reader.PageToken, error) {
+func (p *PaginationStorageAdapter) handleResponse(resp *larkbitable.ListAppTableRecordResp) (*paginated_reader.PageToken, error) {
 	if len(resp.Data.Items) == 0 { // empty
-		return paginated_reader.PageToken(0), nil
+		return paginated_reader.NewPageToken(0), nil
 	}
 
 	pageTokenField, ok := resp.Data.Items[0].Fields[consts.BitableFieldPaginationPageToken]
 	if !ok {
-		return paginated_reader.PageToken(0), fmt.Errorf("bitable field %v dosen't exist, appToken: %v, tableId: %v", consts.BitableFieldPaginationPageToken, p.appToken, p.tableId)
+		return paginated_reader.NewPageToken(0), fmt.Errorf("bitable field %v dosen't exist, appToken: %v, tableId: %v", consts.BitableFieldPaginationPageToken, p.appToken, p.tableId)
 	}
 
 	return p.pageTokenFrom(pageTokenField)
 }
 
-func (p *PaginationStorageAdapter) pageTokenFrom(pageTokenField interface{}) (paginated_reader.PageToken, error) {
+func (p *PaginationStorageAdapter) pageTokenFrom(pageTokenField interface{}) (*paginated_reader.PageToken, error) {
 	switch pageTokenValue := pageTokenField.(type) {
 	case string:
 		if pageTokenInt, err := strconv.Atoi(pageTokenValue); err != nil {
-			return paginated_reader.PageToken(0), fmt.Errorf("fails to convert '%v' field to integer, value: %v, appToken: %v, tableId: %v", consts.BitableFieldPaginationPageToken, pageTokenValue, p.appToken, p.tableId)
+			return paginated_reader.NewPageToken(0), fmt.Errorf("fails to convert '%v' field to integer, value: %v, appToken: %v, tableId: %v", consts.BitableFieldPaginationPageToken, pageTokenValue, p.appToken, p.tableId)
 		} else {
-			return paginated_reader.PageToken(pageTokenInt), nil
+			return paginated_reader.NewPageToken(int64(pageTokenInt)), nil
 		}
 	case int:
-		return paginated_reader.PageToken(pageTokenValue), nil
+		return paginated_reader.NewPageToken(int64(pageTokenValue)), nil
 	default:
-		return paginated_reader.PageToken(0), fmt.Errorf("unknown type of '%v' field, value: %v, appToken: %v, tableId: %v", consts.BitableFieldPaginationPageToken, pageTokenField, p.appToken, p.tableId)
+		return paginated_reader.NewPageToken(0), fmt.Errorf("unknown type of '%v' field, value: %v, appToken: %v, tableId: %v", consts.BitableFieldPaginationPageToken, pageTokenField, p.appToken, p.tableId)
 	}
 }
 
@@ -98,7 +98,7 @@ func (p *PaginationStorageAdapter) buildRequestByFetchingLatestRecord() *larkbit
 	return req
 }
 
-func (p *PaginationStorageAdapter) Set(pageToken paginated_reader.PageToken) error {
+func (p *PaginationStorageAdapter) Set(pageToken *paginated_reader.PageToken) error {
 	// TODO:
 	return io.ErrClosedPipe
 }

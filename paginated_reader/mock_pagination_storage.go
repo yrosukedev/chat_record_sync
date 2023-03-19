@@ -34,10 +34,10 @@ func (m *MockChatRecordPaginationStorage) EXPECT() *MockChatRecordPaginationStor
 }
 
 // Get mocks base method.
-func (m *MockChatRecordPaginationStorage) Get() (PageToken, error) {
+func (m *MockChatRecordPaginationStorage) Get() (*PageToken, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Get")
-	ret0, _ := ret[0].(PageToken)
+	ret0, _ := ret[0].(*PageToken)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -49,7 +49,7 @@ func (mr *MockChatRecordPaginationStorageMockRecorder) Get() *gomock.Call {
 }
 
 // Set mocks base method.
-func (m *MockChatRecordPaginationStorage) Set(pageToken PageToken) error {
+func (m *MockChatRecordPaginationStorage) Set(pageToken *PageToken) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Set", pageToken)
 	ret0, _ := ret[0].(error)
