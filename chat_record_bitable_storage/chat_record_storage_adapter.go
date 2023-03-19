@@ -1,4 +1,4 @@
-package bitable_storage
+package chat_record_bitable_storage
 
 import (
 	"context"
