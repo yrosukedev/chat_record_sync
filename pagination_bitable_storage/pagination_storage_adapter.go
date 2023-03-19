@@ -35,7 +35,7 @@ func (p *PaginationStorageAdapter) Get() (pageToken *paginated_reader.PageToken,
 	resp, err := p.larkClient.Bitable.AppTableRecord.List(p.ctx, req)
 
 	if err := p.checkErrors(err, resp); err != nil {
-		return paginated_reader.NewPageToken(0), err
+		return nil, err
 	}
 
 	return p.handleResponse(resp)
@@ -43,12 +43,12 @@ func (p *PaginationStorageAdapter) Get() (pageToken *paginated_reader.PageToken,
 
 func (p *PaginationStorageAdapter) handleResponse(resp *larkbitable.ListAppTableRecordResp) (*paginated_reader.PageToken, error) {
 	if len(resp.Data.Items) == 0 { // empty
-		return paginated_reader.NewPageToken(0), nil
+		return nil, nil
 	}
 
 	pageTokenField, ok := resp.Data.Items[0].Fields[consts.BitableFieldPaginationPageToken]
 	if !ok {
-		return paginated_reader.NewPageToken(0), fmt.Errorf("bitable field %v dosen't exist, appToken: %v, tableId: %v", consts.BitableFieldPaginationPageToken, p.appToken, p.tableId)
+		return nil, fmt.Errorf("bitable field %v dosen't exist, appToken: %v, tableId: %v", consts.BitableFieldPaginationPageToken, p.appToken, p.tableId)
 	}
 
 	return p.pageTokenFrom(pageTokenField)
@@ -58,14 +58,14 @@ func (p *PaginationStorageAdapter) pageTokenFrom(pageTokenField interface{}) (*p
 	switch pageTokenValue := pageTokenField.(type) {
 	case string:
 		if pageTokenInt, err := strconv.Atoi(pageTokenValue); err != nil {
-			return paginated_reader.NewPageToken(0), fmt.Errorf("fails to convert '%v' field to integer, value: %v, appToken: %v, tableId: %v", consts.BitableFieldPaginationPageToken, pageTokenValue, p.appToken, p.tableId)
+			return nil, fmt.Errorf("fails to convert '%v' field to integer, value: %v, appToken: %v, tableId: %v", consts.BitableFieldPaginationPageToken, pageTokenValue, p.appToken, p.tableId)
 		} else {
 			return paginated_reader.NewPageToken(int64(pageTokenInt)), nil
 		}
 	case int:
 		return paginated_reader.NewPageToken(int64(pageTokenValue)), nil
 	default:
-		return paginated_reader.NewPageToken(0), fmt.Errorf("unknown type of '%v' field, value: %v, appToken: %v, tableId: %v", consts.BitableFieldPaginationPageToken, pageTokenField, p.appToken, p.tableId)
+		return nil, fmt.Errorf("unknown type of '%v' field, value: %v, appToken: %v, tableId: %v", consts.BitableFieldPaginationPageToken, pageTokenField, p.appToken, p.tableId)
 	}
 }
 

@@ -25,3 +25,23 @@ func TestGetPageToken_succeeds(t *testing.T) {
 
 	fmt.Printf("page token: %v\n", token)
 }
+
+func TestGetPageToken_nil(t *testing.T) {
+	// Given
+	ctx := context.Background()
+	larkConfig := config.NewLarkConfig()
+	larkClient := lark.NewClient(larkConfig.AppId, larkConfig.AppSecret)
+	paginationStorage := NewPaginationStorageAdapter(ctx, larkClient, "DLSbbQIcEa0KyIsetHWcg3PDnNh", "tblLJY5YSoEkV3G3")
+
+	// When
+	token, err := paginationStorage.Get()
+
+	// Then
+	if err != nil {
+		t.Errorf("error shouldn't happen here, expected: %+v, actual: %+v", nil, err)
+	}
+
+	if token != nil {
+		t.Errorf("page token is expected to be %v, actual: %v", nil, token)
+	}
+}
