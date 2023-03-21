@@ -4,6 +4,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/yrosukedev/chat_record_sync/business"
 	"github.com/yrosukedev/chat_record_sync/paginated_reader"
+	"io"
 	"reflect"
 	"testing"
 )
@@ -481,6 +482,28 @@ func TestManyRecords_nilInputPageToken(t *testing.T) {
 	}
 	if !reflect.DeepEqual(outPageToken, paginated_reader.NewPageToken(1050)) {
 		t.Errorf("output page token not matched, expected: %+v, actual: %+v", paginated_reader.NewPageToken(1050), outPageToken)
+		return
+	}
+}
+
+func TestChatRecordServiceError(t *testing.T) {
+	// Given
+	ctrl := gomock.NewController(t)
+	chatRecordService := NewMockChatRecordService(ctrl)
+	openAPIService := NewMockOpenAPIService(ctrl)
+	transformer := NewMockChatRecordTransformer(ctrl)
+	readerAdapter := NewPaginatedBufferedReaderAdapter(chatRecordService, openAPIService, transformer)
+
+	// Then
+	chatRecordService.EXPECT().Read(gomock.Any(), gomock.Any()).Return(nil, io.ErrShortBuffer).Times(1)
+	openAPIService.EXPECT().GetUserInfoByID(gomock.Any()).Times(0)
+	openAPIService.EXPECT().GetExternalContactByID(gomock.Any()).Times(0)
+	transformer.EXPECT().Transform(gomock.Any(), gomock.Any(), gomock.Any()).Times(0)
+
+	// When
+	_, _, err := readerAdapter.Read(paginated_reader.NewPageToken(345), 10)
+	if err == nil {
+		t.Errorf("error shouldn happen here, expected: %v, actual: %v", io.ErrShortBuffer, err)
 		return
 	}
 }
