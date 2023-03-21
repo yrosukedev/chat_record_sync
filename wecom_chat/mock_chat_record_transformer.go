@@ -35,16 +35,16 @@ func (m *MockChatRecordTransformer) EXPECT() *MockChatRecordTransformerMockRecor
 }
 
 // Transform mocks base method.
-func (m *MockChatRecordTransformer) Transform(wecomChatRecord *WeComChatRecord) (*business.ChatRecord, error) {
+func (m *MockChatRecordTransformer) Transform(wecomChatRecord *WeComChatRecord, userInfo *WeComUserInfo, externalContacts []*WeComExternalContact) (*business.ChatRecord, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Transform", wecomChatRecord)
+	ret := m.ctrl.Call(m, "Transform", wecomChatRecord, userInfo, externalContacts)
 	ret0, _ := ret[0].(*business.ChatRecord)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Transform indicates an expected call of Transform.
-func (mr *MockChatRecordTransformerMockRecorder) Transform(wecomChatRecord interface{}) *gomock.Call {
+func (mr *MockChatRecordTransformerMockRecorder) Transform(wecomChatRecord, userInfo, externalContacts interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Transform", reflect.TypeOf((*MockChatRecordTransformer)(nil).Transform), wecomChatRecord)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Transform", reflect.TypeOf((*MockChatRecordTransformer)(nil).Transform), wecomChatRecord, userInfo, externalContacts)
 }
