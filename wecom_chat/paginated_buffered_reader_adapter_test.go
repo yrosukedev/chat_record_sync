@@ -232,3 +232,114 @@ func TestOneRecord_manyReceivers(t *testing.T) {
 		return
 	}
 }
+
+func TestManyRecords(t *testing.T) {
+	// Given
+	ctrl := gomock.NewController(t)
+	chatRecordService := NewMockChatRecordService(ctrl)
+	openAPIService := NewMockOpenAPIService(ctrl)
+	transformer := NewMockChatRecordTransformer(ctrl)
+	readerAdapter := NewPaginatedBufferedReaderAdapter(chatRecordService, openAPIService, transformer)
+
+	// Then
+	wecomRecords := []*WeComChatRecord{
+		{
+			Seq:    890,
+			From:   "ID_xiaoming",
+			ToList: []string{"ID_xiaowang"},
+		},
+		{
+			Seq:    357,
+			From:   "ID_xiaohuang",
+			ToList: []string{"ID_xiaoli"},
+		},
+		{
+			Seq:    1050,
+			From:   "ID_xiaoming",
+			ToList: []string{"ID_xiaozhang"},
+		},
+	}
+	userXiaoming := &WeComUserInfo{
+		UserID: "ID_xiaoming",
+		Name:   "Xiao Ming",
+	}
+	userXiaohuang := &WeComUserInfo{
+		UserID: "ID_xiaohuang",
+		Name:   "Xiao Huang",
+	}
+	contactXiaowang := &WeComExternalContact{
+		ExternalUserID: "ID_xiaowang",
+		Name:           "Xiao Wang",
+	}
+	contactXiaoli := &WeComExternalContact{
+		ExternalUserID: "ID_xiaoli",
+		Name:           "Xiao Li",
+	}
+	contactXiaozhang := &WeComExternalContact{
+		ExternalUserID: "ID_xiaozhang",
+		Name:           "Xiao Zhang",
+	}
+	expectedRecords := []*business.ChatRecord{
+		{
+			From: &business.User{
+				UserId: "ID_xiaoming",
+				Name:   "Xiao Ming",
+			},
+			To: []*business.User{
+				{
+					UserId: "ID_xiaowang",
+					Name:   "Xiao Wang",
+				},
+			},
+		},
+		{
+			From: &business.User{
+				UserId: "ID_xiaohuang",
+				Name:   "Xiao Huang",
+			},
+			To: []*business.User{
+				{
+					UserId: "ID_xiaoli",
+					Name:   "Xiao Li",
+				},
+			},
+		},
+		{
+			From: &business.User{
+				UserId: "ID_xiaoming",
+				Name:   "Xiao Ming",
+			},
+			To: []*business.User{
+				{
+					UserId: "ID_xiaozhang",
+					Name:   "Xiao Zhang",
+				},
+			},
+		},
+	}
+
+	chatRecordService.EXPECT().Read(gomock.Eq(uint64(15)), gomock.Eq(uint64(30))).Return(wecomRecords, nil).Times(1)
+	openAPIService.EXPECT().GetUserInfoByID(gomock.Eq("ID_xiaoming")).Return(userXiaoming, nil).Times(2)
+	openAPIService.EXPECT().GetUserInfoByID(gomock.Eq("ID_xiaohuang")).Return(userXiaohuang, nil).Times(1)
+	openAPIService.EXPECT().GetExternalContactByID(gomock.Eq("ID_xiaowang")).Return(contactXiaowang, nil).Times(1)
+	openAPIService.EXPECT().GetExternalContactByID(gomock.Eq("ID_xiaozhang")).Return(contactXiaozhang, nil).Times(1)
+	openAPIService.EXPECT().GetExternalContactByID(gomock.Eq("ID_xiaoli")).Return(contactXiaoli, nil).Times(1)
+	transformer.EXPECT().Transform(gomock.Eq(wecomRecords[0]), gomock.Eq(userXiaoming), gomock.Eq([]*WeComExternalContact{contactXiaowang})).Return(expectedRecords[0], nil).Times(1)
+	transformer.EXPECT().Transform(gomock.Eq(wecomRecords[1]), gomock.Eq(userXiaohuang), gomock.Eq([]*WeComExternalContact{contactXiaoli})).Return(expectedRecords[1], nil).Times(1)
+	transformer.EXPECT().Transform(gomock.Eq(wecomRecords[2]), gomock.Eq(userXiaoming), gomock.Eq([]*WeComExternalContact{contactXiaozhang})).Return(expectedRecords[2], nil).Times(1)
+
+	// When
+	records, outPageToken, err := readerAdapter.Read(paginated_reader.NewPageToken(15), 30)
+	if err != nil {
+		t.Errorf("error shouldn't happen here, expected: %v, actual: %v", nil, err)
+		return
+	}
+	if !reflect.DeepEqual(expectedRecords, records) {
+		t.Errorf("records not matched, expected: %+v, actual: %+v", expectedRecords, records)
+		return
+	}
+	if !reflect.DeepEqual(outPageToken, paginated_reader.NewPageToken(1050)) {
+		t.Errorf("output page token not matched, expected: %+v, actual: %+v", paginated_reader.NewPageToken(1050), outPageToken)
+		return
+	}
+}
