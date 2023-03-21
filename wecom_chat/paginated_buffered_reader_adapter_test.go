@@ -148,3 +148,87 @@ func TestOneRecord_zeroReceiver(t *testing.T) {
 		return
 	}
 }
+
+func TestOneRecord_manyReceivers(t *testing.T) {
+	// Given
+	ctrl := gomock.NewController(t)
+	chatRecordService := NewMockChatRecordService(ctrl)
+	openAPIService := NewMockOpenAPIService(ctrl)
+	transformer := NewMockChatRecordTransformer(ctrl)
+	readerAdapter := NewPaginatedBufferedReaderAdapter(chatRecordService, openAPIService, transformer)
+
+	// Then
+	wecomRecords := []*WeComChatRecord{
+		{
+			Seq:  1334,
+			From: "ID_xiaoming",
+			ToList: []string{
+				"ID_xiaowang",
+				"ID_xiaozhang",
+				"ID_xiaoli",
+			},
+		},
+	}
+	user := &WeComUserInfo{
+		UserID: "ID_xiaoming",
+		Name:   "Xiao Ming",
+	}
+	contacts := []*WeComExternalContact{
+		{
+			ExternalUserID: "ID_xiaowang",
+			Name:           "Xiao Wang",
+		},
+		{
+			ExternalUserID: "ID_xiaozhang",
+			Name:           "Xiao Zhang",
+		},
+		{
+			ExternalUserID: "ID_xiaoli",
+			Name:           "Xiao Li",
+		},
+	}
+	expectedRecords := []*business.ChatRecord{
+		{
+			From: &business.User{
+				UserId: "ID_xiaoming",
+				Name:   "Xiao Ming",
+			},
+			To: []*business.User{
+				{
+					UserId: "ID_xiaowang",
+					Name:   "Xiao Wang",
+				},
+				{
+					UserId: "ID_xiaozhang",
+					Name:   "Xiao Zhang",
+				},
+				{
+					UserId: "ID_xiaoli",
+					Name:   "Xiao Li",
+				},
+			},
+		},
+	}
+
+	chatRecordService.EXPECT().Read(gomock.Eq(uint64(123)), gomock.Eq(uint64(10))).Return(wecomRecords, nil).Times(1)
+	openAPIService.EXPECT().GetUserInfoByID(gomock.Eq("ID_xiaoming")).Return(user, nil).Times(1)
+	openAPIService.EXPECT().GetExternalContactByID(gomock.Eq("ID_xiaowang")).Return(contacts[0], nil).Times(1)
+	openAPIService.EXPECT().GetExternalContactByID(gomock.Eq("ID_xiaozhang")).Return(contacts[1], nil).Times(1)
+	openAPIService.EXPECT().GetExternalContactByID(gomock.Eq("ID_xiaoli")).Return(contacts[2], nil).Times(1)
+	transformer.EXPECT().Transform(gomock.Eq(wecomRecords[0]), gomock.Eq(user), gomock.Eq(contacts)).Return(expectedRecords[0], nil).Times(1)
+
+	// When
+	records, outPageToken, err := readerAdapter.Read(paginated_reader.NewPageToken(123), 10)
+	if err != nil {
+		t.Errorf("error shouldn't happen here, expected: %v, actual: %v", nil, err)
+		return
+	}
+	if !reflect.DeepEqual(expectedRecords, records) {
+		t.Errorf("records not matched, expected: %+v, actual: %+v", expectedRecords, records)
+		return
+	}
+	if !reflect.DeepEqual(outPageToken, paginated_reader.NewPageToken(1334)) {
+		t.Errorf("output page token not matched, expected: %+v, actual: %+v", paginated_reader.NewPageToken(1334), outPageToken)
+		return
+	}
+}
