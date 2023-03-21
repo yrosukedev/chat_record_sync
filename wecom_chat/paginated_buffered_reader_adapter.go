@@ -31,30 +31,54 @@ func (p *PaginatedBufferedReaderAdapter) Read(inPageToken *paginated_reader.Page
 		return nil, outPageToken, err
 	}
 
+	outPageToken = p.updatePageToken(inPageToken, wecomRecords)
+
+	records, err = p.transformWecomRecords(wecomRecords)
+	if err != nil {
+		return nil, outPageToken, err
+	}
+
+	return records, outPageToken, nil
+}
+
+func (p *PaginatedBufferedReaderAdapter) transformWecomRecords(wecomRecords []*WeComChatRecord) (records []*business.ChatRecord, err error) {
 	for _, wecomRecord := range wecomRecords {
 		user, err := p.openAPIService.GetUserInfoByID(wecomRecord.From)
 		if err != nil {
-			return nil, outPageToken, err
+			return nil, err
 		}
 
-		var contacts []*WeComExternalContact
-		for _, contactId := range wecomRecord.ToList {
-			contact, err := p.openAPIService.GetExternalContactByID(contactId)
-			if err != nil {
-				return nil, outPageToken, err
-			}
-			contacts = append(contacts, contact)
+		contacts, err := p.getContacts(wecomRecord.ToList)
+		if err != nil {
+			return nil, err
 		}
 
 		record, err := p.transformer.Transform(wecomRecord, user, contacts)
 		if err != nil {
-			return nil, outPageToken, err
+			return nil, err
 		}
 
 		records = append(records, record)
-
-		outPageToken = paginated_reader.NewPageToken(uint64(math.Max(float64(inPageToken.Value), float64(wecomRecord.Seq))))
 	}
+	return records, nil
+}
 
-	return records, outPageToken, nil
+func (p *PaginatedBufferedReaderAdapter) getContacts(contactIds []string) ([]*WeComExternalContact, error) {
+	var contacts []*WeComExternalContact
+	for _, contactId := range contactIds {
+		contact, err := p.openAPIService.GetExternalContactByID(contactId)
+		if err != nil {
+			return nil, err
+		}
+		contacts = append(contacts, contact)
+	}
+	return contacts, nil
+}
+
+func (p *PaginatedBufferedReaderAdapter) updatePageToken(inPageToken *paginated_reader.PageToken, wecomRecords []*WeComChatRecord) *paginated_reader.PageToken {
+	result := inPageToken.Value
+	for _, wecomRecord := range wecomRecords {
+		result = uint64(math.Max(float64(result), float64(wecomRecord.Seq)))
+	}
+	return paginated_reader.NewPageToken(result)
 }
