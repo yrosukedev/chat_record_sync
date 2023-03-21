@@ -571,3 +571,43 @@ func TestOpenAPIServiceError_getContact(t *testing.T) {
 		return
 	}
 }
+
+func TestTransformerError(t *testing.T) {
+	// Given
+	ctrl := gomock.NewController(t)
+	chatRecordService := NewMockChatRecordService(ctrl)
+	openAPIService := NewMockOpenAPIService(ctrl)
+	transformer := NewMockChatRecordTransformer(ctrl)
+	readerAdapter := NewPaginatedBufferedReaderAdapter(chatRecordService, openAPIService, transformer)
+
+	// Then
+	wecomRecords := []*WeComChatRecord{
+		{
+			Seq:    890,
+			From:   "ID_xiaoming",
+			ToList: []string{"ID_xiaowang"},
+		},
+	}
+	user := &WeComUserInfo{
+		UserID: "ID_xiaoming",
+		Name:   "Xiao Ming",
+	}
+	contacts := []*WeComExternalContact{
+		{
+			ExternalUserID: "ID_xiaowang",
+			Name:           "Xiao Wang",
+		},
+	}
+
+	chatRecordService.EXPECT().Read(gomock.Eq(uint64(267)), gomock.Eq(uint64(10))).Return(wecomRecords, nil).Times(1)
+	openAPIService.EXPECT().GetUserInfoByID(gomock.Eq("ID_xiaoming")).Return(user, nil).Times(1)
+	openAPIService.EXPECT().GetExternalContactByID(gomock.Eq("ID_xiaowang")).Return(contacts[0], nil).Times(1)
+	transformer.EXPECT().Transform(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, io.ErrUnexpectedEOF).Times(1)
+
+	// When
+	_, _, err := readerAdapter.Read(paginated_reader.NewPageToken(267), 10)
+	if err == nil {
+		t.Errorf("error should happen here, expected: %v, actual: %v", io.ErrUnexpectedEOF, err)
+		return
+	}
+}
