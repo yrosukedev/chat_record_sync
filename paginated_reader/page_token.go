@@ -1,10 +1,10 @@
 package paginated_reader
 
 type PageToken struct {
-	Value int64
+	Value uint64
 }
 
-func NewPageToken(value int64) *PageToken {
+func NewPageToken(value uint64) *PageToken {
 	return &PageToken{
 		Value: value,
 	}
