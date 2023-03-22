@@ -1,5 +1,12 @@
 package wecom_chat
 
+const (
+	WeComMessageTypeText  = "text"
+	WeComMessageTypeImage = "image"
+	WeComMessageTypeVoice = "voice"
+	WeComMessageTypeVideo = "video"
+)
+
 type WeComChatRecord struct {
 	Seq     uint64   `json:"seq,omitempty"`
 	MsgID   string   `json:"msgid,omitempty"`

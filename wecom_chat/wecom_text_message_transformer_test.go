@@ -123,3 +123,40 @@ func TestContent_nilText(t *testing.T) {
 		return
 	}
 }
+
+func TestContent_missMatchedMessageType(t *testing.T) {
+	// Given
+	transformer := NewWeComTextMessageTransformer()
+	wecomChatRecord := &WeComChatRecord{
+		Seq:    10,
+		MsgID:  "CAQQluDa4QUY0On2rYSAgAMgzPrShAE=",
+		Action: "send",
+		From:   "id_XuJinSheng",
+		ToList: []string{
+			"id_icefog",
+		},
+		RoomID:  "",
+		MsgTime: 1547087894783,
+		MsgType: "video",
+		Text: &TextMessage{
+			Content: "Hello, there!",
+		},
+	}
+	user := &WeComUserInfo{
+		UserID: "id_XuJinSheng",
+		Name:   "Xu Jin Sheng",
+	}
+	contacts := []*WeComExternalContact{
+		{
+			ExternalUserID: "id_icefog",
+			Name:           "icefog",
+		},
+	}
+
+	// When
+	_, err := transformer.Transform(wecomChatRecord, user, contacts)
+	if !reflect.DeepEqual(err, NewTransformerErrorMessageTypeMissMatched("text", "video")) {
+		t.Errorf("error should happen here, \nexpected: %v, \nactual: %v\n", NewTransformerErrorMessageTypeMissMatched("text", "video"), err)
+		return
+	}
+}
