@@ -17,7 +17,7 @@ func (w *WeComTextMessageTransformer) Transform(wecomChatRecord *WeComChatRecord
 		return nil, NewTransformerErrorMessageTypeMissMatched(WeComMessageTypeText, wecomChatRecord.MsgType)
 	}
 
-	fromUser := w.userFrom(wecomChatRecord, userInfo)
+	sender := w.senderFrom(wecomChatRecord, userInfo)
 
 	var toUsers []*business.User
 	for _, contact := range externalContacts {
@@ -32,7 +32,7 @@ func (w *WeComTextMessageTransformer) Transform(wecomChatRecord *WeComChatRecord
 	record = &business.ChatRecord{
 		MsgId:   wecomChatRecord.MsgID,
 		Action:  wecomChatRecord.Action,
-		From:    fromUser,
+		From:    sender,
 		To:      toUsers,
 		RoomId:  wecomChatRecord.RoomID,
 		MsgTime: time.UnixMilli(wecomChatRecord.MsgTime),
@@ -43,17 +43,22 @@ func (w *WeComTextMessageTransformer) Transform(wecomChatRecord *WeComChatRecord
 	return record, nil
 }
 
-func (w *WeComTextMessageTransformer) userFrom(wecomChatRecord *WeComChatRecord, userInfo *WeComUserInfo) *business.User {
-	userName := "<unknown>"
-	if wecomChatRecord.From == userInfo.UserID {
-		userName = userInfo.Name
-	}
+func (w *WeComTextMessageTransformer) senderFrom(wecomChatRecord *WeComChatRecord, userInfo *WeComUserInfo) *business.User {
+	userName := w.senderNameFrom(wecomChatRecord, userInfo)
 
 	fromUser := &business.User{
 		UserId: wecomChatRecord.From,
 		Name:   userName,
 	}
 	return fromUser
+}
+
+func (w *WeComTextMessageTransformer) senderNameFrom(wecomChatRecord *WeComChatRecord, userInfo *WeComUserInfo) string {
+	result := "<unknown>"
+	if userInfo != nil && userInfo.UserID == wecomChatRecord.From {
+		result = userInfo.Name
+	}
+	return result
 }
 
 func (w *WeComTextMessageTransformer) contentFrom(wecomChatRecord *WeComChatRecord) string {
