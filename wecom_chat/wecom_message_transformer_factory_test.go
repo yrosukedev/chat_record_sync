@@ -40,6 +40,40 @@ func TestTransformerFactory_transformerFound(t *testing.T) {
 	}
 }
 
+func TestTransformerFactory_transformerNotFound(t *testing.T) {
+	// Given
+	ctrl := gomock.NewController(t)
+	transformer1 := NewMockChatRecordTransformer(ctrl)
+	transformer2 := NewMockChatRecordTransformer(ctrl)
+	transformer3 := NewMockChatRecordTransformer(ctrl)
+	defaultTransformer := NewMockChatRecordTransformer(ctrl)
+	messageTypeToTransformers := map[string]ChatRecordTransformer{
+		"::any type but text 1::": transformer1,
+		"::any type but text 2::": transformer2,
+		"::any type but text 3::": transformer3,
+	}
+	factory := NewWeComMessageTransformerFactory(messageTypeToTransformers, defaultTransformer)
+	wecomChatRecord, user, contacts, expectedRecord := makeSUTForTransformerFactory()
+
+	// Then
+	transformer1.EXPECT().Transform(gomock.Any(), gomock.Any(), gomock.Any()).Times(0)
+	transformer2.EXPECT().Transform(gomock.Any(), gomock.Any(), gomock.Any()).Times(0)
+	transformer3.EXPECT().Transform(gomock.Any(), gomock.Any(), gomock.Any()).Times(0)
+	defaultTransformer.EXPECT().Transform(gomock.Eq(wecomChatRecord), gomock.Eq(user), gomock.Eq(contacts)).Return(expectedRecord, nil).Times(1)
+
+	// When
+	record, err := factory.Transform(wecomChatRecord, user, contacts)
+	if err != nil {
+		t.Errorf("error shouldn't happen here, expected: %v, actual: %v", nil, err)
+		return
+	}
+
+	if !reflect.DeepEqual(expectedRecord, record) {
+		t.Errorf("records are not matched, expected: %+v, actual: %+v", expectedRecord, record)
+		return
+	}
+}
+
 func makeSUTForTransformerFactory() (*WeComChatRecord, *WeComUserInfo, []*WeComExternalContact, *business.ChatRecord) {
 	wecomChatRecord := &WeComChatRecord{
 		Seq:    10,
