@@ -17,10 +17,11 @@ type WeComChatRecord struct {
 	MsgTime int64    `json:"msgtime,omitempty"`
 	MsgType string   `json:"msgtype,omitempty"`
 
-	Text  *TextMessage  `json:"text,omitempty"`
-	Image *ImageMessage `json:"image,omitempty"`
-	Voice *VoiceMessage `json:"voice,omitempty"`
-	Video *VideoMessage `json:"video,omitempty"`
+	Text          *TextMessage  `json:"text,omitempty"`
+	Image         *ImageMessage `json:"image,omitempty"`
+	Voice         *VoiceMessage `json:"voice,omitempty"`
+	Video         *VideoMessage `json:"video,omitempty"`
+	OriginMessage []byte
 }
 
 type TextMessage struct {

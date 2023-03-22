@@ -17,15 +17,14 @@ func (w *WeComTextMessageTransformer) Transform(wecomChatRecord *WeComChatRecord
 		return nil, nil
 	}
 
-	if wecomChatRecord.MsgType != WeComMessageTypeText {
-		return nil, NewTransformerErrorMessageTypeMissMatched(WeComMessageTypeText, wecomChatRecord.MsgType)
+	content, err := w.contentFrom(wecomChatRecord)
+	if err != nil {
+		return nil, err
 	}
 
 	sender := w.senderFrom(wecomChatRecord, userInfo)
 
 	receivers := w.receiversFrom(wecomChatRecord, externalContacts)
-
-	content := w.contentFrom(wecomChatRecord)
 
 	record = &business.ChatRecord{
 		MsgId:   wecomChatRecord.MsgID,
@@ -80,10 +79,14 @@ func (w *WeComTextMessageTransformer) senderNameFrom(wecomChatRecord *WeComChatR
 	return result
 }
 
-func (w *WeComTextMessageTransformer) contentFrom(wecomChatRecord *WeComChatRecord) string {
+func (w *WeComTextMessageTransformer) contentFrom(wecomChatRecord *WeComChatRecord) (string, error) {
+	if wecomChatRecord.MsgType != WeComMessageTypeText {
+		return "", NewTransformerErrorMessageTypeMissMatched(WeComMessageTypeText, wecomChatRecord.MsgType)
+	}
+
 	result := ""
 	if wecomChatRecord.Text != nil {
 		result = wecomChatRecord.Text.Content
 	}
-	return result
+	return result, nil
 }
