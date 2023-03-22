@@ -276,3 +276,72 @@ func TestUserMissmatched_nilUser(t *testing.T) {
 		return
 	}
 }
+
+func TestContactsMissmatched_contactNotFound(t *testing.T) {
+	// Given
+	transformer := NewWeComTextMessageTransformer()
+	wecomChatRecord := &WeComChatRecord{
+		Seq:    10,
+		MsgID:  "CAQQluDa4QUY0On2rYSAgAMgzPrShAE=",
+		Action: "send",
+		From:   "id_XuJinSheng",
+		ToList: []string{
+			"id_icefog",
+			"id_xiaohuang",
+		},
+		RoomID:  "",
+		MsgTime: 1547087894783,
+		MsgType: "text",
+		Text: &TextMessage{
+			Content: "Hello, there!",
+		},
+	}
+	user := &WeComUserInfo{
+		UserID: "id_XuJinSheng",
+		Name:   "Xu Jin Sheng",
+	}
+	contacts := []*WeComExternalContact{
+		{
+			ExternalUserID: "id_xiaohuang",
+			Name:           "Xiao Huang",
+		},
+		{
+			ExternalUserID: "id_xiaozhang",
+			Name:           "Xiao Zhang",
+		},
+	}
+	expectedRecord := &business.ChatRecord{
+		MsgId:  "CAQQluDa4QUY0On2rYSAgAMgzPrShAE=",
+		Action: "send",
+		From: &business.User{
+			UserId: "id_XuJinSheng",
+			Name:   "Xu Jin Sheng",
+		},
+		To: []*business.User{
+			{
+				UserId: "id_icefog",
+				Name:   "<unknown>",
+			},
+			{
+				UserId: "id_xiaohuang",
+				Name:   "Xiao Huang",
+			},
+		},
+		RoomId:  "",
+		MsgTime: time.UnixMilli(1547087894783),
+		MsgType: "text",
+		Content: "Hello, there!",
+	}
+
+	// When
+	record, err := transformer.Transform(wecomChatRecord, user, contacts)
+	if err != nil {
+		t.Errorf("error shouldn't happen here, expected: %v, actual: %v", nil, err)
+		return
+	}
+
+	if !reflect.DeepEqual(expectedRecord.To, record.To) {
+		t.Errorf("contacts are not matched, \nexpected: %+v, \nactual: %+v", expectedRecord.To, record.To)
+		return
+	}
+}

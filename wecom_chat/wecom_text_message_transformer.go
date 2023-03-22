@@ -19,13 +19,7 @@ func (w *WeComTextMessageTransformer) Transform(wecomChatRecord *WeComChatRecord
 
 	sender := w.senderFrom(wecomChatRecord, userInfo)
 
-	var toUsers []*business.User
-	for _, contact := range externalContacts {
-		toUsers = append(toUsers, &business.User{
-			UserId: contact.ExternalUserID,
-			Name:   contact.Name,
-		})
-	}
+	receivers := w.receiversFrom(wecomChatRecord, externalContacts)
 
 	content := w.contentFrom(wecomChatRecord)
 
@@ -33,7 +27,7 @@ func (w *WeComTextMessageTransformer) Transform(wecomChatRecord *WeComChatRecord
 		MsgId:   wecomChatRecord.MsgID,
 		Action:  wecomChatRecord.Action,
 		From:    sender,
-		To:      toUsers,
+		To:      receivers,
 		RoomId:  wecomChatRecord.RoomID,
 		MsgTime: time.UnixMilli(wecomChatRecord.MsgTime),
 		MsgType: wecomChatRecord.MsgType,
@@ -41,6 +35,27 @@ func (w *WeComTextMessageTransformer) Transform(wecomChatRecord *WeComChatRecord
 	}
 
 	return record, nil
+}
+
+func (w *WeComTextMessageTransformer) receiversFrom(wecomChatRecord *WeComChatRecord, externalContacts []*WeComExternalContact) []*business.User {
+	contactIdToNames := make(map[string]string, len(externalContacts))
+	for _, contact := range externalContacts {
+		contactIdToNames[contact.ExternalUserID] = contact.Name
+	}
+
+	var results []*business.User
+	for _, contactId := range wecomChatRecord.ToList {
+		contactName := "<unknown>"
+		if name, ok := contactIdToNames[contactId]; ok {
+			contactName = name
+		}
+
+		results = append(results, &business.User{
+			UserId: contactId,
+			Name:   contactName,
+		})
+	}
+	return results
 }
 
 func (w *WeComTextMessageTransformer) senderFrom(wecomChatRecord *WeComChatRecord, userInfo *WeComUserInfo) *business.User {
