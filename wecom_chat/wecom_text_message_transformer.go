@@ -25,6 +25,18 @@ func NewWeComTextMessageTransformer() ChatRecordTransformer {
 	}
 }
 
+func NewWeComDefaultMessageTransformer() ChatRecordTransformer {
+	return &WeComMessageTransformer{
+		contentTransformer: func(wecomChatRecord *WeComChatRecord) (content string, err error) {
+			content = ""
+			if wecomChatRecord.OriginMessage != nil {
+				content = string(wecomChatRecord.OriginMessage)
+			}
+			return content, nil
+		},
+	}
+}
+
 func (w *WeComMessageTransformer) Transform(wecomChatRecord *WeComChatRecord, userInfo *WeComUserInfo, externalContacts []*WeComExternalContact) (record *business.ChatRecord, err error) {
 	if wecomChatRecord == nil {
 		return nil, nil
