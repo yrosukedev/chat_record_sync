@@ -26,6 +26,8 @@ func (w *WeComTextMessageTransformer) Transform(wecomChatRecord *WeComChatRecord
 		})
 	}
 
+	content := w.contentFrom(wecomChatRecord)
+
 	record = &business.ChatRecord{
 		MsgId:   wecomChatRecord.MsgID,
 		Action:  wecomChatRecord.Action,
@@ -34,8 +36,16 @@ func (w *WeComTextMessageTransformer) Transform(wecomChatRecord *WeComChatRecord
 		RoomId:  wecomChatRecord.RoomID,
 		MsgTime: time.UnixMilli(wecomChatRecord.MsgTime),
 		MsgType: wecomChatRecord.MsgType,
-		Content: wecomChatRecord.Text.Content,
+		Content: content,
 	}
 
 	return record, nil
+}
+
+func (w *WeComTextMessageTransformer) contentFrom(wecomChatRecord *WeComChatRecord) string {
+	result := ""
+	if wecomChatRecord.Text != nil {
+		result = wecomChatRecord.Text.Content
+	}
+	return result
 }
