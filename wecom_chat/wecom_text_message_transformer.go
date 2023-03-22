@@ -1,6 +1,7 @@
 package wecom_chat
 
 import (
+	"fmt"
 	"github.com/yrosukedev/chat_record_sync/business"
 	"time"
 )
@@ -13,7 +14,7 @@ func NewWeComTextMessageTransformer() ChatRecordTransformer {
 	return &WeComMessageTransformer{
 		contentTransformer: func(wecomChatRecord *WeComChatRecord) (content string, err error) {
 			if wecomChatRecord.MsgType != WeComMessageTypeText {
-				return "", NewTransformerErrorMessageTypeMissMatched(WeComMessageTypeText, wecomChatRecord.MsgType)
+				panic(fmt.Sprintf("missmatched message type, expected: %v, actual: %v", WeComMessageTypeText, wecomChatRecord.MsgType))
 			}
 
 			content = ""
