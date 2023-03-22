@@ -404,3 +404,21 @@ func TestContactsMissmatched_nilContact(t *testing.T) {
 		return
 	}
 }
+
+func TestNilWeComChatRecord(t *testing.T) {
+	// Given
+	transformer := NewWeComTextMessageTransformer()
+
+	// When
+	record, err := transformer.Transform(nil, nil, nil)
+	if err != nil {
+		t.Errorf("error shouldn't happen here, expected: %v, actual: %v", nil, err)
+		return
+	}
+
+	if record != nil {
+		t.Errorf("records not matched, expected: %+v, actual: %+v", nil, record)
+		return
+	}
+}
+

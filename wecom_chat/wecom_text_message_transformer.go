@@ -13,6 +13,10 @@ func NewWeComTextMessageTransformer() ChatRecordTransformer {
 }
 
 func (w *WeComTextMessageTransformer) Transform(wecomChatRecord *WeComChatRecord, userInfo *WeComUserInfo, externalContacts []*WeComExternalContact) (record *business.ChatRecord, err error) {
+	if wecomChatRecord == nil {
+		return nil, nil
+	}
+
 	if wecomChatRecord.MsgType != WeComMessageTypeText {
 		return nil, NewTransformerErrorMessageTypeMissMatched(WeComMessageTypeText, wecomChatRecord.MsgType)
 	}
