@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func TestContent(t *testing.T) {
+func TestTextMessage_Content(t *testing.T) {
 	// Given
 	transformer := NewWeComTextMessageTransformer()
 	wecomChatRecord := &WeComChatRecord{
@@ -67,7 +67,7 @@ func TestContent(t *testing.T) {
 	}
 }
 
-func TestContent_nilText(t *testing.T) {
+func TestTextMessage_Content_nilText(t *testing.T) {
 	// Given
 	transformer := NewWeComTextMessageTransformer()
 	wecomChatRecord := &WeComChatRecord{
@@ -124,7 +124,7 @@ func TestContent_nilText(t *testing.T) {
 	}
 }
 
-func TestContent_missMatchedMessageType(t *testing.T) {
+func TestTextMessage_Content_missMatchedMessageType(t *testing.T) {
 	// Given
 	transformer := NewWeComTextMessageTransformer()
 	wecomChatRecord := &WeComChatRecord{
@@ -421,4 +421,3 @@ func TestNilWeComChatRecord(t *testing.T) {
 		return
 	}
 }
-
