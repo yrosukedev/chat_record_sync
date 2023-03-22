@@ -74,6 +74,23 @@ func TestTransformerFactory_transformerNotFound(t *testing.T) {
 	}
 }
 
+func TestTransformerFactory_nilParameters(t *testing.T) {
+	// Given
+	factory := NewWeComMessageTransformerFactory(nil, nil)
+
+	// When
+	record, err := factory.Transform(nil, nil, nil)
+	if err != nil {
+		t.Errorf("error shouldn't happen here, expected: %v, actual: %v", nil, err)
+		return
+	}
+
+	if nil != record {
+		t.Errorf("records are not matched, expected: %+v, actual: %+v", nil, record)
+		return
+	}
+}
+
 func makeSUTForTransformerFactory() (*WeComChatRecord, *WeComUserInfo, []*WeComExternalContact, *business.ChatRecord) {
 	wecomChatRecord := &WeComChatRecord{
 		Seq:    10,

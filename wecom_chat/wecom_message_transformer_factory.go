@@ -15,6 +15,10 @@ func NewWeComMessageTransformerFactory(messageTypeToTransformers map[string]Chat
 }
 
 func (f *WeComMessageTransformerFactory) Transform(wecomChatRecord *WeComChatRecord, userInfo *WeComUserInfo, externalContacts []*WeComExternalContact) (record *business.ChatRecord, err error) {
+	if wecomChatRecord == nil {
+		return nil, nil
+	}
+
 	return f.transformerFor(wecomChatRecord).Transform(wecomChatRecord, userInfo, externalContacts)
 }
 
