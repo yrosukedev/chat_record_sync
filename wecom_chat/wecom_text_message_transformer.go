@@ -32,6 +32,11 @@ func NewWeComDefaultMessageTransformer() ChatRecordTransformer {
 			if wecomChatRecord.OriginMessage != nil {
 				content = string(wecomChatRecord.OriginMessage)
 			}
+
+			if content == "" {
+				return "", NewTransformerEmptyContentError(wecomChatRecord)
+			}
+
 			return content, nil
 		},
 	}

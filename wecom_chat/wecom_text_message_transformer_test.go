@@ -183,6 +183,40 @@ func TestTextMessage_Content_nilText(t *testing.T) {
 	}
 }
 
+func TestOtherMessage_Content_nilOriginMessage(t *testing.T) {
+	// Given
+	transformer := NewWeComDefaultMessageTransformer()
+	wecomChatRecord := &WeComChatRecord{
+		Seq:    10,
+		MsgID:  "CAQQluDa4QUY0On2rYSAgAMgzPrShAE=",
+		Action: "send",
+		From:   "id_XuJinSheng",
+		ToList: []string{
+			"id_icefog",
+		},
+		RoomID:  "",
+		MsgTime: 1547087894783,
+		MsgType: "location",
+	}
+	user := &WeComUserInfo{
+		UserID: "id_XuJinSheng",
+		Name:   "Xu Jin Sheng",
+	}
+	contacts := []*WeComExternalContact{
+		{
+			ExternalUserID: "id_icefog",
+			Name:           "icefog",
+		},
+	}
+
+	// When
+	_, err := transformer.Transform(wecomChatRecord, user, contacts)
+	if !reflect.DeepEqual(err, NewTransformerEmptyContentError(wecomChatRecord)) {
+		t.Errorf("error should happen here, expected: %v, actual: %v", NewTransformerEmptyContentError(wecomChatRecord), err)
+		return
+	}
+}
+
 func TestTextMessage_Content_missMatchedMessageType(t *testing.T) {
 	// Given
 	transformer := NewWeComTextMessageTransformer()
