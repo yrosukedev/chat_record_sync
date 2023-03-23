@@ -10,7 +10,7 @@ import (
 func TestWeComChatRecordServiceSDK_firstPage(t *testing.T) {
 	// Given
 	weComConfig := config.NewWeComConfig()
-	client, err := WeWorkFinanceSDK.NewClient(weComConfig.CorpID, weComConfig.CorpSecret, weComConfig.RsaPrivateKey)
+	client, err := WeWorkFinanceSDK.NewClient(weComConfig.CorpID, weComConfig.ChatSyncSecret, weComConfig.ChatSyncRsaPrivateKey)
 	if err != nil {
 		t.Errorf("error shouldn't happen here, expected: %v, actual: %v", nil, err)
 		return
