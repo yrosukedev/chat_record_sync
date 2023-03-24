@@ -21,11 +21,27 @@ func NewChatSyncHTTPController(ctx context.Context, useCase use_case.UseCase) ht
 }
 
 func (c *ChatSyncHTTPController) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
-	err := c.useCase.Run(c.ctx)
-	if err != nil {
+	errs := c.useCase.Run(c.ctx)
+
+	if len(errs) != 0 {
+		c.writeFailureResponse(writer, errs)
 		return
 	}
 
+	c.writeSuccessResponse(writer)
+}
+
+func (c *ChatSyncHTTPController) writeFailureResponse(writer http.ResponseWriter, errs []*use_case.SyncError) {
+	writer.WriteHeader(http.StatusInternalServerError)
+
+	response := ChatSyncResponse{
+		Code: ResponseCodeFailure,
+		Msg:  fmt.Sprintf("%v\n%v", ResponseCodeFailure.Msg(), combineErrors(errs)),
+	}
+	c.writeResponseBody(writer, response)
+}
+
+func (c *ChatSyncHTTPController) writeSuccessResponse(writer http.ResponseWriter) {
 	writer.WriteHeader(http.StatusOK)
 
 	response := ChatSyncResponse{

@@ -9,6 +9,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
+	use_case "github.com/yrosukedev/chat_record_sync/use_case"
 )
 
 // MockUseCase is a mock of UseCase interface.
@@ -35,10 +36,10 @@ func (m *MockUseCase) EXPECT() *MockUseCaseMockRecorder {
 }
 
 // Run mocks base method.
-func (m *MockUseCase) Run(ctx context.Context) error {
+func (m *MockUseCase) Run(ctx context.Context) []*use_case.SyncError {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Run", ctx)
-	ret0, _ := ret[0].(error)
+	ret0, _ := ret[0].([]*use_case.SyncError)
 	return ret0
 }
 
