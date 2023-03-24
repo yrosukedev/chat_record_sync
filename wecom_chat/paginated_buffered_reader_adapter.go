@@ -53,7 +53,7 @@ func (p *PaginatedBufferedReaderAdapter) seqFrom(inPageToken *paginated_reader.P
 
 func (p *PaginatedBufferedReaderAdapter) transformWecomRecords(wecomRecords []*WeComChatRecord) (records []*business.ChatRecord, err error) {
 	for _, wecomRecord := range wecomRecords {
-		user, err := p.openAPIService.GetUserInfoByID(wecomRecord.From)
+		user, err := p.getUserInfo(wecomRecord)
 		if err != nil {
 			return nil, err
 		}
@@ -73,7 +73,23 @@ func (p *PaginatedBufferedReaderAdapter) transformWecomRecords(wecomRecords []*W
 	return records, nil
 }
 
+func (p *PaginatedBufferedReaderAdapter) getUserInfo(wecomRecord *WeComChatRecord) (*WeComUserInfo, error) {
+	if p.openAPIService == nil {
+		return nil, nil
+	}
+
+	user, err := p.openAPIService.GetUserInfoByID(wecomRecord.From)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
+}
+
 func (p *PaginatedBufferedReaderAdapter) getContacts(contactIds []string) ([]*WeComExternalContact, error) {
+	if p.openAPIService == nil {
+		return nil, nil
+	}
+
 	var contacts []*WeComExternalContact
 	for _, contactId := range contactIds {
 		contact, err := p.openAPIService.GetExternalContactByID(contactId)

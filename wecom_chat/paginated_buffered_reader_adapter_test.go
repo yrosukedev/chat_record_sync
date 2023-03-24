@@ -572,6 +572,55 @@ func TestOpenAPIServiceError_getContact(t *testing.T) {
 	}
 }
 
+func TestOpenAPIService_nil(t *testing.T) {
+	// Given
+	ctrl := gomock.NewController(t)
+	chatRecordService := NewMockChatRecordService(ctrl)
+	transformer := NewMockChatRecordTransformer(ctrl)
+	readerAdapter := NewPaginatedBufferedReaderAdapter(chatRecordService, nil, transformer)
+
+	// Then
+	wecomRecords := []*WeComChatRecord{
+		{
+			Seq:    890,
+			From:   "ID_xiaoming",
+			ToList: []string{"ID_xiaowang"},
+		},
+	}
+	expectedRecords := []*business.ChatRecord{
+		{
+			From: &business.User{
+				UserId: "ID_xiaoming",
+				Name:   "<unknown>",
+			},
+			To: []*business.User{
+				{
+					UserId: "ID_xiaowang",
+					Name:   "<unknown>",
+				},
+			},
+		},
+	}
+
+	chatRecordService.EXPECT().Read(gomock.Eq(uint64(267)), gomock.Eq(uint64(10))).Return(wecomRecords, nil).Times(1)
+	transformer.EXPECT().Transform(gomock.Eq(wecomRecords[0]), gomock.Nil(), gomock.Nil()).Return(expectedRecords[0], nil).Times(1)
+
+	// When
+	records, outPageToken, err := readerAdapter.Read(paginated_reader.NewPageToken(267), 10)
+	if err != nil {
+		t.Errorf("error shouldn't happen here, expected: %v, actual: %v", nil, err)
+		return
+	}
+	if !reflect.DeepEqual(expectedRecords, records) {
+		t.Errorf("records not matched, expected: %+v, actual: %+v", expectedRecords, records)
+		return
+	}
+	if !reflect.DeepEqual(outPageToken, paginated_reader.NewPageToken(890)) {
+		t.Errorf("output page token not matched, expected: %+v, actual: %+v", paginated_reader.NewPageToken(890), outPageToken)
+		return
+	}
+}
+
 func TestTransformerError(t *testing.T) {
 	// Given
 	ctrl := gomock.NewController(t)
