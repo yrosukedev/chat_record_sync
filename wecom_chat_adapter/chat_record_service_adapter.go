@@ -56,6 +56,7 @@ func (w *WeComChatRecordServiceAdapter) textMessageFrom(chatMessage WeWorkFinanc
 		ToList:  textMsg.ToList,
 		RoomID:  textMsg.RoomID,
 		MsgTime: textMsg.MsgTime,
+		MsgType: textMsg.MsgType,
 		Text: &wecom_chat.TextMessage{
 			Content: textMsg.Text.Content,
 		},
@@ -73,6 +74,7 @@ func (w *WeComChatRecordServiceAdapter) otherMessageFrom(chatMessage WeWorkFinan
 		ToList:        chatMessage.ToList,
 		RoomID:        chatMessage.RoomID,
 		MsgTime:       chatMessage.MsgTime,
+		MsgType:       chatMessage.Type,
 		OriginMessage: chatMessage.GetRawChatMessage(),
 	}
 	return record

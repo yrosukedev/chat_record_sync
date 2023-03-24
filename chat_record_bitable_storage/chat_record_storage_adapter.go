@@ -7,6 +7,7 @@ import (
 	larkbitable "github.com/larksuite/oapi-sdk-go/v3/service/bitable/v1"
 	"github.com/yrosukedev/chat_record_sync/business"
 	"github.com/yrosukedev/chat_record_sync/consts"
+	"github.com/yrosukedev/chat_record_sync/retry_writer"
 	"net/http"
 	"strings"
 )
@@ -18,7 +19,7 @@ type ChatRecordStorageAdapter struct {
 	tableId    string
 }
 
-func NewChatRecordStorageAdapter(ctx context.Context, larkClient *lark.Client, appToken string, tableId string) *ChatRecordStorageAdapter {
+func NewChatRecordStorageAdapter(ctx context.Context, larkClient *lark.Client, appToken string, tableId string) retry_writer.RetryWriter {
 	return &ChatRecordStorageAdapter{
 		ctx:        ctx,
 		larkClient: larkClient,

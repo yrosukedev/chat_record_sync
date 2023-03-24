@@ -56,13 +56,13 @@ func (p *PaginationStorageAdapter) handleResponse(resp *larkbitable.ListAppTable
 func (p *PaginationStorageAdapter) pageTokenFrom(pageTokenField interface{}) (*paginated_reader.PageToken, error) {
 	switch pageTokenValue := pageTokenField.(type) {
 	case string:
-		if pageTokenInt, err := strconv.Atoi(pageTokenValue); err != nil {
+		if pageTokenInt, err := strconv.ParseInt(pageTokenValue, 10, 64); err != nil {
 			return nil, fmt.Errorf("fails to convert '%v' field to integer, value: %v, appToken: %v, tableId: %v", consts.BitableFieldPaginationPageToken, pageTokenValue, p.appToken, p.tableId)
 		} else {
-			return paginated_reader.NewPageToken(int64(pageTokenInt)), nil
+			return paginated_reader.NewPageToken(uint64(pageTokenInt)), nil
 		}
-	case int:
-		return paginated_reader.NewPageToken(int64(pageTokenValue)), nil
+	case uint64:
+		return paginated_reader.NewPageToken(pageTokenValue), nil
 	default:
 		return nil, fmt.Errorf("unknown type of '%v' field, value: %v, appToken: %v, tableId: %v", consts.BitableFieldPaginationPageToken, pageTokenField, p.appToken, p.tableId)
 	}
