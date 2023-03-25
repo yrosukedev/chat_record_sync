@@ -17,3 +17,6 @@ mockgen -source wecom_chat/chat_record_transformer.go -package wecom_chat -desti
 # package: http_controller
 mockgen -source use_case/use_case.go -package http_controller -destination http_controller/mock_use_case.go
 mockgen -package http_controller -destination http_controller/mock_response_writer.go net/http ResponseWriter
+
+# package: tencent_faas_adapter
+mockgen -package tencent_faas_adapter -destination tencent_faas_adapter/mock_handler.go net/http Handler
