@@ -52,9 +52,12 @@ func TestHTTPAdapter_succeeds(t *testing.T) {
 
 	ctrl := gomock.NewController(t)
 	handler := NewMockHandler(ctrl)
-	adapter := NewHTTPAdapter(handler)
+	logger := NewMockLogger(ctrl)
+	adapter := NewHTTPAdapter(handler, logger)
 
 	// Then
+	logger.EXPECT().Info(gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes()
+
 	handler.
 		EXPECT().
 		ServeHTTP(gomock.Any(), newHttpRequestMatcher(httpReq)).

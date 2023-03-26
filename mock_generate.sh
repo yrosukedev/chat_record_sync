@@ -20,3 +20,4 @@ mockgen -package http_controller -destination http_controller/mock_response_writ
 
 # package: tencent_faas_adapter
 mockgen -package tencent_faas_adapter -destination tencent_faas_adapter/mock_handler.go net/http Handler
+mockgen -source logger/logger.go -package tencent_faas_adapter -destination tencent_faas_adapter/mock_logger.go

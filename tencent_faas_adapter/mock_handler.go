@@ -37,7 +37,7 @@ func (m *MockHandler) EXPECT() *MockHandlerMockRecorder {
 // ServeHTTP mocks base method.
 func (m *MockHandler) ServeHTTP(arg0 http.ResponseWriter, arg1 *http.Request) {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "ServeHTTP", arg0, *arg1)
+	m.ctrl.Call(m, "ServeHTTP", arg0, arg1)
 }
 
 // ServeHTTP indicates an expected call of ServeHTTP.
