@@ -10,6 +10,13 @@ const (
 	LarkEnvKeyAppSecret = "lark_app_secret"
 )
 
+const (
+	PaginationStorageBitableAppToken = "DLSbbQIcEa0KyIsetHWcg3PDnNh"
+	PaginationStorageBitableTableId  = "tblLJY5YSoEkV3G3"
+	ChatStorageBitableAppToken       = "QCBrbzgx4aKRAis9eewcV731n7d"
+	ChatStorageBitableTableId        = "tblIk692K5LXte8x"
+)
+
 type LarkConfig struct {
 	AppId     string
 	AppSecret string
