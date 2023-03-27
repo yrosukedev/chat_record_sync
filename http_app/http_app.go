@@ -43,7 +43,7 @@ func NewHTTPApp(ctx context.Context) *HTTPApp {
 		logger:      logger,
 	}
 
-	logger.Info(ctx, "[faas app] http app created")
+	logger.Info(ctx, "[http app] http app created")
 
 	return httpApp
 }
@@ -54,7 +54,9 @@ func (f *HTTPApp) Run(ctx context.Context) {
 	requestMux := f.createMultiplexer(ctx)
 	f.logger.Info(ctx, "[http app] request multiplexer created")
 
-	err := http.ListenAndServe(fmt.Sprintf(":%v", config.HttpAppPort), requestMux)
+	err := http.ListenAndServe(
+		fmt.Sprintf(":%v", config.HttpAppPort),
+		NewLogHandler(ctx, requestMux, f.logger))
 	if err != nil {
 		f.logger.Error(ctx, "[http app] server exit with err: %v", err)
 	} else {
