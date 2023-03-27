@@ -18,7 +18,8 @@ func TestSucceeds(t *testing.T) {
 	ctx := context.Background()
 	ctrl := gomock.NewController(t)
 	useCase := NewMockUseCase(ctrl)
-	controller := NewChatSyncHTTPController(ctx, useCase)
+	logger := NewMockLogger(ctrl)
+	controller := NewChatSyncHTTPController(ctx, useCase, logger)
 	responseWriter := NewMockResponseWriter(ctrl)
 	chatSyncReponse := ChatSyncResponse{
 		Code: ResponseCodeOK,
@@ -37,6 +38,8 @@ func TestSucceeds(t *testing.T) {
 	responseWriter.EXPECT().WriteHeader(gomock.Eq(http.StatusOK)).Times(1)
 	responseWriter.EXPECT().Write(gomock.Eq(chatSyncReponseJson)).Return(len(chatSyncReponseJson), nil).Times(1)
 
+	logger.EXPECT().Info(gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes()
+
 	// When
 	request, err := http.NewRequest(http.MethodPost, "/chat_sync", strings.NewReader(""))
 	if err != nil {
@@ -52,7 +55,8 @@ func TestFails(t *testing.T) {
 	ctx := context.Background()
 	ctrl := gomock.NewController(t)
 	useCase := NewMockUseCase(ctrl)
-	controller := NewChatSyncHTTPController(ctx, useCase)
+	logger := NewMockLogger(ctrl)
+	controller := NewChatSyncHTTPController(ctx, useCase, logger)
 	responseWriter := NewMockResponseWriter(ctrl)
 
 	errs := []*use_case.SyncError{
@@ -77,6 +81,9 @@ func TestFails(t *testing.T) {
 
 	responseWriter.EXPECT().WriteHeader(gomock.Eq(http.StatusInternalServerError)).Times(1)
 	responseWriter.EXPECT().Write(gomock.Eq(chatSyncReponseJson)).Return(len(chatSyncReponseJson), nil).Times(1)
+
+	logger.EXPECT().Info(gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes()
+	logger.EXPECT().Error(gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes()
 
 	// When
 	request, err := http.NewRequest(http.MethodPost, "/chat_sync", strings.NewReader(""))

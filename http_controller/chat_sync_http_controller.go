@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/yrosukedev/chat_record_sync/logger"
 	"github.com/yrosukedev/chat_record_sync/use_case"
 	"net/http"
 )
@@ -11,22 +12,30 @@ import (
 type ChatSyncHTTPController struct {
 	ctx     context.Context
 	useCase use_case.UseCase
+	logger  logger.Logger
 }
 
-func NewChatSyncHTTPController(ctx context.Context, useCase use_case.UseCase) http.Handler {
+func NewChatSyncHTTPController(ctx context.Context, useCase use_case.UseCase, logger logger.Logger) http.Handler {
 	return &ChatSyncHTTPController{
 		ctx:     ctx,
 		useCase: useCase,
+		logger:  logger,
 	}
 }
 
 func (c *ChatSyncHTTPController) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
+
+	c.logger.Info(c.ctx, "[chat sync http controller] use case is about to start")
+
 	errs := c.useCase.Run(c.ctx)
 
 	if len(errs) != 0 {
+		c.logger.Error(c.ctx, "[chat sync http controller] use case is finished with errors: %v", combineErrors(errs))
 		c.writeFailureResponse(writer, errs)
 		return
 	}
+
+	c.logger.Info(c.ctx, "[chat sync http controller] use case is finished successfully")
 
 	c.writeSuccessResponse(writer)
 }

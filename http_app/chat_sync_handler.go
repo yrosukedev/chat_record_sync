@@ -16,7 +16,7 @@ import (
 )
 
 func (f *HTTPApp) createChatSyncHTTPHandler(ctx context.Context) http.Handler {
-	return http_controller.NewChatSyncHTTPController(ctx, f.createChatSyncUseCase(ctx))
+	return http_controller.NewChatSyncHTTPController(ctx, f.createChatSyncUseCase(ctx), f.logger)
 }
 
 func (f *HTTPApp) createChatSyncUseCase(ctx context.Context) use_case.UseCase {
