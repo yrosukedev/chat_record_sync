@@ -3,6 +3,7 @@ package chat_record_bitable_storage
 import (
 	"context"
 	"fmt"
+	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
 	lark "github.com/larksuite/oapi-sdk-go/v3"
 	"github.com/yrosukedev/chat_record_sync/business"
@@ -14,11 +15,16 @@ import (
 func TestWriteSucceeds(t *testing.T) {
 	// Given
 	ctx := context.Background()
+	ctrl := gomock.NewController(t)
 	larkConfig := config.NewLarkConfig()
 	larkClient := lark.NewClient(larkConfig.AppId, larkConfig.AppSecret)
-	storageAdapter := NewChatRecordStorageAdapter(ctx, larkClient, "QCBrbzgx4aKRAis9eewcV731n7d", "tblIk692K5LXte8x")
+	logger := NewMockLogger(ctrl)
+	storageAdapter := NewChatRecordStorageAdapter(ctx, larkClient, "QCBrbzgx4aKRAis9eewcV731n7d", "tblIk692K5LXte8x", logger)
 
 	// When
+	logger.EXPECT().Info(gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes()
+	logger.EXPECT().Error(gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes()
+
 	record := &business.ChatRecord{
 		MsgId:  "CAQQluDa4QUY0On2rYSAgAMgzPrShAE=",
 		Action: "send",

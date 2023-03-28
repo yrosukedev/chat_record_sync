@@ -7,6 +7,7 @@ import (
 	larkbitable "github.com/larksuite/oapi-sdk-go/v3/service/bitable/v1"
 	"github.com/yrosukedev/chat_record_sync/business"
 	"github.com/yrosukedev/chat_record_sync/consts"
+	"github.com/yrosukedev/chat_record_sync/logger"
 	"github.com/yrosukedev/chat_record_sync/retry_writer"
 	"net/http"
 	"strings"
@@ -17,14 +18,21 @@ type ChatRecordStorageAdapter struct {
 	larkClient *lark.Client
 	appToken   string
 	tableId    string
+	logger     logger.Logger
 }
 
-func NewChatRecordStorageAdapter(ctx context.Context, larkClient *lark.Client, appToken string, tableId string) retry_writer.RetryWriter {
+func NewChatRecordStorageAdapter(
+	ctx context.Context,
+	larkClient *lark.Client,
+	appToken string,
+	tableId string,
+	logger logger.Logger) retry_writer.RetryWriter {
 	return &ChatRecordStorageAdapter{
 		ctx:        ctx,
 		larkClient: larkClient,
 		appToken:   appToken,
 		tableId:    tableId,
+		logger:     logger,
 	}
 }
 
@@ -34,6 +42,8 @@ func NewChatRecordStorageAdapter(ctx context.Context, larkClient *lark.Client, a
 // It's very useful for handling the errors of writing the chat record to Bitable.
 // Because this operation is idempotent when the UUID is provided, so we could retry the operation many times.
 func (c *ChatRecordStorageAdapter) Write(chatRecord *business.ChatRecord, requestUUID string) error {
+
+	c.logger.Info(c.ctx, "[chat record storage adapter] will write record to Bitable, msgId: %v", chatRecord.MsgId)
 
 	fields := c.tableFieldsFrom(chatRecord)
 
@@ -52,16 +62,23 @@ func (c *ChatRecordStorageAdapter) Write(chatRecord *business.ChatRecord, reques
 
 	resp, err := c.larkClient.Bitable.AppTableRecord.Create(c.ctx, req)
 	if err != nil {
+		c.logger.Info(c.ctx, "[chat record storage adapter] fails to write record to Bitable, msgId: %v, err: %v", chatRecord.MsgId, err)
 		return err
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("fails to create lark bitable table record, statusCode: %v, code: %v, msg: %v", resp.StatusCode, resp.Code, resp.Msg)
+		err = fmt.Errorf("fails to create lark bitable table record, statusCode: %v, code: %v, msg: %v", resp.StatusCode, resp.Code, resp.Msg)
+		c.logger.Info(c.ctx, "[chat record storage adapter] fails to write record to Bitable, msgId: %v, err: %v", chatRecord.MsgId, err)
+		return err
 	}
 
 	if resp.Code != 0 {
-		return fmt.Errorf("fails to create lark bitable table record, statusCode: %v, code: %v, msg: %v", resp.StatusCode, resp.Code, resp.Msg)
+		err = fmt.Errorf("fails to create lark bitable table record, statusCode: %v, code: %v, msg: %v", resp.StatusCode, resp.Code, resp.Msg)
+		c.logger.Info(c.ctx, "[chat record storage adapter] fails to write record to Bitable, msgId: %v, err: %v", chatRecord.MsgId, err)
+		return err
 	}
+
+	c.logger.Info(c.ctx, "[chat record storage adapter] succeeds to write record to Bitable, msgId: %v", chatRecord.MsgId)
 
 	return nil
 }

@@ -33,7 +33,7 @@ func (f *HTTPApp) createChatSyncUseCase(ctx context.Context) use_case.UseCase {
 				pagination_bitable_storage.NewPaginationStorageAdapter(ctx, f.larkClient, config.PaginationStorageBitableAppToken, config.PaginationStorageBitableTableId),
 				config.PaginatedReaderPageSize)),
 		retry_writer.NewRetryWriterAdapter(
-			chat_record_bitable_storage.NewChatRecordStorageAdapter(ctx, f.larkClient, config.ChatStorageBitableAppToken, config.ChatStorageBitableTableId)),
+			chat_record_bitable_storage.NewChatRecordStorageAdapter(ctx, f.larkClient, config.ChatStorageBitableAppToken, config.ChatStorageBitableTableId, f.logger)),
 	)
 
 	return useCase

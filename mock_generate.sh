@@ -22,3 +22,6 @@ mockgen -source logger/logger.go -package http_controller -destination http_cont
 # package: tencent_faas_adapter
 mockgen -package tencent_faas_adapter -destination tencent_faas_adapter/mock_handler.go net/http Handler
 mockgen -source logger/logger.go -package tencent_faas_adapter -destination tencent_faas_adapter/mock_logger.go
+
+# package: chat_record_bitable_storage
+mockgen -source logger/logger.go -package chat_record_bitable_storage -destination chat_record_bitable_storage/mock_logger.go
