@@ -39,9 +39,9 @@ func RunCLIApp(ctx context.Context) error {
 					wecom_chat_adapter.NewWeComChatRecordServiceAdapter(client, "", "", config.WeComChatRecordSDKTimeout),
 					nil,
 					wecom_chat.NewWeComMessageTransformerFactory(map[string]wecom_chat.ChatRecordTransformer{
-						wecom_chat.WeComMessageTypeText: wecom_chat.NewWeComTextMessageTransformer(),
+						wecom_chat.WeComMessageTypeText: wecom_chat.NewWeComTextMessageTransformer(ctx, logger),
 					},
-						wecom_chat.NewWeComDefaultMessageTransformer())),
+						wecom_chat.NewWeComDefaultMessageTransformer(ctx, logger))),
 				pagination_bitable_storage.NewPaginationStorageAdapter(ctx, larkClient, "DLSbbQIcEa0KyIsetHWcg3PDnNh", "tblLJY5YSoEkV3G3", logger),
 				pageSize)),
 		retry_writer.NewRetryWriterAdapter(

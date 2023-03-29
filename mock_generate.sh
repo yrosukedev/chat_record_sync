@@ -13,6 +13,7 @@ mockgen -source buffer_reader/chat_record_buffered_reader.go -package buffer_rea
 mockgen -source wecom_chat/chat_record_service.go -package wecom_chat -destination wecom_chat/mock_chat_record_service.go
 mockgen -source wecom_chat/open_api_service.go -package wecom_chat -destination wecom_chat/mock_open_api_service.go
 mockgen -source wecom_chat/chat_record_transformer.go -package wecom_chat -destination wecom_chat/mock_chat_record_transformer.go
+mockgen -source logger/logger.go -package wecom_chat -destination wecom_chat/mock_logger.go
 
 # package: http_controller
 mockgen -source use_case/use_case.go -package http_controller -destination http_controller/mock_use_case.go

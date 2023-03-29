@@ -1,6 +1,8 @@
 package wecom_chat
 
 import (
+	"context"
+	"github.com/golang/mock/gomock"
 	"github.com/yrosukedev/chat_record_sync/business"
 	"reflect"
 	"testing"
@@ -9,7 +11,10 @@ import (
 
 func TestTextMessage_Content(t *testing.T) {
 	// Given
-	transformer := NewWeComTextMessageTransformer()
+	ctx := context.Background()
+	ctrl := gomock.NewController(t)
+	logger := NewMockLogger(ctrl)
+	transformer := NewWeComTextMessageTransformer(ctx, logger)
 	wecomChatRecord := &WeComChatRecord{
 		Seq:    10,
 		MsgID:  "CAQQluDa4QUY0On2rYSAgAMgzPrShAE=",
@@ -55,6 +60,9 @@ func TestTextMessage_Content(t *testing.T) {
 	}
 
 	// When
+	logger.EXPECT().Info(gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes()
+	logger.EXPECT().Error(gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes()
+
 	record, err := transformer.Transform(wecomChatRecord, user, contacts)
 	if err != nil {
 		t.Errorf("error shouldn't happen here, expected: %v, actual: %v", nil, err)
@@ -69,7 +77,10 @@ func TestTextMessage_Content(t *testing.T) {
 
 func TestOtherMessage_Content(t *testing.T) {
 	// Given
-	transformer := NewWeComDefaultMessageTransformer()
+	ctx := context.Background()
+	ctrl := gomock.NewController(t)
+	logger := NewMockLogger(ctrl)
+	transformer := NewWeComDefaultMessageTransformer(ctx, logger)
 	originMessage := "{\"msgid\":\"2641513858500683770_1603876152\",\"action\":\"send\",\"from\":\"icefog\",\"tolist\":[\"wmN6etBgAA0sbJ3invMvRxPQDFoq9uWA\"],\"roomid\":\"\",\"msgtime\":1603876152141,\"msgtype\":\"location\",\"location\":{\"longitude\":116.586285899,\"latitude\":39.911125799,\"address\":\"北京市xxx区xxx路xxx大厦x座\",\"title\":\"xxx管理中心\",\"zoom\":15}}"
 	wecomChatRecord := &WeComChatRecord{
 		Seq:    10,
@@ -114,6 +125,9 @@ func TestOtherMessage_Content(t *testing.T) {
 	}
 
 	// When
+	logger.EXPECT().Info(gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes()
+	logger.EXPECT().Error(gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes()
+
 	record, err := transformer.Transform(wecomChatRecord, user, contacts)
 	if err != nil {
 		t.Errorf("error shouldn't happen here, expected: %v, actual: %v", nil, err)
@@ -128,7 +142,10 @@ func TestOtherMessage_Content(t *testing.T) {
 
 func TestTextMessage_Content_nilText(t *testing.T) {
 	// Given
-	transformer := NewWeComTextMessageTransformer()
+	ctx := context.Background()
+	ctrl := gomock.NewController(t)
+	logger := NewMockLogger(ctrl)
+	transformer := NewWeComTextMessageTransformer(ctx, logger)
 	wecomChatRecord := &WeComChatRecord{
 		Seq:    10,
 		MsgID:  "CAQQluDa4QUY0On2rYSAgAMgzPrShAE=",
@@ -171,6 +188,9 @@ func TestTextMessage_Content_nilText(t *testing.T) {
 	}
 
 	// When
+	logger.EXPECT().Info(gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes()
+	logger.EXPECT().Error(gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes()
+
 	record, err := transformer.Transform(wecomChatRecord, user, contacts)
 	if err != nil {
 		t.Errorf("error shouldn't happen here, expected: %v, actual: %v", nil, err)
@@ -185,7 +205,10 @@ func TestTextMessage_Content_nilText(t *testing.T) {
 
 func TestOtherMessage_Content_nilOriginMessage(t *testing.T) {
 	// Given
-	transformer := NewWeComDefaultMessageTransformer()
+	ctx := context.Background()
+	ctrl := gomock.NewController(t)
+	logger := NewMockLogger(ctrl)
+	transformer := NewWeComDefaultMessageTransformer(ctx, logger)
 	wecomChatRecord := &WeComChatRecord{
 		Seq:    10,
 		MsgID:  "CAQQluDa4QUY0On2rYSAgAMgzPrShAE=",
@@ -210,6 +233,9 @@ func TestOtherMessage_Content_nilOriginMessage(t *testing.T) {
 	}
 
 	// When
+	logger.EXPECT().Info(gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes()
+	logger.EXPECT().Error(gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes()
+
 	_, err := transformer.Transform(wecomChatRecord, user, contacts)
 	if !reflect.DeepEqual(err, NewTransformerEmptyContentError(wecomChatRecord)) {
 		t.Errorf("error should happen here, expected: %v, actual: %v", NewTransformerEmptyContentError(wecomChatRecord), err)
@@ -219,7 +245,10 @@ func TestOtherMessage_Content_nilOriginMessage(t *testing.T) {
 
 func TestUserMissmatched_notFound(t *testing.T) {
 	// Given
-	transformer := NewWeComTextMessageTransformer()
+	ctx := context.Background()
+	ctrl := gomock.NewController(t)
+	logger := NewMockLogger(ctrl)
+	transformer := NewWeComTextMessageTransformer(ctx, logger)
 	wecomChatRecord := &WeComChatRecord{
 		Seq:    10,
 		MsgID:  "CAQQluDa4QUY0On2rYSAgAMgzPrShAE=",
@@ -265,6 +294,9 @@ func TestUserMissmatched_notFound(t *testing.T) {
 	}
 
 	// When
+	logger.EXPECT().Info(gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes()
+	logger.EXPECT().Error(gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes()
+
 	record, err := transformer.Transform(wecomChatRecord, user, contacts)
 	if err != nil {
 		t.Errorf("error shouldn't happen here, \nexpected: %+v, \nactual: %+v", nil, err)
@@ -279,7 +311,10 @@ func TestUserMissmatched_notFound(t *testing.T) {
 
 func TestUserMissmatched_nilUser(t *testing.T) {
 	// Given
-	transformer := NewWeComTextMessageTransformer()
+	ctx := context.Background()
+	ctrl := gomock.NewController(t)
+	logger := NewMockLogger(ctrl)
+	transformer := NewWeComTextMessageTransformer(ctx, logger)
 	wecomChatRecord := &WeComChatRecord{
 		Seq:    10,
 		MsgID:  "CAQQluDa4QUY0On2rYSAgAMgzPrShAE=",
@@ -321,6 +356,9 @@ func TestUserMissmatched_nilUser(t *testing.T) {
 	}
 
 	// When
+	logger.EXPECT().Info(gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes()
+	logger.EXPECT().Error(gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes()
+
 	record, err := transformer.Transform(wecomChatRecord, nil, contacts)
 	if err != nil {
 		t.Errorf("error shouldn't happen here, \nexpected: %+v, \nactual: %+v", nil, err)
@@ -335,7 +373,10 @@ func TestUserMissmatched_nilUser(t *testing.T) {
 
 func TestContactsMissmatched_contactNotFound(t *testing.T) {
 	// Given
-	transformer := NewWeComTextMessageTransformer()
+	ctx := context.Background()
+	ctrl := gomock.NewController(t)
+	logger := NewMockLogger(ctrl)
+	transformer := NewWeComTextMessageTransformer(ctx, logger)
 	wecomChatRecord := &WeComChatRecord{
 		Seq:    10,
 		MsgID:  "CAQQluDa4QUY0On2rYSAgAMgzPrShAE=",
@@ -390,6 +431,9 @@ func TestContactsMissmatched_contactNotFound(t *testing.T) {
 	}
 
 	// When
+	logger.EXPECT().Info(gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes()
+	logger.EXPECT().Error(gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes()
+
 	record, err := transformer.Transform(wecomChatRecord, user, contacts)
 	if err != nil {
 		t.Errorf("error shouldn't happen here, expected: %v, actual: %v", nil, err)
@@ -404,7 +448,10 @@ func TestContactsMissmatched_contactNotFound(t *testing.T) {
 
 func TestContactsMissmatched_nilContact(t *testing.T) {
 	// Given
-	transformer := NewWeComTextMessageTransformer()
+	ctx := context.Background()
+	ctrl := gomock.NewController(t)
+	logger := NewMockLogger(ctrl)
+	transformer := NewWeComTextMessageTransformer(ctx, logger)
 	wecomChatRecord := &WeComChatRecord{
 		Seq:    10,
 		MsgID:  "CAQQluDa4QUY0On2rYSAgAMgzPrShAE=",
@@ -449,6 +496,9 @@ func TestContactsMissmatched_nilContact(t *testing.T) {
 	}
 
 	// When
+	logger.EXPECT().Info(gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes()
+	logger.EXPECT().Error(gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes()
+
 	record, err := transformer.Transform(wecomChatRecord, user, nil)
 	if err != nil {
 		t.Errorf("error shouldn't happen here, expected: %v, actual: %v", nil, err)
@@ -463,9 +513,15 @@ func TestContactsMissmatched_nilContact(t *testing.T) {
 
 func TestNilWeComChatRecord(t *testing.T) {
 	// Given
-	transformer := NewWeComTextMessageTransformer()
+	ctx := context.Background()
+	ctrl := gomock.NewController(t)
+	logger := NewMockLogger(ctrl)
+	transformer := NewWeComTextMessageTransformer(ctx, logger)
 
 	// When
+	logger.EXPECT().Info(gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes()
+	logger.EXPECT().Error(gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes()
+
 	record, err := transformer.Transform(nil, nil, nil)
 	if err != nil {
 		t.Errorf("error shouldn't happen here, expected: %v, actual: %v", nil, err)
