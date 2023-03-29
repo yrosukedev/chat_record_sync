@@ -4,6 +4,8 @@
 package wecom_openapi_adapter
 
 import (
+	"context"
+	"github.com/golang/mock/gomock"
 	"github.com/xen0n/go-workwx"
 	"github.com/yrosukedev/chat_record_sync/config"
 	"github.com/yrosukedev/chat_record_sync/wecom_chat"
@@ -13,10 +15,14 @@ import (
 
 func TestWeComOpenAPIAdapter_GetUserInfoByID(t *testing.T) {
 	// Given
+	ctx := context.Background()
+	ctrl := gomock.NewController(t)
 	wecomConfig := config.NewWeComConfig()
 	wecomApp := workwx.New(wecomConfig.CorpID).WithApp(wecomConfig.AgentSecret, wecomConfig.AgentID)
 
-	openAPI := NewWeComOpenAPIAdapter(wecomApp)
+	logger := NewMockLogger(ctrl)
+
+	openAPI := NewWeComOpenAPIAdapter(ctx, wecomApp, logger)
 	userId := "WangHuan"
 	expectedUserInfo := &wecom_chat.WeComUserInfo{
 		UserID: userId,
@@ -24,6 +30,9 @@ func TestWeComOpenAPIAdapter_GetUserInfoByID(t *testing.T) {
 	}
 
 	// When
+	logger.EXPECT().Info(gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes()
+	logger.EXPECT().Error(gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes()
+
 	userInfo, err := openAPI.GetUserInfoByID(userId)
 	if err != nil {
 		t.Errorf("error shouldn't happen here, expected: %v, actual: %v", nil, err)

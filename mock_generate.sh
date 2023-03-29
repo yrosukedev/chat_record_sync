@@ -29,3 +29,6 @@ mockgen -source logger/logger.go -package chat_record_bitable_storage -destinati
 
 # package: wecom_chat_adapter
 mockgen -source logger/logger.go -package wecom_chat_adapter -destination wecom_chat_adapter/mock_logger.go
+
+# package: wecom_openapi_adapter
+mockgen -source logger/logger.go -package wecom_openapi_adapter -destination wecom_openapi_adapter/mock_logger.go
