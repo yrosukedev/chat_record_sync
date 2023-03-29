@@ -42,7 +42,7 @@ func RunCLIApp(ctx context.Context) error {
 						wecom_chat.WeComMessageTypeText: wecom_chat.NewWeComTextMessageTransformer(),
 					},
 						wecom_chat.NewWeComDefaultMessageTransformer())),
-				pagination_bitable_storage.NewPaginationStorageAdapter(ctx, larkClient, "DLSbbQIcEa0KyIsetHWcg3PDnNh", "tblLJY5YSoEkV3G3"),
+				pagination_bitable_storage.NewPaginationStorageAdapter(ctx, larkClient, "DLSbbQIcEa0KyIsetHWcg3PDnNh", "tblLJY5YSoEkV3G3", logger),
 				pageSize)),
 		retry_writer.NewRetryWriterAdapter(
 			chat_record_bitable_storage.NewChatRecordStorageAdapter(ctx, larkClient, "QCBrbzgx4aKRAis9eewcV731n7d", "tblIk692K5LXte8x", logger)),

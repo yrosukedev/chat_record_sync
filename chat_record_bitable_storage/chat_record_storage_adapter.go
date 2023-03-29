@@ -43,7 +43,7 @@ func NewChatRecordStorageAdapter(
 // Because this operation is idempotent when the UUID is provided, so we could retry the operation many times.
 func (c *ChatRecordStorageAdapter) Write(chatRecord *business.ChatRecord, requestUUID string) error {
 
-	c.logger.Info(c.ctx, "[chat record storage adapter] will write record to Bitable, msgId: %v", chatRecord.MsgId)
+	c.logger.Info(c.ctx, "[chat record storage adapter] will write record to Bitable, appToken: %v, tableId: %v, msgId: %v", c.appToken, c.tableId, chatRecord.MsgId)
 
 	fields := c.tableFieldsFrom(chatRecord)
 
@@ -62,23 +62,23 @@ func (c *ChatRecordStorageAdapter) Write(chatRecord *business.ChatRecord, reques
 
 	resp, err := c.larkClient.Bitable.AppTableRecord.Create(c.ctx, req)
 	if err != nil {
-		c.logger.Info(c.ctx, "[chat record storage adapter] fails to write record to Bitable, msgId: %v, err: %v", chatRecord.MsgId, err)
+		c.logger.Info(c.ctx, "[chat record storage adapter] fails to write record to Bitable, appToken: %v, tableId: %v, msgId: %v, err: %v", c.appToken, c.tableId, chatRecord.MsgId, err)
 		return err
 	}
 
 	if resp.StatusCode != http.StatusOK {
 		err = fmt.Errorf("fails to create lark bitable table record, statusCode: %v, code: %v, msg: %v", resp.StatusCode, resp.Code, resp.Msg)
-		c.logger.Info(c.ctx, "[chat record storage adapter] fails to write record to Bitable, msgId: %v, err: %v", chatRecord.MsgId, err)
+		c.logger.Info(c.ctx, "[chat record storage adapter] fails to write record to Bitable, appToken: %v, tableId: %v, msgId: %v, err: %v", c.appToken, c.tableId, chatRecord.MsgId, err)
 		return err
 	}
 
 	if resp.Code != 0 {
 		err = fmt.Errorf("fails to create lark bitable table record, statusCode: %v, code: %v, msg: %v", resp.StatusCode, resp.Code, resp.Msg)
-		c.logger.Info(c.ctx, "[chat record storage adapter] fails to write record to Bitable, msgId: %v, err: %v", chatRecord.MsgId, err)
+		c.logger.Info(c.ctx, "[chat record storage adapter] fails to write record to Bitable, appToken: %v, tableId: %v, msgId: %v, err: %v", c.appToken, c.tableId, chatRecord.MsgId, err)
 		return err
 	}
 
-	c.logger.Info(c.ctx, "[chat record storage adapter] succeeds to write record to Bitable, msgId: %v", chatRecord.MsgId)
+	c.logger.Info(c.ctx, "[chat record storage adapter] succeeds to write record to Bitable, appToken: %v, tableId: %v, msgId: %v, record id: %v", c.appToken, c.tableId, chatRecord.MsgId, resp.Data.Record.RecordId)
 
 	return nil
 }

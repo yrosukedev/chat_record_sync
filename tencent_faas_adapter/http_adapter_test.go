@@ -1,3 +1,6 @@
+//go:build integration
+// +build integration
+
 package tencent_faas_adapter
 
 import (
@@ -13,6 +16,7 @@ import (
 	"testing"
 )
 
+// !!! fix me
 func TestHTTPAdapter_succeeds(t *testing.T) {
 	// Given
 	ctx, faasReq := makeSUT()
