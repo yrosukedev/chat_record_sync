@@ -36,7 +36,7 @@ func RunCLIApp(ctx context.Context) error {
 		buffer_reader.NewChatRecordBufferedReaderAdapter(
 			paginated_reader.NewChatRecordPaginatedReader(
 				wecom_chat.NewPaginatedBufferedReaderAdapter(
-					wecom_chat_adapter.NewWeComChatRecordServiceAdapter(client, "", "", config.WeComChatRecordSDKTimeout),
+					wecom_chat_adapter.NewWeComChatRecordServiceAdapter(ctx, client, "", "", config.WeComChatRecordSDKTimeout, logger),
 					nil,
 					wecom_chat.NewWeComMessageTransformerFactory(map[string]wecom_chat.ChatRecordTransformer{
 						wecom_chat.WeComMessageTypeText: wecom_chat.NewWeComTextMessageTransformer(ctx, logger),

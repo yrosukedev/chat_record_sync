@@ -24,7 +24,7 @@ func (f *HTTPApp) createChatSyncUseCase(ctx context.Context) use_case.UseCase {
 		buffer_reader.NewChatRecordBufferedReaderAdapter(
 			paginated_reader.NewChatRecordPaginatedReader(
 				wecom_chat.NewPaginatedBufferedReaderAdapter(
-					wecom_chat_adapter.NewWeComChatRecordServiceAdapter(f.wecomClient, "", "", config.WeComChatRecordSDKTimeout),
+					wecom_chat_adapter.NewWeComChatRecordServiceAdapter(ctx, f.wecomClient, "", "", config.WeComChatRecordSDKTimeout, f.logger),
 					nil,
 					wecom_chat.NewWeComMessageTransformerFactory(map[string]wecom_chat.ChatRecordTransformer{
 						wecom_chat.WeComMessageTypeText: wecom_chat.NewWeComTextMessageTransformer(ctx, f.logger),

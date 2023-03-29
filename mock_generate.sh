@@ -26,3 +26,6 @@ mockgen -source logger/logger.go -package tencent_faas_adapter -destination tenc
 
 # package: chat_record_bitable_storage
 mockgen -source logger/logger.go -package chat_record_bitable_storage -destination chat_record_bitable_storage/mock_logger.go
+
+# package: wecom_chat_adapter
+mockgen -source logger/logger.go -package wecom_chat_adapter -destination wecom_chat_adapter/mock_logger.go
