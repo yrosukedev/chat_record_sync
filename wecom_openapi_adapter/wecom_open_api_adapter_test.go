@@ -1,3 +1,6 @@
+//go:build integration
+// +build integration
+
 package wecom_openapi_adapter
 
 import (

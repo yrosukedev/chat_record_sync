@@ -8,6 +8,7 @@ import (
 	"github.com/yrosukedev/chat_record_sync/buffer_reader"
 	"github.com/yrosukedev/chat_record_sync/chat_record_bitable_storage"
 	"github.com/yrosukedev/chat_record_sync/config"
+	logproxy "github.com/yrosukedev/chat_record_sync/logger/proxy"
 	"github.com/yrosukedev/chat_record_sync/paginated_reader"
 	"github.com/yrosukedev/chat_record_sync/pagination_bitable_storage"
 	"github.com/yrosukedev/chat_record_sync/retry_writer"
@@ -29,6 +30,8 @@ func RunCLIApp(ctx context.Context) error {
 
 	pageSize := uint64(10)
 
+	logger := logproxy.NewLoggerProxy(config.HttpAppLogLevel, logproxy.NewDefaultLogger())
+
 	useCase := use_case.NewSyncChatRecordUseCase(
 		buffer_reader.NewChatRecordBufferedReaderAdapter(
 			paginated_reader.NewChatRecordPaginatedReader(
@@ -42,7 +45,7 @@ func RunCLIApp(ctx context.Context) error {
 				pagination_bitable_storage.NewPaginationStorageAdapter(ctx, larkClient, "DLSbbQIcEa0KyIsetHWcg3PDnNh", "tblLJY5YSoEkV3G3"),
 				pageSize)),
 		retry_writer.NewRetryWriterAdapter(
-			chat_record_bitable_storage.NewChatRecordStorageAdapter(ctx, larkClient, "QCBrbzgx4aKRAis9eewcV731n7d", "tblIk692K5LXte8x")),
+			chat_record_bitable_storage.NewChatRecordStorageAdapter(ctx, larkClient, "QCBrbzgx4aKRAis9eewcV731n7d", "tblIk692K5LXte8x", logger)),
 	)
 
 	// When

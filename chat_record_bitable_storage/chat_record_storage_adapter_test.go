@@ -1,3 +1,6 @@
+//go:build integration
+// +build integration
+
 package chat_record_bitable_storage
 
 import (

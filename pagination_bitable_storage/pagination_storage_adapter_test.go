@@ -1,3 +1,6 @@
+//go:build integration
+// +build integration
+
 package pagination_bitable_storage
 
 import (
