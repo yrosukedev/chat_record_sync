@@ -5,19 +5,19 @@ import (
 	"io"
 )
 
-type SyncChatRecordUseCase struct {
-	reader ChatRecordReader
-	writer ChatRecordWriter
+type ChatSyncUseCase struct {
+	reader Reader
+	writer Writer
 }
 
-func NewSyncChatRecordUseCase(reader ChatRecordReader, writer ChatRecordWriter) *SyncChatRecordUseCase {
-	return &SyncChatRecordUseCase{
+func NewChatSyncUseCase(reader Reader, writer Writer) *ChatSyncUseCase {
+	return &ChatSyncUseCase{
 		reader: reader,
 		writer: writer,
 	}
 }
 
-func (u *SyncChatRecordUseCase) Run(ctx context.Context) []*SyncError {
+func (u *ChatSyncUseCase) Run(ctx context.Context) []*SyncError {
 	var errs []*SyncError
 
 	for {

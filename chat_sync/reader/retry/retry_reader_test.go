@@ -11,9 +11,9 @@ import (
 func TestZeroSequenceOfConsecutiveErrors_zeroRead(t *testing.T) {
 	// Given
 	ctrl := gomock.NewController(t)
-	reader := use_case.NewMockChatRecordReader(ctrl)
+	reader := use_case.NewMockReader(ctrl)
 	maxRetryTimes := uint(3)
-	proxyReader := NewChatRecordRetryReader(reader, maxRetryTimes)
+	proxyReader := NewRetryReader(reader, maxRetryTimes)
 
 	// When
 	reader.EXPECT().Read().Return(nil, io.EOF).Times(1)
@@ -27,9 +27,9 @@ func TestZeroSequenceOfConsecutiveErrors_zeroRead(t *testing.T) {
 func TestZeroSequenceOfConsecutiveErrors_oneRead(t *testing.T) {
 	// Given
 	ctrl := gomock.NewController(t)
-	reader := use_case.NewMockChatRecordReader(ctrl)
+	reader := use_case.NewMockReader(ctrl)
 	maxRetryTimes := uint(3)
-	proxyReader := NewChatRecordRetryReader(reader, maxRetryTimes)
+	proxyReader := NewRetryReader(reader, maxRetryTimes)
 
 	// When
 	records := []*business.ChatRecord{
@@ -50,9 +50,9 @@ func TestZeroSequenceOfConsecutiveErrors_oneRead(t *testing.T) {
 func TestZeroSequenceOfConsecutiveErrors_manyReads(t *testing.T) {
 	// Given
 	ctrl := gomock.NewController(t)
-	reader := use_case.NewMockChatRecordReader(ctrl)
+	reader := use_case.NewMockReader(ctrl)
 	maxRetryTimes := uint(3)
-	proxyReader := NewChatRecordRetryReader(reader, maxRetryTimes)
+	proxyReader := NewRetryReader(reader, maxRetryTimes)
 
 	// When
 	records := []*business.ChatRecord{
@@ -77,9 +77,9 @@ func TestZeroSequenceOfConsecutiveErrors_manyReads(t *testing.T) {
 func TestOneSequenceOfConsecutiveErrors_oneError_errorCountsLessThanMaxRetryTimes(t *testing.T) {
 	// Given
 	ctrl := gomock.NewController(t)
-	reader := use_case.NewMockChatRecordReader(ctrl)
+	reader := use_case.NewMockReader(ctrl)
 	maxRetryTimes := uint(3)
-	proxyReader := NewChatRecordRetryReader(reader, maxRetryTimes)
+	proxyReader := NewRetryReader(reader, maxRetryTimes)
 
 	// When
 	records := []*use_case.RecordOrError{
@@ -96,9 +96,9 @@ func TestOneSequenceOfConsecutiveErrors_oneError_errorCountsLessThanMaxRetryTime
 func TestOneSequenceOfConsecutiveErrors_oneError_errorCountsEqualToMaxRetryTimes(t *testing.T) {
 	// Given
 	ctrl := gomock.NewController(t)
-	reader := use_case.NewMockChatRecordReader(ctrl)
+	reader := use_case.NewMockReader(ctrl)
 	maxRetryTimes := uint(1)
-	proxyReader := NewChatRecordRetryReader(reader, maxRetryTimes)
+	proxyReader := NewRetryReader(reader, maxRetryTimes)
 
 	// When
 	records := []*use_case.RecordOrError{
@@ -115,9 +115,9 @@ func TestOneSequenceOfConsecutiveErrors_oneError_errorCountsEqualToMaxRetryTimes
 func TestOneSequenceOfConsecutiveErrors_oneError_errorCountsGreaterThanMaxRetryTimes(t *testing.T) {
 	// Given
 	ctrl := gomock.NewController(t)
-	reader := use_case.NewMockChatRecordReader(ctrl)
+	reader := use_case.NewMockReader(ctrl)
 	maxRetryTimes := uint(0)
-	proxyReader := NewChatRecordRetryReader(reader, maxRetryTimes)
+	proxyReader := NewRetryReader(reader, maxRetryTimes)
 
 	// When
 	records := []*use_case.RecordOrError{
@@ -139,9 +139,9 @@ func TestOneSequenceOfConsecutiveErrors_oneError_errorCountsGreaterThanMaxRetryT
 func TestOneSequenceOfConsecutiveErrors_manyErrors_errorCountsLessThanMaxRetryTimes(t *testing.T) {
 	// Given
 	ctrl := gomock.NewController(t)
-	reader := use_case.NewMockChatRecordReader(ctrl)
+	reader := use_case.NewMockReader(ctrl)
 	maxRetryTimes := uint(4)
-	proxyReader := NewChatRecordRetryReader(reader, maxRetryTimes)
+	proxyReader := NewRetryReader(reader, maxRetryTimes)
 
 	// When
 	records := []*use_case.RecordOrError{
@@ -160,9 +160,9 @@ func TestOneSequenceOfConsecutiveErrors_manyErrors_errorCountsLessThanMaxRetryTi
 func TestOneSequenceOfConsecutiveErrors_manyErrors_errorCountsEqualToMaxRetryTimes(t *testing.T) {
 	// Given
 	ctrl := gomock.NewController(t)
-	reader := use_case.NewMockChatRecordReader(ctrl)
+	reader := use_case.NewMockReader(ctrl)
 	maxRetryTimes := uint(4)
-	proxyReader := NewChatRecordRetryReader(reader, maxRetryTimes)
+	proxyReader := NewRetryReader(reader, maxRetryTimes)
 
 	// When
 	records := []*use_case.RecordOrError{
@@ -182,9 +182,9 @@ func TestOneSequenceOfConsecutiveErrors_manyErrors_errorCountsEqualToMaxRetryTim
 func TestOneSequenceOfConsecutiveErrors_manyErrors_errorCountsGreaterThanMaxRetryTimes(t *testing.T) {
 	// Given
 	ctrl := gomock.NewController(t)
-	reader := use_case.NewMockChatRecordReader(ctrl)
+	reader := use_case.NewMockReader(ctrl)
 	maxRetryTimes := uint(3)
-	proxyReader := NewChatRecordRetryReader(reader, maxRetryTimes)
+	proxyReader := NewRetryReader(reader, maxRetryTimes)
 
 	// When
 	records := []*use_case.RecordOrError{
@@ -214,9 +214,9 @@ func TestOneSequenceOfConsecutiveErrors_manyErrors_errorCountsGreaterThanMaxRetr
 func TestManySequencesOfConsecutiveErrors_errorCountLessThanMaxRetryTimes(t *testing.T) {
 	// Given
 	ctrl := gomock.NewController(t)
-	reader := use_case.NewMockChatRecordReader(ctrl)
+	reader := use_case.NewMockReader(ctrl)
 	maxRetryTimes := uint(5)
-	proxyReader := NewChatRecordRetryReader(reader, maxRetryTimes)
+	proxyReader := NewRetryReader(reader, maxRetryTimes)
 
 	// When
 	records := []*use_case.RecordOrError{
@@ -243,9 +243,9 @@ func TestManySequencesOfConsecutiveErrors_errorCountLessThanMaxRetryTimes(t *tes
 func TestManySequencesOfConsecutiveErrors_errorCountEqualToMaxRetryTimes(t *testing.T) {
 	// Given
 	ctrl := gomock.NewController(t)
-	reader := use_case.NewMockChatRecordReader(ctrl)
+	reader := use_case.NewMockReader(ctrl)
 	maxRetryTimes := uint(4)
-	proxyReader := NewChatRecordRetryReader(reader, maxRetryTimes)
+	proxyReader := NewRetryReader(reader, maxRetryTimes)
 
 	// When
 	records := []*use_case.RecordOrError{
@@ -272,9 +272,9 @@ func TestManySequencesOfConsecutiveErrors_errorCountEqualToMaxRetryTimes(t *test
 func TestManySequencesOfConsecutiveErrors_errorCountGreaterThanMaxRetryTimes(t *testing.T) {
 	// Given
 	ctrl := gomock.NewController(t)
-	reader := use_case.NewMockChatRecordReader(ctrl)
+	reader := use_case.NewMockReader(ctrl)
 	maxRetryTimes := uint(3)
-	proxyReader := NewChatRecordRetryReader(reader, maxRetryTimes)
+	proxyReader := NewRetryReader(reader, maxRetryTimes)
 
 	// When
 	records := []*use_case.RecordOrError{
@@ -311,7 +311,7 @@ func TestManySequencesOfConsecutiveErrors_errorCountGreaterThanMaxRetryTimes(t *
 	expectReaderToReadRecordsOrErrors(t, proxyReader, expectedRecordsOrErrors)
 }
 
-func expectReaderToReadRecordsOrErrors(t *testing.T, reader use_case.ChatRecordReader, records []*use_case.RecordOrError) {
+func expectReaderToReadRecordsOrErrors(t *testing.T, reader use_case.Reader, records []*use_case.RecordOrError) {
 	for _, record := range records {
 		switch record.InnerType {
 		case use_case.RecordOrErrorInnerTypeError:

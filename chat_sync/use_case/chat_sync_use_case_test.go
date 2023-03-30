@@ -13,9 +13,9 @@ func TestZeroRecord(t *testing.T) {
 	// Given
 	ctx := context.Background()
 	ctrl := gomock.NewController(t)
-	reader := NewMockChatRecordReader(ctrl)
-	writer := NewMockChatRecordWriter(ctrl)
-	useCase := NewSyncChatRecordUseCase(reader, writer)
+	reader := NewMockReader(ctrl)
+	writer := NewMockWriter(ctrl)
+	useCase := NewChatSyncUseCase(reader, writer)
 
 	reader.EXPECT().Read().Times(1).Return(nil, io.EOF)
 
@@ -30,9 +30,9 @@ func TestOneRecord(t *testing.T) {
 	// Given
 	ctx := context.Background()
 	ctrl := gomock.NewController(t)
-	reader := NewMockChatRecordReader(ctrl)
-	writer := NewMockChatRecordWriter(ctrl)
-	useCase := NewSyncChatRecordUseCase(reader, writer)
+	reader := NewMockReader(ctrl)
+	writer := NewMockWriter(ctrl)
+	useCase := NewChatSyncUseCase(reader, writer)
 
 	records := []*business.ChatRecord{
 		&business.ChatRecord{},
@@ -53,9 +53,9 @@ func TestManyRecords(t *testing.T) {
 	// Given
 	ctx := context.Background()
 	ctrl := gomock.NewController(t)
-	reader := NewMockChatRecordReader(ctrl)
-	writer := NewMockChatRecordWriter(ctrl)
-	useCase := NewSyncChatRecordUseCase(reader, writer)
+	reader := NewMockReader(ctrl)
+	writer := NewMockWriter(ctrl)
+	useCase := NewChatSyncUseCase(reader, writer)
 
 	records := []*business.ChatRecord{
 		&business.ChatRecord{},
@@ -75,9 +75,9 @@ func TestReaderError_beforeReading(t *testing.T) {
 	// Given
 	ctx := context.Background()
 	ctrl := gomock.NewController(t)
-	reader := NewMockChatRecordReader(ctrl)
-	writer := NewMockChatRecordWriter(ctrl)
-	useCase := NewSyncChatRecordUseCase(reader, writer)
+	reader := NewMockReader(ctrl)
+	writer := NewMockWriter(ctrl)
+	useCase := NewChatSyncUseCase(reader, writer)
 
 	records := []*RecordOrError{
 		NewRecordOrErrorWithError(io.ErrClosedPipe),
@@ -96,9 +96,9 @@ func TestReaderError_whileReading(t *testing.T) {
 	// Given
 	ctx := context.Background()
 	ctrl := gomock.NewController(t)
-	reader := NewMockChatRecordReader(ctrl)
-	writer := NewMockChatRecordWriter(ctrl)
-	useCase := NewSyncChatRecordUseCase(reader, writer)
+	reader := NewMockReader(ctrl)
+	writer := NewMockWriter(ctrl)
+	useCase := NewChatSyncUseCase(reader, writer)
 
 	records := []*RecordOrError{
 		NewRecordOrErrorWithRecord(&business.ChatRecord{}),
@@ -119,9 +119,9 @@ func TestWriterError_firstRecord(t *testing.T) {
 	// Given
 	ctx := context.Background()
 	ctrl := gomock.NewController(t)
-	reader := NewMockChatRecordReader(ctrl)
-	writer := NewMockChatRecordWriter(ctrl)
-	useCase := NewSyncChatRecordUseCase(reader, writer)
+	reader := NewMockReader(ctrl)
+	writer := NewMockWriter(ctrl)
+	useCase := NewChatSyncUseCase(reader, writer)
 
 	records := []*business.ChatRecord{
 		&business.ChatRecord{},
@@ -143,9 +143,9 @@ func TestWriterError_recordInTheMiddle(t *testing.T) {
 	// Given
 	ctx := context.Background()
 	ctrl := gomock.NewController(t)
-	reader := NewMockChatRecordReader(ctrl)
-	writer := NewMockChatRecordWriter(ctrl)
-	useCase := NewSyncChatRecordUseCase(reader, writer)
+	reader := NewMockReader(ctrl)
+	writer := NewMockWriter(ctrl)
+	useCase := NewChatSyncUseCase(reader, writer)
 
 	records := []*business.ChatRecord{
 		&business.ChatRecord{},
@@ -167,9 +167,9 @@ func TestAccumulateErrors_readerError(t *testing.T) {
 	// Given
 	ctx := context.Background()
 	ctrl := gomock.NewController(t)
-	reader := NewMockChatRecordReader(ctrl)
-	writer := NewMockChatRecordWriter(ctrl)
-	useCase := NewSyncChatRecordUseCase(reader, writer)
+	reader := NewMockReader(ctrl)
+	writer := NewMockWriter(ctrl)
+	useCase := NewChatSyncUseCase(reader, writer)
 
 	records := []*RecordOrError{
 		NewRecordOrErrorWithError(io.ErrClosedPipe),
@@ -196,9 +196,9 @@ func TestAccumulatedErrors_writeError(t *testing.T) {
 	// Given
 	ctx := context.Background()
 	ctrl := gomock.NewController(t)
-	reader := NewMockChatRecordReader(ctrl)
-	writer := NewMockChatRecordWriter(ctrl)
-	useCase := NewSyncChatRecordUseCase(reader, writer)
+	reader := NewMockReader(ctrl)
+	writer := NewMockWriter(ctrl)
+	useCase := NewChatSyncUseCase(reader, writer)
 
 	records := []*business.ChatRecord{
 		&business.ChatRecord{},
@@ -227,9 +227,9 @@ func TestAccumulateErrors_readAndWriteErrors(t *testing.T) {
 	// Given
 	ctx := context.Background()
 	ctrl := gomock.NewController(t)
-	reader := NewMockChatRecordReader(ctrl)
-	writer := NewMockChatRecordWriter(ctrl)
-	useCase := NewSyncChatRecordUseCase(reader, writer)
+	reader := NewMockReader(ctrl)
+	writer := NewMockWriter(ctrl)
+	useCase := NewChatSyncUseCase(reader, writer)
 
 	records := []*RecordOrError{
 		NewRecordOrErrorWithError(io.ErrUnexpectedEOF),

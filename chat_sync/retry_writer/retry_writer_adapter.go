@@ -10,7 +10,7 @@ type RetryWriterAdapter struct {
 	retryWriter RetryWriter
 }
 
-func NewRetryWriterAdapter(retryWriter RetryWriter) use_case.ChatRecordWriter {
+func NewRetryWriterAdapter(retryWriter RetryWriter) use_case.Writer {
 	return &RetryWriterAdapter{
 		retryWriter: retryWriter,
 	}

@@ -7,17 +7,17 @@ import (
 	"math"
 )
 
-type ChatRecordRetryReader struct {
-	reader                  use_case.ChatRecordReader
+type RetryReader struct {
+	reader                  use_case.Reader
 	maxRetryTimes           uint
 	consecutiveFailureTimes uint
 }
 
-// NewChatRecordRetryReader act as an adapter for the original reader.
+// NewRetryReader act as an adapter for the original reader.
 //
 // maxRetryTimes should be greater than or equal to 1. if it is less than 1, 1 will be used.
-func NewChatRecordRetryReader(reader use_case.ChatRecordReader, maxRetryTimes uint) *ChatRecordRetryReader {
-	return &ChatRecordRetryReader{
+func NewRetryReader(reader use_case.Reader, maxRetryTimes uint) *RetryReader {
+	return &RetryReader{
 		reader:                  reader,
 		maxRetryTimes:           uint(math.Max(float64(maxRetryTimes), 1)),
 		consecutiveFailureTimes: 0,
@@ -27,7 +27,7 @@ func NewChatRecordRetryReader(reader use_case.ChatRecordReader, maxRetryTimes ui
 // Read from the proxy reader and forward the result.
 // If the number of proxy reader consecutive failure exceeds maxRetryTimes,
 // stop forwarding the result and append io.EOF to indicate the end.
-func (c *ChatRecordRetryReader) Read() (record *business.ChatRecord, err error) {
+func (c *RetryReader) Read() (record *business.ChatRecord, err error) {
 	if c.consecutiveFailureTimes > c.maxRetryTimes {
 		return nil, io.EOF
 	}

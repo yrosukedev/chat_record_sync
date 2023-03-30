@@ -33,7 +33,7 @@ func NewRecordOrErrorWithError(err error) *RecordOrError {
 	}
 }
 
-func ExpectRecordsToWrite(writer *MockChatRecordWriter, records []*business.ChatRecord) {
+func ExpectRecordsToWrite(writer *MockWriter, records []*business.ChatRecord) {
 	for _, r := range records {
 		writer.
 			EXPECT().
@@ -42,7 +42,7 @@ func ExpectRecordsToWrite(writer *MockChatRecordWriter, records []*business.Chat
 	}
 }
 
-func GivenRecordsToRead(reader *MockChatRecordReader, records []*business.ChatRecord) {
+func GivenRecordsToRead(reader *MockReader, records []*business.ChatRecord) {
 	idx := 0
 	reader.
 		EXPECT().
@@ -57,7 +57,7 @@ func GivenRecordsToRead(reader *MockChatRecordReader, records []*business.ChatRe
 		AnyTimes()
 }
 
-func EncounterErrorWhileReadingRecords(reader *MockChatRecordReader, records []*RecordOrError) {
+func EncounterErrorWhileReadingRecords(reader *MockReader, records []*RecordOrError) {
 	idx := 0
 	reader.
 		EXPECT().

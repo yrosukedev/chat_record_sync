@@ -32,7 +32,7 @@ func RunCLIApp(ctx context.Context) error {
 
 	logger := logproxy.NewLoggerProxy(config.HttpAppLogLevel, logproxy.NewDefaultLogger())
 
-	useCase := use_case.NewSyncChatRecordUseCase(
+	useCase := use_case.NewChatSyncUseCase(
 		buffer_reader.NewChatRecordBufferedReaderAdapter(
 			paginated_reader.NewChatRecordPaginatedReader(
 				wecom_chat2.NewPaginatedBufferedReaderAdapter(

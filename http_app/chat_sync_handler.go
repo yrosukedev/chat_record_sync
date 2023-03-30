@@ -20,7 +20,7 @@ func (f *HTTPApp) createChatSyncHTTPHandler(ctx context.Context) http.Handler {
 }
 
 func (f *HTTPApp) createChatSyncUseCase(ctx context.Context) use_case2.UseCase {
-	useCase := use_case2.NewSyncChatRecordUseCase(
+	useCase := use_case2.NewChatSyncUseCase(
 		buffer_reader.NewChatRecordBufferedReaderAdapter(
 			paginated_reader.NewChatRecordPaginatedReader(
 				wecom_chat2.NewPaginatedBufferedReaderAdapter(
