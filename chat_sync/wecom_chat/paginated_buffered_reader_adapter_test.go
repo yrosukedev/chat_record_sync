@@ -3,7 +3,7 @@ package wecom_chat
 import (
 	"github.com/golang/mock/gomock"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/business"
-	"github.com/yrosukedev/chat_record_sync/chat_sync/paginated_reader"
+	"github.com/yrosukedev/chat_record_sync/chat_sync/reader/pagination"
 	"io"
 	"reflect"
 	"testing"
@@ -24,7 +24,7 @@ func TestZeroRecord(t *testing.T) {
 	transformer.EXPECT().Transform(gomock.Any(), gomock.Any(), gomock.Any()).Times(0)
 
 	// When
-	records, outPageToken, err := readerAdapter.Read(paginated_reader.NewPageToken(345), 10)
+	records, outPageToken, err := readerAdapter.Read(pagination.NewPageToken(345), 10)
 	if err != nil {
 		t.Errorf("error shouldn't happen here, expected: %v, actual: %v", nil, err)
 		return
@@ -33,8 +33,8 @@ func TestZeroRecord(t *testing.T) {
 		t.Errorf("records count not matched, expected: %v, actual: %v", 0, len(records))
 		return
 	}
-	if !reflect.DeepEqual(outPageToken, paginated_reader.NewPageToken(345)) {
-		t.Errorf("output page token not matched, expected: %+v, actual: %+v", paginated_reader.NewPageToken(345), outPageToken)
+	if !reflect.DeepEqual(outPageToken, pagination.NewPageToken(345)) {
+		t.Errorf("output page token not matched, expected: %+v, actual: %+v", pagination.NewPageToken(345), outPageToken)
 		return
 	}
 }
@@ -116,7 +116,7 @@ func TestOneRecord_oneReceiver(t *testing.T) {
 	transformer.EXPECT().Transform(gomock.Eq(wecomRecords[0]), gomock.Eq(user), gomock.Eq(contacts)).Return(expectedRecords[0], nil).Times(1)
 
 	// When
-	records, outPageToken, err := readerAdapter.Read(paginated_reader.NewPageToken(267), 10)
+	records, outPageToken, err := readerAdapter.Read(pagination.NewPageToken(267), 10)
 	if err != nil {
 		t.Errorf("error shouldn't happen here, expected: %v, actual: %v", nil, err)
 		return
@@ -125,8 +125,8 @@ func TestOneRecord_oneReceiver(t *testing.T) {
 		t.Errorf("records not matched, expected: %+v, actual: %+v", expectedRecords, records)
 		return
 	}
-	if !reflect.DeepEqual(outPageToken, paginated_reader.NewPageToken(890)) {
-		t.Errorf("output page token not matched, expected: %+v, actual: %+v", paginated_reader.NewPageToken(890), outPageToken)
+	if !reflect.DeepEqual(outPageToken, pagination.NewPageToken(890)) {
+		t.Errorf("output page token not matched, expected: %+v, actual: %+v", pagination.NewPageToken(890), outPageToken)
 		return
 	}
 }
@@ -165,7 +165,7 @@ func TestOneRecord_zeroReceiver(t *testing.T) {
 	transformer.EXPECT().Transform(gomock.Eq(wecomRecords[0]), gomock.Eq(user), gomock.Nil()).Return(expectedRecords[0], nil).Times(1)
 
 	// When
-	records, outPageToken, err := readerAdapter.Read(paginated_reader.NewPageToken(267), 10)
+	records, outPageToken, err := readerAdapter.Read(pagination.NewPageToken(267), 10)
 	if err != nil {
 		t.Errorf("error shouldn't happen here, expected: %v, actual: %v", nil, err)
 		return
@@ -174,8 +174,8 @@ func TestOneRecord_zeroReceiver(t *testing.T) {
 		t.Errorf("records not matched, expected: %+v, actual: %+v", expectedRecords, records)
 		return
 	}
-	if !reflect.DeepEqual(outPageToken, paginated_reader.NewPageToken(375)) {
-		t.Errorf("output page token not matched, expected: %+v, actual: %+v", paginated_reader.NewPageToken(375), outPageToken)
+	if !reflect.DeepEqual(outPageToken, pagination.NewPageToken(375)) {
+		t.Errorf("output page token not matched, expected: %+v, actual: %+v", pagination.NewPageToken(375), outPageToken)
 		return
 	}
 }
@@ -249,7 +249,7 @@ func TestOneRecord_manyReceivers(t *testing.T) {
 	transformer.EXPECT().Transform(gomock.Eq(wecomRecords[0]), gomock.Eq(user), gomock.Eq(contacts)).Return(expectedRecords[0], nil).Times(1)
 
 	// When
-	records, outPageToken, err := readerAdapter.Read(paginated_reader.NewPageToken(123), 10)
+	records, outPageToken, err := readerAdapter.Read(pagination.NewPageToken(123), 10)
 	if err != nil {
 		t.Errorf("error shouldn't happen here, expected: %v, actual: %v", nil, err)
 		return
@@ -258,8 +258,8 @@ func TestOneRecord_manyReceivers(t *testing.T) {
 		t.Errorf("records not matched, expected: %+v, actual: %+v", expectedRecords, records)
 		return
 	}
-	if !reflect.DeepEqual(outPageToken, paginated_reader.NewPageToken(1334)) {
-		t.Errorf("output page token not matched, expected: %+v, actual: %+v", paginated_reader.NewPageToken(1334), outPageToken)
+	if !reflect.DeepEqual(outPageToken, pagination.NewPageToken(1334)) {
+		t.Errorf("output page token not matched, expected: %+v, actual: %+v", pagination.NewPageToken(1334), outPageToken)
 		return
 	}
 }
@@ -360,7 +360,7 @@ func TestManyRecords(t *testing.T) {
 	transformer.EXPECT().Transform(gomock.Eq(wecomRecords[2]), gomock.Eq(userXiaoming), gomock.Eq([]*WeComExternalContact{contactXiaozhang})).Return(expectedRecords[2], nil).Times(1)
 
 	// When
-	records, outPageToken, err := readerAdapter.Read(paginated_reader.NewPageToken(15), 30)
+	records, outPageToken, err := readerAdapter.Read(pagination.NewPageToken(15), 30)
 	if err != nil {
 		t.Errorf("error shouldn't happen here, expected: %v, actual: %v", nil, err)
 		return
@@ -369,8 +369,8 @@ func TestManyRecords(t *testing.T) {
 		t.Errorf("records not matched, expected: %+v, actual: %+v", expectedRecords, records)
 		return
 	}
-	if !reflect.DeepEqual(outPageToken, paginated_reader.NewPageToken(1050)) {
-		t.Errorf("output page token not matched, expected: %+v, actual: %+v", paginated_reader.NewPageToken(1050), outPageToken)
+	if !reflect.DeepEqual(outPageToken, pagination.NewPageToken(1050)) {
+		t.Errorf("output page token not matched, expected: %+v, actual: %+v", pagination.NewPageToken(1050), outPageToken)
 		return
 	}
 }
@@ -480,8 +480,8 @@ func TestManyRecords_nilInputPageToken(t *testing.T) {
 		t.Errorf("records not matched, expected: %+v, actual: %+v", expectedRecords, records)
 		return
 	}
-	if !reflect.DeepEqual(outPageToken, paginated_reader.NewPageToken(1050)) {
-		t.Errorf("output page token not matched, expected: %+v, actual: %+v", paginated_reader.NewPageToken(1050), outPageToken)
+	if !reflect.DeepEqual(outPageToken, pagination.NewPageToken(1050)) {
+		t.Errorf("output page token not matched, expected: %+v, actual: %+v", pagination.NewPageToken(1050), outPageToken)
 		return
 	}
 }
@@ -501,7 +501,7 @@ func TestChatRecordServiceError(t *testing.T) {
 	transformer.EXPECT().Transform(gomock.Any(), gomock.Any(), gomock.Any()).Times(0)
 
 	// When
-	_, _, err := readerAdapter.Read(paginated_reader.NewPageToken(345), 10)
+	_, _, err := readerAdapter.Read(pagination.NewPageToken(345), 10)
 	if err == nil {
 		t.Errorf("error shouldn happen here, expected: %v, actual: %v", io.ErrShortBuffer, err)
 		return
@@ -531,7 +531,7 @@ func TestOpenAPIServiceError_getUserInfo(t *testing.T) {
 	transformer.EXPECT().Transform(gomock.Any(), gomock.Any(), gomock.Any()).Times(0)
 
 	// When
-	_, _, err := readerAdapter.Read(paginated_reader.NewPageToken(267), 10)
+	_, _, err := readerAdapter.Read(pagination.NewPageToken(267), 10)
 	if err == nil {
 		t.Errorf("error should happen here, expected: %v, actual: %v", io.ErrClosedPipe, err)
 		return
@@ -565,7 +565,7 @@ func TestOpenAPIServiceError_getContact(t *testing.T) {
 	transformer.EXPECT().Transform(gomock.Any(), gomock.Any(), gomock.Any()).Times(0)
 
 	// When
-	_, _, err := readerAdapter.Read(paginated_reader.NewPageToken(267), 10)
+	_, _, err := readerAdapter.Read(pagination.NewPageToken(267), 10)
 	if err == nil {
 		t.Errorf("error should happen here, expected: %v, actual: %v", io.ErrNoProgress, err)
 		return
@@ -606,7 +606,7 @@ func TestOpenAPIService_nil(t *testing.T) {
 	transformer.EXPECT().Transform(gomock.Eq(wecomRecords[0]), gomock.Nil(), gomock.Nil()).Return(expectedRecords[0], nil).Times(1)
 
 	// When
-	records, outPageToken, err := readerAdapter.Read(paginated_reader.NewPageToken(267), 10)
+	records, outPageToken, err := readerAdapter.Read(pagination.NewPageToken(267), 10)
 	if err != nil {
 		t.Errorf("error shouldn't happen here, expected: %v, actual: %v", nil, err)
 		return
@@ -615,8 +615,8 @@ func TestOpenAPIService_nil(t *testing.T) {
 		t.Errorf("records not matched, expected: %+v, actual: %+v", expectedRecords, records)
 		return
 	}
-	if !reflect.DeepEqual(outPageToken, paginated_reader.NewPageToken(890)) {
-		t.Errorf("output page token not matched, expected: %+v, actual: %+v", paginated_reader.NewPageToken(890), outPageToken)
+	if !reflect.DeepEqual(outPageToken, pagination.NewPageToken(890)) {
+		t.Errorf("output page token not matched, expected: %+v, actual: %+v", pagination.NewPageToken(890), outPageToken)
 		return
 	}
 }
@@ -654,7 +654,7 @@ func TestTransformerError(t *testing.T) {
 	transformer.EXPECT().Transform(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, io.ErrUnexpectedEOF).Times(1)
 
 	// When
-	_, _, err := readerAdapter.Read(paginated_reader.NewPageToken(267), 10)
+	_, _, err := readerAdapter.Read(pagination.NewPageToken(267), 10)
 	if err == nil {
 		t.Errorf("error should happen here, expected: %v, actual: %v", io.ErrUnexpectedEOF, err)
 		return

@@ -1,6 +1,6 @@
-package paginated_reader
+package pagination
 
-type ChatRecordPaginationStorage interface {
+type PaginationStorage interface {
 	// Get return the page token.
 	// Return nil if the page token is never stored before.
 	Get() (pageToken *PageToken, err error)

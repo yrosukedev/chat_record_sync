@@ -5,7 +5,7 @@ import (
 	"fmt"
 	lark "github.com/larksuite/oapi-sdk-go/v3"
 	larkbitable "github.com/larksuite/oapi-sdk-go/v3/service/bitable/v1"
-	"github.com/yrosukedev/chat_record_sync/chat_sync/paginated_reader"
+	"github.com/yrosukedev/chat_record_sync/chat_sync/reader/pagination"
 	"github.com/yrosukedev/chat_record_sync/consts"
 	"github.com/yrosukedev/chat_record_sync/logger"
 	"net/http"
@@ -30,7 +30,7 @@ func NewPaginationStorageAdapter(ctx context.Context, larkClient *lark.Client, a
 	}
 }
 
-func (p *PaginationStorageAdapter) Get() (pageToken *paginated_reader.PageToken, err error) {
+func (p *PaginationStorageAdapter) Get() (pageToken *pagination.PageToken, err error) {
 
 	p.logger.Info(p.ctx, "[pagination storage adapter] will get page token, appToken: %v, tableId: %v", p.appToken, p.tableId)
 
@@ -53,7 +53,7 @@ func (p *PaginationStorageAdapter) Get() (pageToken *paginated_reader.PageToken,
 	return pageToken, err
 }
 
-func (p *PaginationStorageAdapter) handleResponse(resp *larkbitable.ListAppTableRecordResp) (*paginated_reader.PageToken, error) {
+func (p *PaginationStorageAdapter) handleResponse(resp *larkbitable.ListAppTableRecordResp) (*pagination.PageToken, error) {
 	if len(resp.Data.Items) == 0 { // empty
 		return nil, nil
 	}
@@ -66,16 +66,16 @@ func (p *PaginationStorageAdapter) handleResponse(resp *larkbitable.ListAppTable
 	return p.pageTokenFrom(pageTokenField)
 }
 
-func (p *PaginationStorageAdapter) pageTokenFrom(pageTokenField interface{}) (*paginated_reader.PageToken, error) {
+func (p *PaginationStorageAdapter) pageTokenFrom(pageTokenField interface{}) (*pagination.PageToken, error) {
 	switch pageTokenValue := pageTokenField.(type) {
 	case string:
 		if pageTokenInt, err := strconv.ParseInt(pageTokenValue, 10, 64); err != nil {
 			return nil, fmt.Errorf("fails to convert '%v' field to integer, value: %v", consts.BitableFieldPaginationPageToken, pageTokenValue)
 		} else {
-			return paginated_reader.NewPageToken(uint64(pageTokenInt)), nil
+			return pagination.NewPageToken(uint64(pageTokenInt)), nil
 		}
 	case uint64:
-		return paginated_reader.NewPageToken(pageTokenValue), nil
+		return pagination.NewPageToken(pageTokenValue), nil
 	default:
 		return nil, fmt.Errorf("unknown type of '%v' field, value: %v", consts.BitableFieldPaginationPageToken, pageTokenField)
 	}
@@ -110,7 +110,7 @@ func (p *PaginationStorageAdapter) buildRequestOfFetchingLatestRecord() *larkbit
 	return req
 }
 
-func (p *PaginationStorageAdapter) Set(pageToken *paginated_reader.PageToken) error {
+func (p *PaginationStorageAdapter) Set(pageToken *pagination.PageToken) error {
 	p.logger.Info(p.ctx, "[pagination storage adapter] will set page token, appToken: %v, tableId: %v, page token: %v", p.appToken, p.tableId, pageToken)
 
 	if pageToken == nil { // append nothing
@@ -131,7 +131,7 @@ func (p *PaginationStorageAdapter) Set(pageToken *paginated_reader.PageToken) er
 	return nil
 }
 
-func (p *PaginationStorageAdapter) buildRequestOfAppendingPageToken(pageToken *paginated_reader.PageToken) *larkbitable.CreateAppTableRecordReq {
+func (p *PaginationStorageAdapter) buildRequestOfAppendingPageToken(pageToken *pagination.PageToken) *larkbitable.CreateAppTableRecordReq {
 	fields := p.tableFieldsFrom(pageToken)
 
 	tableRecord := larkbitable.NewAppTableRecordBuilder().
@@ -163,7 +163,7 @@ func (p *PaginationStorageAdapter) checkCreateRecordErrors(err error, resp *lark
 	return nil
 }
 
-func (p *PaginationStorageAdapter) tableFieldsFrom(pageToken *paginated_reader.PageToken) map[string]interface{} {
+func (p *PaginationStorageAdapter) tableFieldsFrom(pageToken *pagination.PageToken) map[string]interface{} {
 	return map[string]interface{}{
 		consts.BitableFieldPaginationPageToken: fmt.Sprintf("%d", pageToken.Value),
 	}

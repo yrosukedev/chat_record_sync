@@ -6,9 +6,9 @@ import (
 	lark "github.com/larksuite/oapi-sdk-go/v3"
 	"github.com/yrosukedev/WeWorkFinanceSDK"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/chat_record_bitable_storage"
-	"github.com/yrosukedev/chat_record_sync/chat_sync/paginated_reader"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/pagination_bitable_storage"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/reader/buffer"
+	"github.com/yrosukedev/chat_record_sync/chat_sync/reader/pagination"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/retry_writer"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/use_case"
 	wecom_chat2 "github.com/yrosukedev/chat_record_sync/chat_sync/wecom_chat"
@@ -34,7 +34,7 @@ func RunCLIApp(ctx context.Context) error {
 
 	useCase := use_case.NewChatSyncUseCase(
 		buffer.NewReader(
-			paginated_reader.NewChatRecordPaginatedReader(
+			pagination.NewBatchReaderAdapter(
 				wecom_chat2.NewPaginatedBufferedReaderAdapter(
 					wecom_chat_adapter.NewWeComChatRecordServiceAdapter(ctx, client, "", "", config.WeComChatRecordSDKTimeout, logger),
 					nil,

@@ -1,4 +1,4 @@
-package paginated_reader
+package pagination
 
 type PageToken struct {
 	Value uint64

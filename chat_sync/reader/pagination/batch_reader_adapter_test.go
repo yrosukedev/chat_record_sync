@@ -1,4 +1,4 @@
-package paginated_reader
+package pagination
 
 import (
 	"fmt"
@@ -12,103 +12,103 @@ import (
 func TestFetchPageToken_nil(t *testing.T) {
 	// Given
 	ctrl := gomock.NewController(t)
-	bufferedReader := NewMockChatRecordPaginatedBufferedReader(ctrl)
-	paginationStorage := NewMockChatRecordPaginationStorage(ctrl)
+	paginatedReader := NewMockPaginatedReader(ctrl)
+	paginationStorage := NewMockPaginationStorage(ctrl)
 	pageSize := uint64(10)
-	paginatedReader := NewChatRecordPaginatedReader(bufferedReader, paginationStorage, pageSize)
+	batchReader := NewBatchReaderAdapter(paginatedReader, paginationStorage, pageSize)
 
 	// Then
 	paginationStorage.EXPECT().Get().Return(nil, nil).Times(1)
-	bufferedReader.EXPECT().Read(gomock.Nil(), gomock.Eq(pageSize)).Return([]*business.ChatRecord{}, NewPageToken(0), nil).Times(1)
+	paginatedReader.EXPECT().Read(gomock.Nil(), gomock.Eq(pageSize)).Return([]*business.ChatRecord{}, NewPageToken(0), nil).Times(1)
 	paginationStorage.EXPECT().Set(gomock.Eq(NewPageToken(0))).Return(nil).Times(1)
 
 	// When
-	paginatedReader.Read()
+	batchReader.Read()
 }
 
 func TestFetchPageToken_zero(t *testing.T) {
 	// Given
 	ctrl := gomock.NewController(t)
-	bufferedReader := NewMockChatRecordPaginatedBufferedReader(ctrl)
-	paginationStorage := NewMockChatRecordPaginationStorage(ctrl)
+	paginatedReader := NewMockPaginatedReader(ctrl)
+	paginationStorage := NewMockPaginationStorage(ctrl)
 	pageSize := uint64(10)
-	paginatedReader := NewChatRecordPaginatedReader(bufferedReader, paginationStorage, pageSize)
+	batchReaderAdapter := NewBatchReaderAdapter(paginatedReader, paginationStorage, pageSize)
 
 	// Then
 	paginationStorage.EXPECT().Get().Return(NewPageToken(0), nil).Times(1)
-	bufferedReader.EXPECT().Read(gomock.Eq(NewPageToken(0)), gomock.Eq(pageSize)).Return([]*business.ChatRecord{}, NewPageToken(0), nil).Times(1)
+	paginatedReader.EXPECT().Read(gomock.Eq(NewPageToken(0)), gomock.Eq(pageSize)).Return([]*business.ChatRecord{}, NewPageToken(0), nil).Times(1)
 	paginationStorage.EXPECT().Set(gomock.Eq(NewPageToken(0))).Return(nil).Times(1)
 
 	// When
-	paginatedReader.Read()
+	batchReaderAdapter.Read()
 }
 
 func TestFetchPageToken_one(t *testing.T) {
 	// Given
 	ctrl := gomock.NewController(t)
-	bufferedReader := NewMockChatRecordPaginatedBufferedReader(ctrl)
-	paginationStorage := NewMockChatRecordPaginationStorage(ctrl)
+	paginatedReader := NewMockPaginatedReader(ctrl)
+	paginationStorage := NewMockPaginationStorage(ctrl)
 	pageSize := uint64(10)
-	paginatedReader := NewChatRecordPaginatedReader(bufferedReader, paginationStorage, pageSize)
+	batchReaderAdapter := NewBatchReaderAdapter(paginatedReader, paginationStorage, pageSize)
 
 	// Then
 	paginationStorage.EXPECT().Get().Return(NewPageToken(1), nil).Times(1)
-	bufferedReader.EXPECT().Read(gomock.Eq(NewPageToken(1)), gomock.Eq(pageSize)).Return([]*business.ChatRecord{}, NewPageToken(1), nil).Times(1)
+	paginatedReader.EXPECT().Read(gomock.Eq(NewPageToken(1)), gomock.Eq(pageSize)).Return([]*business.ChatRecord{}, NewPageToken(1), nil).Times(1)
 	paginationStorage.EXPECT().Set(gomock.Eq(NewPageToken(1))).Return(nil).Times(1)
 
 	// When
-	paginatedReader.Read()
+	batchReaderAdapter.Read()
 }
 
 func TestFetchPageToken_many(t *testing.T) {
 	// Given
 	ctrl := gomock.NewController(t)
-	bufferedReader := NewMockChatRecordPaginatedBufferedReader(ctrl)
-	paginationStorage := NewMockChatRecordPaginationStorage(ctrl)
+	paginatedReader := NewMockPaginatedReader(ctrl)
+	paginationStorage := NewMockPaginationStorage(ctrl)
 	pageSize := uint64(10)
-	paginatedReader := NewChatRecordPaginatedReader(bufferedReader, paginationStorage, pageSize)
+	batchReaderAdapter := NewBatchReaderAdapter(paginatedReader, paginationStorage, pageSize)
 
 	// Then
 	paginationStorage.EXPECT().Get().Return(NewPageToken(3), nil).Times(1)
-	bufferedReader.EXPECT().Read(gomock.Eq(NewPageToken(3)), gomock.Eq(pageSize)).Return([]*business.ChatRecord{}, NewPageToken(3), nil).Times(1)
+	paginatedReader.EXPECT().Read(gomock.Eq(NewPageToken(3)), gomock.Eq(pageSize)).Return([]*business.ChatRecord{}, NewPageToken(3), nil).Times(1)
 	paginationStorage.EXPECT().Set(gomock.Eq(NewPageToken(3))).Return(nil).Times(1)
 
 	// When
-	paginatedReader.Read()
+	batchReaderAdapter.Read()
 }
 
 func TestFetchPageToken_ALot(t *testing.T) {
 	// Given
 	ctrl := gomock.NewController(t)
-	bufferedReader := NewMockChatRecordPaginatedBufferedReader(ctrl)
-	paginationStorage := NewMockChatRecordPaginationStorage(ctrl)
+	paginatedReader := NewMockPaginatedReader(ctrl)
+	paginationStorage := NewMockPaginationStorage(ctrl)
 	pageSize := uint64(10)
-	paginatedReader := NewChatRecordPaginatedReader(bufferedReader, paginationStorage, pageSize)
+	batchReaderAdapter := NewBatchReaderAdapter(paginatedReader, paginationStorage, pageSize)
 
 	// Then
 	paginationStorage.EXPECT().Get().Return(NewPageToken(10500), nil).Times(1)
-	bufferedReader.EXPECT().Read(gomock.Eq(NewPageToken(10500)), gomock.Eq(pageSize)).Return([]*business.ChatRecord{}, NewPageToken(10500), nil).Times(1)
+	paginatedReader.EXPECT().Read(gomock.Eq(NewPageToken(10500)), gomock.Eq(pageSize)).Return([]*business.ChatRecord{}, NewPageToken(10500), nil).Times(1)
 	paginationStorage.EXPECT().Set(gomock.Eq(NewPageToken(10500))).Return(nil).Times(1)
 
 	// When
-	paginatedReader.Read()
+	batchReaderAdapter.Read()
 }
 
 func TestFetchPageToken_error(t *testing.T) {
 	// Given
 	ctrl := gomock.NewController(t)
-	bufferedReader := NewMockChatRecordPaginatedBufferedReader(ctrl)
-	paginationStorage := NewMockChatRecordPaginationStorage(ctrl)
+	paginatedReader := NewMockPaginatedReader(ctrl)
+	paginationStorage := NewMockPaginationStorage(ctrl)
 	pageSize := uint64(10)
-	paginatedReader := NewChatRecordPaginatedReader(bufferedReader, paginationStorage, pageSize)
+	batchReaderAdapter := NewBatchReaderAdapter(paginatedReader, paginationStorage, pageSize)
 
 	// Then
 	paginationStorage.EXPECT().Get().Return(NewPageToken(0), io.ErrUnexpectedEOF).Times(1)
-	bufferedReader.EXPECT().Read(gomock.Any(), gomock.Any()).Times(0)
+	paginatedReader.EXPECT().Read(gomock.Any(), gomock.Any()).Times(0)
 	paginationStorage.EXPECT().Set(gomock.Any()).Times(0)
 
 	// When
-	_, err := paginatedReader.Read()
+	_, err := batchReaderAdapter.Read()
 	if err != io.ErrUnexpectedEOF {
 		t.Errorf("error should happen here, expected: %+v, actual: %+v", io.ErrUnexpectedEOF, err)
 	}
@@ -117,21 +117,21 @@ func TestFetchPageToken_error(t *testing.T) {
 func TestForwardResults_zeroRecord(t *testing.T) {
 	// Given
 	ctrl := gomock.NewController(t)
-	bufferedReader := NewMockChatRecordPaginatedBufferedReader(ctrl)
-	paginationStorage := NewMockChatRecordPaginationStorage(ctrl)
+	paginatedReader := NewMockPaginatedReader(ctrl)
+	paginationStorage := NewMockPaginationStorage(ctrl)
 	pageSize := uint64(10)
-	paginatedReader := NewChatRecordPaginatedReader(bufferedReader, paginationStorage, pageSize)
+	batchReaderAdapter := NewBatchReaderAdapter(paginatedReader, paginationStorage, pageSize)
 
 	// Then
 	paginationStorage.EXPECT().Get().Return(NewPageToken(123456), nil).Times(1)
 
 	var records []*business.ChatRecord
-	bufferedReader.EXPECT().Read(gomock.Eq(NewPageToken(123456)), gomock.Eq(pageSize)).Return(records, NewPageToken(897654), nil).Times(1)
+	paginatedReader.EXPECT().Read(gomock.Eq(NewPageToken(123456)), gomock.Eq(pageSize)).Return(records, NewPageToken(897654), nil).Times(1)
 
 	paginationStorage.EXPECT().Set(gomock.Eq(NewPageToken(897654))).Return(nil).Times(1)
 
 	// When
-	forwardingResults, err := paginatedReader.Read()
+	forwardingResults, err := batchReaderAdapter.Read()
 	if err != nil {
 		t.Errorf("error should not happen here, err: %v", err)
 	}
@@ -143,10 +143,10 @@ func TestForwardResults_zeroRecord(t *testing.T) {
 func TestForwardResults_oneRecord(t *testing.T) {
 	// Given
 	ctrl := gomock.NewController(t)
-	bufferedReader := NewMockChatRecordPaginatedBufferedReader(ctrl)
-	paginationStorage := NewMockChatRecordPaginationStorage(ctrl)
+	paginatedReader := NewMockPaginatedReader(ctrl)
+	paginationStorage := NewMockPaginationStorage(ctrl)
 	pageSize := uint64(10)
-	paginatedReader := NewChatRecordPaginatedReader(bufferedReader, paginationStorage, pageSize)
+	batchReaderAdapter := NewBatchReaderAdapter(paginatedReader, paginationStorage, pageSize)
 
 	// Then
 	paginationStorage.EXPECT().Get().Return(NewPageToken(123456), nil).Times(1)
@@ -154,12 +154,12 @@ func TestForwardResults_oneRecord(t *testing.T) {
 	records := []*business.ChatRecord{
 		{},
 	}
-	bufferedReader.EXPECT().Read(gomock.Eq(NewPageToken(123456)), gomock.Eq(pageSize)).Return(records, NewPageToken(2234567), nil).Times(1)
+	paginatedReader.EXPECT().Read(gomock.Eq(NewPageToken(123456)), gomock.Eq(pageSize)).Return(records, NewPageToken(2234567), nil).Times(1)
 
 	paginationStorage.EXPECT().Set(gomock.Eq(NewPageToken(2234567))).Return(nil).Times(1)
 
 	// When
-	forwardingResults, err := paginatedReader.Read()
+	forwardingResults, err := batchReaderAdapter.Read()
 	if err != nil {
 		t.Errorf("error should not happen here, err: %v", err)
 	}
@@ -171,10 +171,10 @@ func TestForwardResults_oneRecord(t *testing.T) {
 func TestForwardResults_manyRecords(t *testing.T) {
 	// Given
 	ctrl := gomock.NewController(t)
-	bufferedReader := NewMockChatRecordPaginatedBufferedReader(ctrl)
-	paginationStorage := NewMockChatRecordPaginationStorage(ctrl)
+	paginatedReader := NewMockPaginatedReader(ctrl)
+	paginationStorage := NewMockPaginationStorage(ctrl)
 	pageSize := uint64(10)
-	paginatedReader := NewChatRecordPaginatedReader(bufferedReader, paginationStorage, pageSize)
+	batchReaderAdapter := NewBatchReaderAdapter(paginatedReader, paginationStorage, pageSize)
 
 	// Then
 	paginationStorage.EXPECT().Get().Return(NewPageToken(10), nil).Times(1)
@@ -184,12 +184,12 @@ func TestForwardResults_manyRecords(t *testing.T) {
 		{},
 		{},
 	}
-	bufferedReader.EXPECT().Read(gomock.Eq(NewPageToken(10)), gomock.Eq(pageSize)).Return(records, NewPageToken(678934), nil).Times(1)
+	paginatedReader.EXPECT().Read(gomock.Eq(NewPageToken(10)), gomock.Eq(pageSize)).Return(records, NewPageToken(678934), nil).Times(1)
 
 	paginationStorage.EXPECT().Set(gomock.Eq(NewPageToken(678934))).Return(nil).Times(1)
 
 	// When
-	forwardingResults, err := paginatedReader.Read()
+	forwardingResults, err := batchReaderAdapter.Read()
 	if err != nil {
 		t.Errorf("error should not happen here, err: %v", err)
 	}
@@ -201,20 +201,20 @@ func TestForwardResults_manyRecords(t *testing.T) {
 func TestForwardResults_error(t *testing.T) {
 	// Given
 	ctrl := gomock.NewController(t)
-	bufferedReader := NewMockChatRecordPaginatedBufferedReader(ctrl)
-	paginationStorage := NewMockChatRecordPaginationStorage(ctrl)
+	paginatedReader := NewMockPaginatedReader(ctrl)
+	paginationStorage := NewMockPaginationStorage(ctrl)
 	pageSize := uint64(10)
-	paginatedReader := NewChatRecordPaginatedReader(bufferedReader, paginationStorage, pageSize)
+	batchReaderAdapter := NewBatchReaderAdapter(paginatedReader, paginationStorage, pageSize)
 
 	// Then
 	paginationStorage.EXPECT().Get().Return(NewPageToken(10), nil).Times(1)
 
-	bufferedReader.EXPECT().Read(gomock.Eq(NewPageToken(10)), gomock.Eq(pageSize)).Return(nil, NewPageToken(0), io.ErrShortBuffer).Times(1)
+	paginatedReader.EXPECT().Read(gomock.Eq(NewPageToken(10)), gomock.Eq(pageSize)).Return(nil, NewPageToken(0), io.ErrShortBuffer).Times(1)
 
 	paginationStorage.EXPECT().Set(gomock.Any()).Times(0)
 
 	// When
-	_, err := paginatedReader.Read()
+	_, err := batchReaderAdapter.Read()
 	if err != io.ErrShortBuffer {
 		t.Errorf("error should happen here, expected: %+v, actual: %+v", io.ErrShortBuffer, err)
 	}
@@ -223,20 +223,20 @@ func TestForwardResults_error(t *testing.T) {
 func TestForwardResults_EOF(t *testing.T) {
 	// Given
 	ctrl := gomock.NewController(t)
-	bufferedReader := NewMockChatRecordPaginatedBufferedReader(ctrl)
-	paginationStorage := NewMockChatRecordPaginationStorage(ctrl)
+	paginatedReader := NewMockPaginatedReader(ctrl)
+	paginationStorage := NewMockPaginationStorage(ctrl)
 	pageSize := uint64(10)
-	paginatedReader := NewChatRecordPaginatedReader(bufferedReader, paginationStorage, pageSize)
+	batchReaderAdapter := NewBatchReaderAdapter(paginatedReader, paginationStorage, pageSize)
 
 	// Then
 	paginationStorage.EXPECT().Get().Return(NewPageToken(10), nil).Times(1)
 
-	bufferedReader.EXPECT().Read(gomock.Eq(NewPageToken(10)), gomock.Eq(pageSize)).Return(nil, NewPageToken(3467), io.EOF).Times(1)
+	paginatedReader.EXPECT().Read(gomock.Eq(NewPageToken(10)), gomock.Eq(pageSize)).Return(nil, NewPageToken(3467), io.EOF).Times(1)
 
 	paginationStorage.EXPECT().Set(gomock.Eq(NewPageToken(3467))).Return(nil).Times(1)
 
 	// When
-	_, err := paginatedReader.Read()
+	_, err := batchReaderAdapter.Read()
 	if err != io.EOF {
 		t.Errorf("error should happen here, expected: %+v, actual: %+v", io.EOF, err)
 	}
@@ -245,10 +245,10 @@ func TestForwardResults_EOF(t *testing.T) {
 func TestUpdatePageToken_error(t *testing.T) {
 	// Given
 	ctrl := gomock.NewController(t)
-	bufferedReader := NewMockChatRecordPaginatedBufferedReader(ctrl)
-	paginationStorage := NewMockChatRecordPaginationStorage(ctrl)
+	paginatedReader := NewMockPaginatedReader(ctrl)
+	paginationStorage := NewMockPaginationStorage(ctrl)
 	pageSize := uint64(10)
-	paginatedReader := NewChatRecordPaginatedReader(bufferedReader, paginationStorage, pageSize)
+	batchReaderAdapter := NewBatchReaderAdapter(paginatedReader, paginationStorage, pageSize)
 
 	// Then
 	paginationStorage.EXPECT().Get().Return(NewPageToken(10), nil).Times(1)
@@ -258,12 +258,12 @@ func TestUpdatePageToken_error(t *testing.T) {
 		{},
 		{},
 	}
-	bufferedReader.EXPECT().Read(gomock.Eq(NewPageToken(10)), gomock.Eq(pageSize)).Return(records, NewPageToken(678934), nil).Times(1)
+	paginatedReader.EXPECT().Read(gomock.Eq(NewPageToken(10)), gomock.Eq(pageSize)).Return(records, NewPageToken(678934), nil).Times(1)
 
 	paginationStorage.EXPECT().Set(gomock.Eq(NewPageToken(678934))).Return(io.ErrUnexpectedEOF).Times(1)
 
 	// When
-	_, err := paginatedReader.Read()
+	_, err := batchReaderAdapter.Read()
 	if err != io.ErrUnexpectedEOF {
 		t.Errorf("error should happen here, expected: %+v, actual: %+v", io.ErrUnexpectedEOF, err)
 	}
@@ -272,10 +272,10 @@ func TestUpdatePageToken_error(t *testing.T) {
 func TestDetermineEnd_requestPageSizeEqualToResponsePageSize(t *testing.T) {
 	// Given
 	ctrl := gomock.NewController(t)
-	bufferedReader := NewMockChatRecordPaginatedBufferedReader(ctrl)
-	paginationStorage := NewMockChatRecordPaginationStorage(ctrl)
+	paginatedReader := NewMockPaginatedReader(ctrl)
+	paginationStorage := NewMockPaginationStorage(ctrl)
 	pageSize := uint64(5)
-	paginatedReader := NewChatRecordPaginatedReader(bufferedReader, paginationStorage, pageSize)
+	batchReaderAdapter := NewBatchReaderAdapter(paginatedReader, paginationStorage, pageSize)
 
 	records := []*business.ChatRecord{
 		{},
@@ -288,8 +288,8 @@ func TestDetermineEnd_requestPageSizeEqualToResponsePageSize(t *testing.T) {
 	// Then
 	givenPaginationStoragePageTokens(paginationStorage, []*PageToken{NewPageToken(100), NewPageToken(231456)})
 
-	bufferedReader.EXPECT().Read(gomock.Eq(NewPageToken(100)), gomock.Eq(pageSize)).Return(records, NewPageToken(231456), nil).Times(1)
-	bufferedReader.EXPECT().Read(gomock.Eq(NewPageToken(231456)), gomock.Eq(pageSize)).Return(records, NewPageToken(901234), nil).Times(1)
+	paginatedReader.EXPECT().Read(gomock.Eq(NewPageToken(100)), gomock.Eq(pageSize)).Return(records, NewPageToken(231456), nil).Times(1)
+	paginatedReader.EXPECT().Read(gomock.Eq(NewPageToken(231456)), gomock.Eq(pageSize)).Return(records, NewPageToken(901234), nil).Times(1)
 
 	paginationStorage.EXPECT().Set(gomock.Eq(NewPageToken(231456))).Return(nil).Times(1)
 	paginationStorage.EXPECT().Set(gomock.Eq(NewPageToken(901234))).Return(nil).Times(1)
@@ -297,7 +297,7 @@ func TestDetermineEnd_requestPageSizeEqualToResponsePageSize(t *testing.T) {
 	// When
 
 	// 1st reading operation
-	forwardingResults, err := paginatedReader.Read()
+	forwardingResults, err := batchReaderAdapter.Read()
 	if err != nil {
 		t.Errorf("error should not happen here, err: %v", err)
 	}
@@ -306,7 +306,7 @@ func TestDetermineEnd_requestPageSizeEqualToResponsePageSize(t *testing.T) {
 	}
 
 	// 2nd reading operation
-	forwardingResults, err = paginatedReader.Read()
+	forwardingResults, err = batchReaderAdapter.Read()
 	if err != nil {
 		t.Errorf("error should not happen here, err: %v", err)
 	}
@@ -318,10 +318,10 @@ func TestDetermineEnd_requestPageSizeEqualToResponsePageSize(t *testing.T) {
 func TestDetermineEnd_requestPageSizeGreaterThanResponsePageSize(t *testing.T) {
 	// Given
 	ctrl := gomock.NewController(t)
-	bufferedReader := NewMockChatRecordPaginatedBufferedReader(ctrl)
-	paginationStorage := NewMockChatRecordPaginationStorage(ctrl)
+	paginatedReader := NewMockPaginatedReader(ctrl)
+	paginationStorage := NewMockPaginationStorage(ctrl)
 	pageSize := uint64(10)
-	paginatedReader := NewChatRecordPaginatedReader(bufferedReader, paginationStorage, pageSize)
+	batchReaderAdapter := NewBatchReaderAdapter(paginatedReader, paginationStorage, pageSize)
 
 	records := []*business.ChatRecord{
 		{},
@@ -335,8 +335,8 @@ func TestDetermineEnd_requestPageSizeGreaterThanResponsePageSize(t *testing.T) {
 	// Then
 	givenPaginationStoragePageTokens(paginationStorage, []*PageToken{NewPageToken(2000), NewPageToken(547612)})
 
-	bufferedReader.EXPECT().Read(gomock.Eq(NewPageToken(2000)), gomock.Eq(pageSize)).Return(records, NewPageToken(547612), nil).Times(1)
-	bufferedReader.EXPECT().Read(gomock.Eq(NewPageToken(547612)), gomock.Eq(pageSize)).Return(records, NewPageToken(657831), nil).Times(0)
+	paginatedReader.EXPECT().Read(gomock.Eq(NewPageToken(2000)), gomock.Eq(pageSize)).Return(records, NewPageToken(547612), nil).Times(1)
+	paginatedReader.EXPECT().Read(gomock.Eq(NewPageToken(547612)), gomock.Eq(pageSize)).Return(records, NewPageToken(657831), nil).Times(0)
 
 	paginationStorage.EXPECT().Set(gomock.Eq(NewPageToken(547612))).Return(nil).Times(1)
 	paginationStorage.EXPECT().Set(gomock.Eq(NewPageToken(657831))).Return(nil).Times(0)
@@ -344,7 +344,7 @@ func TestDetermineEnd_requestPageSizeGreaterThanResponsePageSize(t *testing.T) {
 	// When
 
 	// 1st reading operation
-	forwardingResults, err := paginatedReader.Read()
+	forwardingResults, err := batchReaderAdapter.Read()
 	if err != nil {
 		t.Errorf("error should not happen here, err: %v", err)
 	}
@@ -353,13 +353,13 @@ func TestDetermineEnd_requestPageSizeGreaterThanResponsePageSize(t *testing.T) {
 	}
 
 	// 2nd reading operation
-	_, err = paginatedReader.Read()
+	_, err = batchReaderAdapter.Read()
 	if err != io.EOF {
 		t.Errorf("io.EOF should be returned here, expected: %v, actual: %v", io.EOF, err)
 	}
 }
 
-func givenPaginationStoragePageTokens(paginationStorage *MockChatRecordPaginationStorage, pageTokens []*PageToken) {
+func givenPaginationStoragePageTokens(paginationStorage *MockPaginationStorage, pageTokens []*PageToken) {
 	idx := 0
 	paginationStorage.
 		EXPECT().

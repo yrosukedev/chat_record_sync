@@ -1,10 +1,10 @@
-package paginated_reader
+package pagination
 
 import (
 	"github.com/yrosukedev/chat_record_sync/chat_sync/business"
 )
 
-type ChatRecordPaginatedBufferedReader interface {
+type PaginatedReader interface {
 	// Read return chat records and the next page token.
 	//
 	// inPageToken is the input page token. If it's nil, the chat records will be fetched from the beginning.

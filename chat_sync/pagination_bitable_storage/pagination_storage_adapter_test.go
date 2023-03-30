@@ -7,7 +7,7 @@ import (
 	"context"
 	"fmt"
 	lark "github.com/larksuite/oapi-sdk-go/v3"
-	"github.com/yrosukedev/chat_record_sync/chat_sync/paginated_reader"
+	"github.com/yrosukedev/chat_record_sync/chat_sync/reader/pagination"
 	"github.com/yrosukedev/chat_record_sync/config"
 	"testing"
 )
@@ -58,7 +58,7 @@ func TestSetPageToken_succeeds(t *testing.T) {
 	paginationStorage := NewPaginationStorageAdapter(ctx, larkClient, "DLSbbQIcEa0KyIsetHWcg3PDnNh", "tblLJY5YSoEkV3G3")
 
 	// When
-	if err := paginationStorage.Set(paginated_reader.NewPageToken(789478)); err != nil {
+	if err := paginationStorage.Set(pagination.NewPageToken(789478)); err != nil {
 		t.Errorf("error shouldn't happen here, expected: %v, actual: %v", nil, err)
 	}
 }
