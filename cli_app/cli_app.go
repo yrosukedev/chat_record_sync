@@ -5,16 +5,16 @@ import (
 	"errors"
 	lark "github.com/larksuite/oapi-sdk-go/v3"
 	"github.com/yrosukedev/WeWorkFinanceSDK"
-	"github.com/yrosukedev/chat_record_sync/buffer_reader"
-	"github.com/yrosukedev/chat_record_sync/chat_record_bitable_storage"
+	"github.com/yrosukedev/chat_record_sync/chat_sync/buffer_reader"
+	"github.com/yrosukedev/chat_record_sync/chat_sync/chat_record_bitable_storage"
+	"github.com/yrosukedev/chat_record_sync/chat_sync/paginated_reader"
+	"github.com/yrosukedev/chat_record_sync/chat_sync/pagination_bitable_storage"
+	"github.com/yrosukedev/chat_record_sync/chat_sync/retry_writer"
+	"github.com/yrosukedev/chat_record_sync/chat_sync/use_case"
+	wecom_chat2 "github.com/yrosukedev/chat_record_sync/chat_sync/wecom_chat"
+	"github.com/yrosukedev/chat_record_sync/chat_sync/wecom_chat_adapter"
 	"github.com/yrosukedev/chat_record_sync/config"
 	logproxy "github.com/yrosukedev/chat_record_sync/logger/proxy"
-	"github.com/yrosukedev/chat_record_sync/paginated_reader"
-	"github.com/yrosukedev/chat_record_sync/pagination_bitable_storage"
-	"github.com/yrosukedev/chat_record_sync/retry_writer"
-	"github.com/yrosukedev/chat_record_sync/use_case"
-	"github.com/yrosukedev/chat_record_sync/wecom_chat"
-	"github.com/yrosukedev/chat_record_sync/wecom_chat_adapter"
 	"strings"
 )
 
@@ -35,13 +35,13 @@ func RunCLIApp(ctx context.Context) error {
 	useCase := use_case.NewSyncChatRecordUseCase(
 		buffer_reader.NewChatRecordBufferedReaderAdapter(
 			paginated_reader.NewChatRecordPaginatedReader(
-				wecom_chat.NewPaginatedBufferedReaderAdapter(
+				wecom_chat2.NewPaginatedBufferedReaderAdapter(
 					wecom_chat_adapter.NewWeComChatRecordServiceAdapter(ctx, client, "", "", config.WeComChatRecordSDKTimeout, logger),
 					nil,
-					wecom_chat.NewWeComMessageTransformerFactory(map[string]wecom_chat.ChatRecordTransformer{
-						wecom_chat.WeComMessageTypeText: wecom_chat.NewWeComTextMessageTransformer(ctx, logger),
+					wecom_chat2.NewWeComMessageTransformerFactory(map[string]wecom_chat2.ChatRecordTransformer{
+						wecom_chat2.WeComMessageTypeText: wecom_chat2.NewWeComTextMessageTransformer(ctx, logger),
 					},
-						wecom_chat.NewWeComDefaultMessageTransformer(ctx, logger))),
+						wecom_chat2.NewWeComDefaultMessageTransformer(ctx, logger))),
 				pagination_bitable_storage.NewPaginationStorageAdapter(ctx, larkClient, "DLSbbQIcEa0KyIsetHWcg3PDnNh", "tblLJY5YSoEkV3G3", logger),
 				pageSize)),
 		retry_writer.NewRetryWriterAdapter(
