@@ -34,7 +34,7 @@ func TestZeroSequenceOfConsecutiveErrors_oneRead(t *testing.T) {
 	records := []*business.ChatRecord{
 		{},
 	}
-	givenRecordsToRead(reader, records)
+	GivenRecordsToRead(reader, records)
 
 	// Then
 	if _, err := proxyReader.Read(); err != nil {
@@ -59,7 +59,7 @@ func TestZeroSequenceOfConsecutiveErrors_manyReads(t *testing.T) {
 		{},
 		{},
 	}
-	givenRecordsToRead(reader, records)
+	GivenRecordsToRead(reader, records)
 
 	// Then
 	for i := 0; i < len(records); i++ {
@@ -81,12 +81,12 @@ func TestOneSequenceOfConsecutiveErrors_oneError_errorCountsLessThanMaxRetryTime
 	proxyReader := NewChatRecordRetryReader(reader, maxRetryTimes)
 
 	// When
-	records := []*recordOrError{
-		newRecordOrErrorWithRecord(&business.ChatRecord{}),
-		newRecordOrErrorWithError(io.ErrShortBuffer),
-		newRecordOrErrorWithRecord(&business.ChatRecord{}),
+	records := []*RecordOrError{
+		NewRecordOrErrorWithRecord(&business.ChatRecord{}),
+		NewRecordOrErrorWithError(io.ErrShortBuffer),
+		NewRecordOrErrorWithRecord(&business.ChatRecord{}),
 	}
-	encounterErrorWhileReadingRecords(reader, records)
+	EncounterErrorWhileReadingRecords(reader, records)
 
 	// Then
 	expectReaderToReadRecordsOrErrors(t, proxyReader, records)
@@ -100,12 +100,12 @@ func TestOneSequenceOfConsecutiveErrors_oneError_errorCountsEqualToMaxRetryTimes
 	proxyReader := NewChatRecordRetryReader(reader, maxRetryTimes)
 
 	// When
-	records := []*recordOrError{
-		newRecordOrErrorWithRecord(&business.ChatRecord{}),
-		newRecordOrErrorWithError(io.ErrShortBuffer),
-		newRecordOrErrorWithRecord(&business.ChatRecord{}),
+	records := []*RecordOrError{
+		NewRecordOrErrorWithRecord(&business.ChatRecord{}),
+		NewRecordOrErrorWithError(io.ErrShortBuffer),
+		NewRecordOrErrorWithRecord(&business.ChatRecord{}),
 	}
-	encounterErrorWhileReadingRecords(reader, records)
+	EncounterErrorWhileReadingRecords(reader, records)
 
 	// Then
 	expectReaderToReadRecordsOrErrors(t, proxyReader, records)
@@ -119,18 +119,18 @@ func TestOneSequenceOfConsecutiveErrors_oneError_errorCountsGreaterThanMaxRetryT
 	proxyReader := NewChatRecordRetryReader(reader, maxRetryTimes)
 
 	// When
-	records := []*recordOrError{
-		newRecordOrErrorWithRecord(&business.ChatRecord{}),
-		newRecordOrErrorWithError(io.ErrShortBuffer),
-		newRecordOrErrorWithRecord(&business.ChatRecord{}),
+	records := []*RecordOrError{
+		NewRecordOrErrorWithRecord(&business.ChatRecord{}),
+		NewRecordOrErrorWithError(io.ErrShortBuffer),
+		NewRecordOrErrorWithRecord(&business.ChatRecord{}),
 	}
-	encounterErrorWhileReadingRecords(reader, records)
+	EncounterErrorWhileReadingRecords(reader, records)
 
 	// Then
-	expectedRecordsOrErrors := []*recordOrError{
-		newRecordOrErrorWithRecord(&business.ChatRecord{}),
-		newRecordOrErrorWithError(io.ErrShortBuffer),
-		newRecordOrErrorWithRecord(&business.ChatRecord{}),
+	expectedRecordsOrErrors := []*RecordOrError{
+		NewRecordOrErrorWithRecord(&business.ChatRecord{}),
+		NewRecordOrErrorWithError(io.ErrShortBuffer),
+		NewRecordOrErrorWithRecord(&business.ChatRecord{}),
 	}
 	expectReaderToReadRecordsOrErrors(t, proxyReader, expectedRecordsOrErrors)
 }
@@ -143,14 +143,14 @@ func TestOneSequenceOfConsecutiveErrors_manyErrors_errorCountsLessThanMaxRetryTi
 	proxyReader := NewChatRecordRetryReader(reader, maxRetryTimes)
 
 	// When
-	records := []*recordOrError{
-		newRecordOrErrorWithRecord(&business.ChatRecord{}),
-		newRecordOrErrorWithError(io.ErrShortBuffer),
-		newRecordOrErrorWithError(io.ErrNoProgress),
-		newRecordOrErrorWithError(io.ErrClosedPipe),
-		newRecordOrErrorWithRecord(&business.ChatRecord{}),
+	records := []*RecordOrError{
+		NewRecordOrErrorWithRecord(&business.ChatRecord{}),
+		NewRecordOrErrorWithError(io.ErrShortBuffer),
+		NewRecordOrErrorWithError(io.ErrNoProgress),
+		NewRecordOrErrorWithError(io.ErrClosedPipe),
+		NewRecordOrErrorWithRecord(&business.ChatRecord{}),
 	}
-	encounterErrorWhileReadingRecords(reader, records)
+	EncounterErrorWhileReadingRecords(reader, records)
 
 	// Then
 	expectReaderToReadRecordsOrErrors(t, proxyReader, records)
@@ -164,15 +164,15 @@ func TestOneSequenceOfConsecutiveErrors_manyErrors_errorCountsEqualToMaxRetryTim
 	proxyReader := NewChatRecordRetryReader(reader, maxRetryTimes)
 
 	// When
-	records := []*recordOrError{
-		newRecordOrErrorWithRecord(&business.ChatRecord{}),
-		newRecordOrErrorWithError(io.ErrShortBuffer),
-		newRecordOrErrorWithError(io.ErrUnexpectedEOF),
-		newRecordOrErrorWithError(io.ErrClosedPipe),
-		newRecordOrErrorWithError(io.ErrShortWrite),
-		newRecordOrErrorWithRecord(&business.ChatRecord{}),
+	records := []*RecordOrError{
+		NewRecordOrErrorWithRecord(&business.ChatRecord{}),
+		NewRecordOrErrorWithError(io.ErrShortBuffer),
+		NewRecordOrErrorWithError(io.ErrUnexpectedEOF),
+		NewRecordOrErrorWithError(io.ErrClosedPipe),
+		NewRecordOrErrorWithError(io.ErrShortWrite),
+		NewRecordOrErrorWithRecord(&business.ChatRecord{}),
 	}
-	encounterErrorWhileReadingRecords(reader, records)
+	EncounterErrorWhileReadingRecords(reader, records)
 
 	// Then
 	expectReaderToReadRecordsOrErrors(t, proxyReader, records)
@@ -186,26 +186,26 @@ func TestOneSequenceOfConsecutiveErrors_manyErrors_errorCountsGreaterThanMaxRetr
 	proxyReader := NewChatRecordRetryReader(reader, maxRetryTimes)
 
 	// When
-	records := []*recordOrError{
-		newRecordOrErrorWithRecord(&business.ChatRecord{}),
-		newRecordOrErrorWithError(io.ErrShortBuffer),
-		newRecordOrErrorWithError(io.ErrUnexpectedEOF),
-		newRecordOrErrorWithError(io.ErrClosedPipe),
-		newRecordOrErrorWithError(io.ErrShortWrite),
-		newRecordOrErrorWithRecord(&business.ChatRecord{}),
+	records := []*RecordOrError{
+		NewRecordOrErrorWithRecord(&business.ChatRecord{}),
+		NewRecordOrErrorWithError(io.ErrShortBuffer),
+		NewRecordOrErrorWithError(io.ErrUnexpectedEOF),
+		NewRecordOrErrorWithError(io.ErrClosedPipe),
+		NewRecordOrErrorWithError(io.ErrShortWrite),
+		NewRecordOrErrorWithRecord(&business.ChatRecord{}),
 	}
-	encounterErrorWhileReadingRecords(reader, records)
+	EncounterErrorWhileReadingRecords(reader, records)
 
 	// Then
-	expectedRecordsOrErrors := []*recordOrError{
-		newRecordOrErrorWithRecord(&business.ChatRecord{}),
-		newRecordOrErrorWithError(io.ErrShortBuffer),
-		newRecordOrErrorWithError(io.ErrUnexpectedEOF),
-		newRecordOrErrorWithError(io.ErrClosedPipe),
-		newRecordOrErrorWithError(io.EOF), // terminated from here
-		newRecordOrErrorWithError(io.EOF),
-		newRecordOrErrorWithError(io.EOF),
-		newRecordOrErrorWithError(io.EOF),
+	expectedRecordsOrErrors := []*RecordOrError{
+		NewRecordOrErrorWithRecord(&business.ChatRecord{}),
+		NewRecordOrErrorWithError(io.ErrShortBuffer),
+		NewRecordOrErrorWithError(io.ErrUnexpectedEOF),
+		NewRecordOrErrorWithError(io.ErrClosedPipe),
+		NewRecordOrErrorWithError(io.EOF), // terminated from here
+		NewRecordOrErrorWithError(io.EOF),
+		NewRecordOrErrorWithError(io.EOF),
+		NewRecordOrErrorWithError(io.EOF),
 	}
 	expectReaderToReadRecordsOrErrors(t, proxyReader, expectedRecordsOrErrors)
 }
@@ -218,22 +218,22 @@ func TestManySequencesOfConsecutiveErrors_errorCountLessThanMaxRetryTimes(t *tes
 	proxyReader := NewChatRecordRetryReader(reader, maxRetryTimes)
 
 	// When
-	records := []*recordOrError{
-		newRecordOrErrorWithRecord(&business.ChatRecord{}),
-		newRecordOrErrorWithError(io.ErrShortBuffer),
-		newRecordOrErrorWithError(io.ErrUnexpectedEOF),
-		newRecordOrErrorWithError(io.ErrClosedPipe),
-		newRecordOrErrorWithError(io.ErrShortWrite),
-		newRecordOrErrorWithRecord(&business.ChatRecord{}),
-		newRecordOrErrorWithRecord(&business.ChatRecord{}),
-		newRecordOrErrorWithError(io.ErrNoProgress),
-		newRecordOrErrorWithRecord(&business.ChatRecord{}),
-		newRecordOrErrorWithRecord(&business.ChatRecord{}),
-		newRecordOrErrorWithRecord(&business.ChatRecord{}),
-		newRecordOrErrorWithError(io.ErrUnexpectedEOF),
-		newRecordOrErrorWithError(io.ErrClosedPipe),
+	records := []*RecordOrError{
+		NewRecordOrErrorWithRecord(&business.ChatRecord{}),
+		NewRecordOrErrorWithError(io.ErrShortBuffer),
+		NewRecordOrErrorWithError(io.ErrUnexpectedEOF),
+		NewRecordOrErrorWithError(io.ErrClosedPipe),
+		NewRecordOrErrorWithError(io.ErrShortWrite),
+		NewRecordOrErrorWithRecord(&business.ChatRecord{}),
+		NewRecordOrErrorWithRecord(&business.ChatRecord{}),
+		NewRecordOrErrorWithError(io.ErrNoProgress),
+		NewRecordOrErrorWithRecord(&business.ChatRecord{}),
+		NewRecordOrErrorWithRecord(&business.ChatRecord{}),
+		NewRecordOrErrorWithRecord(&business.ChatRecord{}),
+		NewRecordOrErrorWithError(io.ErrUnexpectedEOF),
+		NewRecordOrErrorWithError(io.ErrClosedPipe),
 	}
-	encounterErrorWhileReadingRecords(reader, records)
+	EncounterErrorWhileReadingRecords(reader, records)
 
 	// Then
 	expectReaderToReadRecordsOrErrors(t, proxyReader, records)
@@ -247,22 +247,22 @@ func TestManySequencesOfConsecutiveErrors_errorCountEqualToMaxRetryTimes(t *test
 	proxyReader := NewChatRecordRetryReader(reader, maxRetryTimes)
 
 	// When
-	records := []*recordOrError{
-		newRecordOrErrorWithRecord(&business.ChatRecord{}),
-		newRecordOrErrorWithRecord(&business.ChatRecord{}),
-		newRecordOrErrorWithError(io.ErrUnexpectedEOF),
-		newRecordOrErrorWithError(io.ErrClosedPipe),
-		newRecordOrErrorWithRecord(&business.ChatRecord{}),
-		newRecordOrErrorWithError(io.ErrNoProgress),
-		newRecordOrErrorWithRecord(&business.ChatRecord{}),
-		newRecordOrErrorWithError(io.ErrShortBuffer),
-		newRecordOrErrorWithError(io.ErrUnexpectedEOF),
-		newRecordOrErrorWithError(io.ErrClosedPipe),
-		newRecordOrErrorWithError(io.ErrShortWrite),
-		newRecordOrErrorWithRecord(&business.ChatRecord{}),
-		newRecordOrErrorWithRecord(&business.ChatRecord{}),
+	records := []*RecordOrError{
+		NewRecordOrErrorWithRecord(&business.ChatRecord{}),
+		NewRecordOrErrorWithRecord(&business.ChatRecord{}),
+		NewRecordOrErrorWithError(io.ErrUnexpectedEOF),
+		NewRecordOrErrorWithError(io.ErrClosedPipe),
+		NewRecordOrErrorWithRecord(&business.ChatRecord{}),
+		NewRecordOrErrorWithError(io.ErrNoProgress),
+		NewRecordOrErrorWithRecord(&business.ChatRecord{}),
+		NewRecordOrErrorWithError(io.ErrShortBuffer),
+		NewRecordOrErrorWithError(io.ErrUnexpectedEOF),
+		NewRecordOrErrorWithError(io.ErrClosedPipe),
+		NewRecordOrErrorWithError(io.ErrShortWrite),
+		NewRecordOrErrorWithRecord(&business.ChatRecord{}),
+		NewRecordOrErrorWithRecord(&business.ChatRecord{}),
 	}
-	encounterErrorWhileReadingRecords(reader, records)
+	EncounterErrorWhileReadingRecords(reader, records)
 
 	// Then
 	expectReaderToReadRecordsOrErrors(t, proxyReader, records)
@@ -276,48 +276,48 @@ func TestManySequencesOfConsecutiveErrors_errorCountGreaterThanMaxRetryTimes(t *
 	proxyReader := NewChatRecordRetryReader(reader, maxRetryTimes)
 
 	// When
-	records := []*recordOrError{
-		newRecordOrErrorWithRecord(&business.ChatRecord{}),
-		newRecordOrErrorWithRecord(&business.ChatRecord{}),
-		newRecordOrErrorWithError(io.ErrUnexpectedEOF),
-		newRecordOrErrorWithError(io.ErrClosedPipe),
-		newRecordOrErrorWithRecord(&business.ChatRecord{}),
-		newRecordOrErrorWithError(io.ErrNoProgress),
-		newRecordOrErrorWithRecord(&business.ChatRecord{}),
-		newRecordOrErrorWithError(io.ErrShortBuffer),
-		newRecordOrErrorWithError(io.ErrUnexpectedEOF),
-		newRecordOrErrorWithError(io.ErrClosedPipe),
-		newRecordOrErrorWithError(io.ErrShortWrite),
-		newRecordOrErrorWithRecord(&business.ChatRecord{}),
-		newRecordOrErrorWithRecord(&business.ChatRecord{}),
+	records := []*RecordOrError{
+		NewRecordOrErrorWithRecord(&business.ChatRecord{}),
+		NewRecordOrErrorWithRecord(&business.ChatRecord{}),
+		NewRecordOrErrorWithError(io.ErrUnexpectedEOF),
+		NewRecordOrErrorWithError(io.ErrClosedPipe),
+		NewRecordOrErrorWithRecord(&business.ChatRecord{}),
+		NewRecordOrErrorWithError(io.ErrNoProgress),
+		NewRecordOrErrorWithRecord(&business.ChatRecord{}),
+		NewRecordOrErrorWithError(io.ErrShortBuffer),
+		NewRecordOrErrorWithError(io.ErrUnexpectedEOF),
+		NewRecordOrErrorWithError(io.ErrClosedPipe),
+		NewRecordOrErrorWithError(io.ErrShortWrite),
+		NewRecordOrErrorWithRecord(&business.ChatRecord{}),
+		NewRecordOrErrorWithRecord(&business.ChatRecord{}),
 	}
-	encounterErrorWhileReadingRecords(reader, records)
+	EncounterErrorWhileReadingRecords(reader, records)
 
 	// Then
-	expectedRecordsOrErrors := []*recordOrError{
-		newRecordOrErrorWithRecord(&business.ChatRecord{}),
-		newRecordOrErrorWithRecord(&business.ChatRecord{}),
-		newRecordOrErrorWithError(io.ErrUnexpectedEOF),
-		newRecordOrErrorWithError(io.ErrClosedPipe),
-		newRecordOrErrorWithRecord(&business.ChatRecord{}),
-		newRecordOrErrorWithError(io.ErrNoProgress),
-		newRecordOrErrorWithRecord(&business.ChatRecord{}),
-		newRecordOrErrorWithError(io.ErrShortBuffer),
-		newRecordOrErrorWithError(io.ErrUnexpectedEOF),
-		newRecordOrErrorWithError(io.ErrClosedPipe),
-		newRecordOrErrorWithError(io.EOF),
+	expectedRecordsOrErrors := []*RecordOrError{
+		NewRecordOrErrorWithRecord(&business.ChatRecord{}),
+		NewRecordOrErrorWithRecord(&business.ChatRecord{}),
+		NewRecordOrErrorWithError(io.ErrUnexpectedEOF),
+		NewRecordOrErrorWithError(io.ErrClosedPipe),
+		NewRecordOrErrorWithRecord(&business.ChatRecord{}),
+		NewRecordOrErrorWithError(io.ErrNoProgress),
+		NewRecordOrErrorWithRecord(&business.ChatRecord{}),
+		NewRecordOrErrorWithError(io.ErrShortBuffer),
+		NewRecordOrErrorWithError(io.ErrUnexpectedEOF),
+		NewRecordOrErrorWithError(io.ErrClosedPipe),
+		NewRecordOrErrorWithError(io.EOF),
 	}
 	expectReaderToReadRecordsOrErrors(t, proxyReader, expectedRecordsOrErrors)
 }
 
-func expectReaderToReadRecordsOrErrors(t *testing.T, reader ChatRecordReader, records []*recordOrError) {
+func expectReaderToReadRecordsOrErrors(t *testing.T, reader ChatRecordReader, records []*RecordOrError) {
 	for _, record := range records {
-		switch record.theType {
-		case recordOrErrorTypeError:
-			if _, err := reader.Read(); err != record.err {
-				t.Errorf("error should happen here, expected: %+v, actual: %+v", record.err, err)
+		switch record.InnerType {
+		case RecordOrErrorInnerTypeError:
+			if _, err := reader.Read(); err != record.Err {
+				t.Errorf("error should happen here, expected: %+v, actual: %+v", record.Err, err)
 			}
-		case recordOrErrorTypeRecord:
+		case RecordOrErrorInnerTypeRecord:
 			if _, err := reader.Read(); err != nil {
 				t.Errorf("error should not happen here, expected: %+v, actual: %+v", nil, err)
 			}

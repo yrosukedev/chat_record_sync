@@ -37,7 +37,7 @@ func TestOneRecord(t *testing.T) {
 	records := []*business.ChatRecord{
 		&business.ChatRecord{},
 	}
-	givenRecordsToRead(reader, records)
+	GivenRecordsToRead(reader, records)
 
 	// Then
 	writer.
@@ -62,10 +62,10 @@ func TestManyRecords(t *testing.T) {
 		&business.ChatRecord{},
 		&business.ChatRecord{},
 	}
-	givenRecordsToRead(reader, records)
+	GivenRecordsToRead(reader, records)
 
 	// Then
-	expectRecordsToWrite(writer, records)
+	ExpectRecordsToWrite(writer, records)
 
 	// When
 	useCase.Run(ctx)
@@ -79,14 +79,14 @@ func TestReaderError_beforeReading(t *testing.T) {
 	writer := NewMockChatRecordWriter(ctrl)
 	useCase := NewSyncChatRecordUseCase(reader, writer)
 
-	records := []*recordOrError{
-		newRecordOrErrorWithError(io.ErrClosedPipe),
-		newRecordOrErrorWithRecord(&business.ChatRecord{}),
+	records := []*RecordOrError{
+		NewRecordOrErrorWithError(io.ErrClosedPipe),
+		NewRecordOrErrorWithRecord(&business.ChatRecord{}),
 	}
-	encounterErrorWhileReadingRecords(reader, records)
+	EncounterErrorWhileReadingRecords(reader, records)
 
 	// Then
-	writer.EXPECT().Write(records[1].record).Times(1)
+	writer.EXPECT().Write(records[1].Record).Times(1)
 
 	// When
 	useCase.Run(ctx)
@@ -100,16 +100,16 @@ func TestReaderError_whileReading(t *testing.T) {
 	writer := NewMockChatRecordWriter(ctrl)
 	useCase := NewSyncChatRecordUseCase(reader, writer)
 
-	records := []*recordOrError{
-		newRecordOrErrorWithRecord(&business.ChatRecord{}),
-		newRecordOrErrorWithError(io.ErrClosedPipe),
-		newRecordOrErrorWithRecord(&business.ChatRecord{}),
+	records := []*RecordOrError{
+		NewRecordOrErrorWithRecord(&business.ChatRecord{}),
+		NewRecordOrErrorWithError(io.ErrClosedPipe),
+		NewRecordOrErrorWithRecord(&business.ChatRecord{}),
 	}
-	encounterErrorWhileReadingRecords(reader, records)
+	EncounterErrorWhileReadingRecords(reader, records)
 
 	// Then
-	writer.EXPECT().Write(gomock.Eq(records[0].record)).Times(1)
-	writer.EXPECT().Write(gomock.Eq(records[2].record)).Times(1)
+	writer.EXPECT().Write(gomock.Eq(records[0].Record)).Times(1)
+	writer.EXPECT().Write(gomock.Eq(records[2].Record)).Times(1)
 
 	// When
 	useCase.Run(ctx)
@@ -128,7 +128,7 @@ func TestWriterError_firstRecord(t *testing.T) {
 		&business.ChatRecord{},
 		&business.ChatRecord{},
 	}
-	givenRecordsToRead(reader, records)
+	GivenRecordsToRead(reader, records)
 
 	// Then
 	writer.EXPECT().Write(gomock.Eq(records[0])).Times(1).Return(io.ErrShortWrite)
@@ -152,7 +152,7 @@ func TestWriterError_recordInTheMiddle(t *testing.T) {
 		&business.ChatRecord{},
 		&business.ChatRecord{},
 	}
-	givenRecordsToRead(reader, records)
+	GivenRecordsToRead(reader, records)
 
 	// Then
 	writer.EXPECT().Write(gomock.Eq(records[0])).Times(1).Return(nil)
@@ -171,15 +171,15 @@ func TestAccumulateErrors_readerError(t *testing.T) {
 	writer := NewMockChatRecordWriter(ctrl)
 	useCase := NewSyncChatRecordUseCase(reader, writer)
 
-	records := []*recordOrError{
-		newRecordOrErrorWithError(io.ErrClosedPipe),
-		newRecordOrErrorWithRecord(&business.ChatRecord{}),
-		newRecordOrErrorWithError(io.ErrNoProgress),
+	records := []*RecordOrError{
+		NewRecordOrErrorWithError(io.ErrClosedPipe),
+		NewRecordOrErrorWithRecord(&business.ChatRecord{}),
+		NewRecordOrErrorWithError(io.ErrNoProgress),
 	}
-	encounterErrorWhileReadingRecords(reader, records)
+	EncounterErrorWhileReadingRecords(reader, records)
 
 	// Then
-	writer.EXPECT().Write(gomock.Eq(records[1].record)).Times(1).Return(nil)
+	writer.EXPECT().Write(gomock.Eq(records[1].Record)).Times(1).Return(nil)
 
 	// When
 	errs := useCase.Run(ctx)
@@ -205,7 +205,7 @@ func TestAccumulatedErrors_writeError(t *testing.T) {
 		&business.ChatRecord{},
 		&business.ChatRecord{},
 	}
-	givenRecordsToRead(reader, records)
+	GivenRecordsToRead(reader, records)
 
 	// Then
 	writer.EXPECT().Write(gomock.Eq(records[0])).Times(1).Return(nil)
@@ -231,98 +231,24 @@ func TestAccumulateErrors_readAndWriteErrors(t *testing.T) {
 	writer := NewMockChatRecordWriter(ctrl)
 	useCase := NewSyncChatRecordUseCase(reader, writer)
 
-	records := []*recordOrError{
-		newRecordOrErrorWithError(io.ErrUnexpectedEOF),
-		newRecordOrErrorWithError(io.ErrShortBuffer),
-		newRecordOrErrorWithRecord(&business.ChatRecord{}),
+	records := []*RecordOrError{
+		NewRecordOrErrorWithError(io.ErrUnexpectedEOF),
+		NewRecordOrErrorWithError(io.ErrShortBuffer),
+		NewRecordOrErrorWithRecord(&business.ChatRecord{}),
 	}
-	encounterErrorWhileReadingRecords(reader, records)
+	EncounterErrorWhileReadingRecords(reader, records)
 
 	// Then
-	writer.EXPECT().Write(gomock.Eq(records[2].record)).Times(1).Return(io.ErrNoProgress)
+	writer.EXPECT().Write(gomock.Eq(records[2].Record)).Times(1).Return(io.ErrNoProgress)
 
 	// When
 	errs := useCase.Run(ctx)
 	expectedErrs := []*SyncError{
 		NewReaderError(io.ErrUnexpectedEOF),
 		NewReaderError(io.ErrShortBuffer),
-		NewWriterError(io.ErrNoProgress, records[2].record),
+		NewWriterError(io.ErrNoProgress, records[2].Record),
 	}
 	if !reflect.DeepEqual(errs, expectedErrs) {
 		t.Errorf("accumulated errors are not equal, expected: %+v, actual: %+v", expectedErrs, errs)
-	}
-}
-
-func expectRecordsToWrite(writer *MockChatRecordWriter, records []*business.ChatRecord) {
-	for _, r := range records {
-		writer.
-			EXPECT().
-			Write(gomock.Eq(r)).
-			Times(1)
-	}
-}
-
-func givenRecordsToRead(reader *MockChatRecordReader, records []*business.ChatRecord) {
-	idx := 0
-	reader.
-		EXPECT().
-		Read().
-		DoAndReturn(func() (*business.ChatRecord, error) {
-			if idx >= len(records) {
-				return nil, io.EOF
-			}
-			defer func() { idx += 1 }()
-			return records[idx], nil
-		}).
-		AnyTimes()
-}
-
-func encounterErrorWhileReadingRecords(reader *MockChatRecordReader, records []*recordOrError) {
-	idx := 0
-	reader.
-		EXPECT().
-		Read().
-		DoAndReturn(func() (*business.ChatRecord, error) {
-			if idx >= len(records) {
-				return nil, io.EOF
-			}
-
-			defer func() { idx += 1 }()
-
-			record := records[idx]
-			switch record.theType {
-			case recordOrErrorTypeError:
-				return nil, record.err
-			default:
-				return record.record, nil
-			}
-		}).
-		AnyTimes()
-}
-
-type recordOrErrorType = string
-
-var (
-	recordOrErrorTypeRecord recordOrErrorType = "Record"
-	recordOrErrorTypeError  recordOrErrorType = "Error"
-)
-
-type recordOrError struct {
-	theType recordOrErrorType
-	record  *business.ChatRecord
-	err     error
-}
-
-func newRecordOrErrorWithRecord(record *business.ChatRecord) *recordOrError {
-	return &recordOrError{
-		theType: recordOrErrorTypeRecord,
-		record:  record,
-	}
-}
-
-func newRecordOrErrorWithError(err error) *recordOrError {
-	return &recordOrError{
-		theType: recordOrErrorTypeError,
-		err:     err,
 	}
 }
