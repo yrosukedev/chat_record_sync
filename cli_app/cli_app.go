@@ -5,10 +5,10 @@ import (
 	"errors"
 	lark "github.com/larksuite/oapi-sdk-go/v3"
 	"github.com/yrosukedev/WeWorkFinanceSDK"
-	"github.com/yrosukedev/chat_record_sync/chat_sync/buffer_reader"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/chat_record_bitable_storage"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/paginated_reader"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/pagination_bitable_storage"
+	"github.com/yrosukedev/chat_record_sync/chat_sync/reader/buffer"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/retry_writer"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/use_case"
 	wecom_chat2 "github.com/yrosukedev/chat_record_sync/chat_sync/wecom_chat"
@@ -33,7 +33,7 @@ func RunCLIApp(ctx context.Context) error {
 	logger := logproxy.NewLoggerProxy(config.HttpAppLogLevel, logproxy.NewDefaultLogger())
 
 	useCase := use_case.NewChatSyncUseCase(
-		buffer_reader.NewChatRecordBufferedReaderAdapter(
+		buffer.NewReader(
 			paginated_reader.NewChatRecordPaginatedReader(
 				wecom_chat2.NewPaginatedBufferedReaderAdapter(
 					wecom_chat_adapter.NewWeComChatRecordServiceAdapter(ctx, client, "", "", config.WeComChatRecordSDKTimeout, logger),

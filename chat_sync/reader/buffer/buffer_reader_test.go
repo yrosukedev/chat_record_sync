@@ -1,4 +1,4 @@
-package buffer_reader
+package buffer
 
 import (
 	"github.com/golang/mock/gomock"
@@ -10,14 +10,14 @@ import (
 func TestBufferSize_one(t *testing.T) {
 	// Given
 	ctrl := gomock.NewController(t)
-	bufferedReader := NewMockChatRecordBufferedReader(ctrl)
-	readerAdapter := NewChatRecordBufferedReaderAdapter(bufferedReader)
+	batchReader := NewMockBatchReader(ctrl)
+	readerAdapter := NewReader(batchReader)
 
 	// Then
 	records := []*business.ChatRecord{
 		{},
 	}
-	bufferedReader.EXPECT().Read().Return(records, nil).Times(10)
+	batchReader.EXPECT().Read().Return(records, nil).Times(10)
 
 	// When
 	for i := 0; i < 10; i++ {
@@ -28,12 +28,12 @@ func TestBufferSize_one(t *testing.T) {
 func TestBufferSize_zero(t *testing.T) {
 	// Given
 	ctrl := gomock.NewController(t)
-	bufferedReader := NewMockChatRecordBufferedReader(ctrl)
-	readerAdapter := NewChatRecordBufferedReaderAdapter(bufferedReader)
+	batchReader := NewMockBatchReader(ctrl)
+	readerAdapter := NewReader(batchReader)
 
 	// Then
 	var records []*business.ChatRecord
-	bufferedReader.EXPECT().Read().Return(records, nil).Times(10)
+	batchReader.EXPECT().Read().Return(records, nil).Times(10)
 
 	// When
 	for i := 0; i < 10; i++ {
@@ -46,8 +46,8 @@ func TestBufferSize_zero(t *testing.T) {
 func TestBufferSize_greaterThanOne(t *testing.T) {
 	// Given
 	ctrl := gomock.NewController(t)
-	bufferedReader := NewMockChatRecordBufferedReader(ctrl)
-	readerAdapter := NewChatRecordBufferedReaderAdapter(bufferedReader)
+	batchReader := NewMockBatchReader(ctrl)
+	readerAdapter := NewReader(batchReader)
 
 	// Then
 	records := []*business.ChatRecord{
@@ -61,7 +61,7 @@ func TestBufferSize_greaterThanOne(t *testing.T) {
 			MsgId: "3",
 		},
 	}
-	bufferedReader.EXPECT().Read().Return(records, nil).Times(1)
+	batchReader.EXPECT().Read().Return(records, nil).Times(1)
 
 	// When
 	expectReaderToReadRecords(t, readerAdapter, records)
@@ -70,11 +70,11 @@ func TestBufferSize_greaterThanOne(t *testing.T) {
 func TestBufferSize_error(t *testing.T) {
 	// Given
 	ctrl := gomock.NewController(t)
-	bufferedReader := NewMockChatRecordBufferedReader(ctrl)
-	readerAdapter := NewChatRecordBufferedReaderAdapter(bufferedReader)
+	batchReader := NewMockBatchReader(ctrl)
+	readerAdapter := NewReader(batchReader)
 
 	// Then
-	bufferedReader.EXPECT().Read().Return(nil, io.ErrShortBuffer).Times(1)
+	batchReader.EXPECT().Read().Return(nil, io.ErrShortBuffer).Times(1)
 
 	// When
 	if _, err := readerAdapter.Read(); err != io.ErrShortBuffer {
@@ -85,8 +85,8 @@ func TestBufferSize_error(t *testing.T) {
 func TestRefill_zeroRecord(t *testing.T) {
 	// Given
 	ctrl := gomock.NewController(t)
-	bufferedReader := NewMockChatRecordBufferedReader(ctrl)
-	readerAdapter := NewChatRecordBufferedReaderAdapter(bufferedReader)
+	batchReader := NewMockBatchReader(ctrl)
+	readerAdapter := NewReader(batchReader)
 
 	// Then
 	recordsGroup1 := []*business.ChatRecord{
@@ -101,7 +101,7 @@ func TestRefill_zeroRecord(t *testing.T) {
 		},
 	}
 	var recordsGroup2 []*business.ChatRecord
-	givenRecordsToRefill(bufferedReader, [][]*business.ChatRecord{recordsGroup1, recordsGroup2})
+	givenRecordsToRefill(batchReader, [][]*business.ChatRecord{recordsGroup1, recordsGroup2})
 
 	// When
 	expectReaderToReadRecords(t, readerAdapter, recordsGroup1)
@@ -113,8 +113,8 @@ func TestRefill_zeroRecord(t *testing.T) {
 func TestRefill_oneTime(t *testing.T) {
 	// Given
 	ctrl := gomock.NewController(t)
-	bufferedReader := NewMockChatRecordBufferedReader(ctrl)
-	readerAdapter := NewChatRecordBufferedReaderAdapter(bufferedReader)
+	batchReader := NewMockBatchReader(ctrl)
+	readerAdapter := NewReader(batchReader)
 
 	// Then
 	recordsGroup1 := []*business.ChatRecord{
@@ -133,7 +133,7 @@ func TestRefill_oneTime(t *testing.T) {
 			MsgId: "4",
 		},
 	}
-	givenRecordsToRefill(bufferedReader, [][]*business.ChatRecord{recordsGroup1, recordsGroup2})
+	givenRecordsToRefill(batchReader, [][]*business.ChatRecord{recordsGroup1, recordsGroup2})
 
 	// When
 	expectReaderToReadRecords(t, readerAdapter, append(recordsGroup1, recordsGroup2...))
@@ -142,8 +142,8 @@ func TestRefill_oneTime(t *testing.T) {
 func TestRefill_manyTimes(t *testing.T) {
 	// Given
 	ctrl := gomock.NewController(t)
-	bufferedReader := NewMockChatRecordBufferedReader(ctrl)
-	readerAdapter := NewChatRecordBufferedReaderAdapter(bufferedReader)
+	batchReader := NewMockBatchReader(ctrl)
+	readerAdapter := NewReader(batchReader)
 
 	// Then
 	recordsGroup1 := []*business.ChatRecord{
@@ -179,7 +179,7 @@ func TestRefill_manyTimes(t *testing.T) {
 		},
 	}
 	givenRecordsToRefill(
-		bufferedReader,
+		batchReader,
 		[][]*business.ChatRecord{
 			recordsGroup1,
 			recordsGroup2,
@@ -195,8 +195,8 @@ func TestRefill_manyTimes(t *testing.T) {
 func TestRefill_error(t *testing.T) {
 	// Given
 	ctrl := gomock.NewController(t)
-	bufferedReader := NewMockChatRecordBufferedReader(ctrl)
-	readerAdapter := NewChatRecordBufferedReaderAdapter(bufferedReader)
+	batchReader := NewMockBatchReader(ctrl)
+	readerAdapter := NewReader(batchReader)
 
 	// Then
 	records := []*business.ChatRecord{
@@ -212,7 +212,7 @@ func TestRefill_error(t *testing.T) {
 	}
 
 	groupIdx := 0
-	bufferedReader.EXPECT().Read().DoAndReturn(func() ([]*business.ChatRecord, error) {
+	batchReader.EXPECT().Read().DoAndReturn(func() ([]*business.ChatRecord, error) {
 		defer func() { groupIdx += 1 }()
 		if groupIdx == 0 {
 			return records, nil
@@ -227,15 +227,15 @@ func TestRefill_error(t *testing.T) {
 	}
 }
 
-func givenRecordsToRefill(bufferedReader *MockChatRecordBufferedReader, recordsGroups [][]*business.ChatRecord) {
+func givenRecordsToRefill(batchReader *MockBatchReader, recordsGroups [][]*business.ChatRecord) {
 	groupIdx := 0
-	bufferedReader.EXPECT().Read().DoAndReturn(func() ([]*business.ChatRecord, error) {
+	batchReader.EXPECT().Read().DoAndReturn(func() ([]*business.ChatRecord, error) {
 		defer func() { groupIdx += 1 }()
 		return recordsGroups[groupIdx], nil
 	}).Times(len(recordsGroups))
 }
 
-func expectReaderToReadRecords(t *testing.T, reader *ChatRecordBufferedReaderAdapter, records []*business.ChatRecord) {
+func expectReaderToReadRecords(t *testing.T, reader *Reader, records []*business.ChatRecord) {
 	for _, expected := range records {
 		actual, err := reader.Read()
 		if err != nil {

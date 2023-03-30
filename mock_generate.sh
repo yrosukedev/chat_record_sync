@@ -6,8 +6,8 @@ mockgen -source chat_sync/use_case/writer.go -package use_case -destination chat
 mockgen -source chat_sync/paginated_reader/paginated_buffered_reader.go -package paginated_reader -destination chat_sync/paginated_reader/mock_paginated_buffered_reader.go
 mockgen -source chat_sync/paginated_reader/pagination_storage.go -package paginated_reader -destination chat_sync/paginated_reader/mock_pagination_storage.go
 
-# package: chat_sync/buffer_reader
-mockgen -source chat_sync/buffer_reader/chat_record_buffered_reader.go -package buffer_reader -destination chat_sync/buffer_reader/mock_chat_record_buffered_reader.go
+# package: chat_sync/reader/buffer
+mockgen -source chat_sync/reader/buffer/batch_reader.go -package buffer -destination chat_sync/reader/buffer/mock_batch_reader.go
 
 # package: chat_sync/wecom_chat
 mockgen -source chat_sync/wecom_chat/chat_record_service.go -package wecom_chat -destination chat_sync/wecom_chat/mock_chat_record_service.go
