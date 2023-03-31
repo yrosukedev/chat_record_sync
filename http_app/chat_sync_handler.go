@@ -2,7 +2,7 @@ package http_app
 
 import (
 	"context"
-	"github.com/yrosukedev/chat_record_sync/chat_sync/chat_record_bitable_storage"
+	"github.com/yrosukedev/chat_record_sync/chat_sync/bitable_storage/chat_record"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/http_controller"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/pagination_bitable_storage"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/reader/buffer"
@@ -34,7 +34,7 @@ func (f *HTTPApp) createChatSyncUseCase(ctx context.Context) use_case2.UseCase {
 				pagination_bitable_storage.NewPaginationStorageAdapter(ctx, f.larkClient, config.PaginationStorageBitableAppToken, config.PaginationStorageBitableTableId, f.logger),
 				config.PaginatedReaderPageSize)),
 		retry_writer.NewRetryWriterAdapter(
-			chat_record_bitable_storage.NewChatRecordStorageAdapter(ctx, f.larkClient, config.ChatStorageBitableAppToken, config.ChatStorageBitableTableId, f.logger)),
+			chat_record.NewStorageAdapter(ctx, f.larkClient, config.ChatStorageBitableAppToken, config.ChatStorageBitableTableId, f.logger)),
 	)
 
 	return useCase

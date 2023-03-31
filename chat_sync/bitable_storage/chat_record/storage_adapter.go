@@ -1,4 +1,4 @@
-package chat_record_bitable_storage
+package chat_record
 
 import (
 	"context"
@@ -13,7 +13,7 @@ import (
 	"strings"
 )
 
-type ChatRecordStorageAdapter struct {
+type StorageAdapter struct {
 	ctx        context.Context
 	larkClient *lark.Client
 	appToken   string
@@ -21,13 +21,13 @@ type ChatRecordStorageAdapter struct {
 	logger     logger.Logger
 }
 
-func NewChatRecordStorageAdapter(
+func NewStorageAdapter(
 	ctx context.Context,
 	larkClient *lark.Client,
 	appToken string,
 	tableId string,
 	logger logger.Logger) retry_writer.RetryWriter {
-	return &ChatRecordStorageAdapter{
+	return &StorageAdapter{
 		ctx:        ctx,
 		larkClient: larkClient,
 		appToken:   appToken,
@@ -41,7 +41,7 @@ func NewChatRecordStorageAdapter(
 // requestUUID is a UUID for retrying the idempotent operation.
 // It's very useful for handling the errors of writing the chat record to Bitable.
 // Because this operation is idempotent when the UUID is provided, so we could retry the operation many times.
-func (c *ChatRecordStorageAdapter) Write(chatRecord *business.ChatRecord, requestUUID string) error {
+func (c *StorageAdapter) Write(chatRecord *business.ChatRecord, requestUUID string) error {
 
 	c.logger.Info(c.ctx, "[chat record storage adapter] will write record to Bitable, appToken: %v, tableId: %v, msgId: %v", c.appToken, c.tableId, chatRecord.MsgId)
 
@@ -83,7 +83,7 @@ func (c *ChatRecordStorageAdapter) Write(chatRecord *business.ChatRecord, reques
 	return nil
 }
 
-func (c *ChatRecordStorageAdapter) tableFieldsFrom(chatRecord *business.ChatRecord) map[string]interface{} {
+func (c *StorageAdapter) tableFieldsFrom(chatRecord *business.ChatRecord) map[string]interface{} {
 	fields := map[string]interface{}{
 		consts.BitableFieldMsgId:   chatRecord.MsgId,
 		consts.BitableFieldAction:  chatRecord.Action,

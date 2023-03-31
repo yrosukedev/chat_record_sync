@@ -2,7 +2,7 @@
 // Source: logger/logger.go
 
 // Package chat_record_bitable_storage is a generated GoMock package.
-package chat_record_bitable_storage
+package chat_record
 
 import (
 	context "context"

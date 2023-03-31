@@ -5,7 +5,7 @@ import (
 	"errors"
 	lark "github.com/larksuite/oapi-sdk-go/v3"
 	"github.com/yrosukedev/WeWorkFinanceSDK"
-	"github.com/yrosukedev/chat_record_sync/chat_sync/chat_record_bitable_storage"
+	"github.com/yrosukedev/chat_record_sync/chat_sync/bitable_storage/chat_record"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/pagination_bitable_storage"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/reader/buffer"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/reader/pagination"
@@ -46,7 +46,7 @@ func RunCLIApp(ctx context.Context) error {
 				pagination_bitable_storage.NewPaginationStorageAdapter(ctx, larkClient, "DLSbbQIcEa0KyIsetHWcg3PDnNh", "tblLJY5YSoEkV3G3", logger),
 				pageSize)),
 		retry_writer.NewRetryWriterAdapter(
-			chat_record_bitable_storage.NewChatRecordStorageAdapter(ctx, larkClient, "QCBrbzgx4aKRAis9eewcV731n7d", "tblIk692K5LXte8x", logger)),
+			chat_record.NewStorageAdapter(ctx, larkClient, "QCBrbzgx4aKRAis9eewcV731n7d", "tblIk692K5LXte8x", logger)),
 	)
 
 	// When

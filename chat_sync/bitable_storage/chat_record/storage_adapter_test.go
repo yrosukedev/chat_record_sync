@@ -1,7 +1,7 @@
 //go:build integration
 // +build integration
 
-package chat_record_bitable_storage
+package chat_record
 
 import (
 	"context"
@@ -22,7 +22,7 @@ func TestWriteSucceeds(t *testing.T) {
 	larkConfig := config.NewLarkConfig()
 	larkClient := lark.NewClient(larkConfig.AppId, larkConfig.AppSecret)
 	logger := NewMockLogger(ctrl)
-	storageAdapter := NewChatRecordStorageAdapter(ctx, larkClient, "QCBrbzgx4aKRAis9eewcV731n7d", "tblIk692K5LXte8x", logger)
+	storageAdapter := NewStorageAdapter(ctx, larkClient, "QCBrbzgx4aKRAis9eewcV731n7d", "tblIk692K5LXte8x", logger)
 
 	// When
 	logger.EXPECT().Info(gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes()
