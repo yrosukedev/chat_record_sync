@@ -2,7 +2,7 @@
 // Source: logger/logger.go
 
 // Package wecom_chat_adapter is a generated GoMock package.
-package wecom_chat_adapter
+package chat_record_service
 
 import (
 	context "context"

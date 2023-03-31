@@ -1,7 +1,7 @@
 //go:build integration
 // +build integration
 
-package wecom_chat_adapter
+package chat_record_service
 
 import (
 	"context"
@@ -25,7 +25,7 @@ func TestWeComChatRecordServiceSDK_firstPage(t *testing.T) {
 
 	logger := NewMockLogger(ctrl)
 
-	adapter := NewWeComChatRecordServiceAdapter(ctx, client, "", "", config.WeComChatRecordSDKTimeout, logger)
+	adapter := NewAdapter(ctx, client, "", "", config.WeComChatRecordSDKTimeout, logger)
 
 	// When
 	logger.EXPECT().Info(gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes()

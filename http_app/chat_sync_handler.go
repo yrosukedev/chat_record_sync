@@ -10,8 +10,8 @@ import (
 	"github.com/yrosukedev/chat_record_sync/chat_sync/retry_writer"
 	use_case2 "github.com/yrosukedev/chat_record_sync/chat_sync/use_case"
 	wecom_chat2 "github.com/yrosukedev/chat_record_sync/chat_sync/wecom"
+	"github.com/yrosukedev/chat_record_sync/chat_sync/wecom/chat_record_service"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/wecom/transformer"
-	"github.com/yrosukedev/chat_record_sync/chat_sync/wecom_chat_adapter"
 	"github.com/yrosukedev/chat_record_sync/config"
 	"net/http"
 )
@@ -25,7 +25,7 @@ func (f *HTTPApp) createChatSyncUseCase(ctx context.Context) use_case2.UseCase {
 		buffer.NewReader(
 			pagination.NewBatchReaderAdapter(
 				wecom_chat2.NewPaginatedReaderAdapter(
-					wecom_chat_adapter.NewWeComChatRecordServiceAdapter(ctx, f.wecomClient, "", "", config.WeComChatRecordSDKTimeout, f.logger),
+					chat_record_service.NewAdapter(ctx, f.wecomClient, "", "", config.WeComChatRecordSDKTimeout, f.logger),
 					nil,
 					transformer.NewWeComMessageTransformerFactory(map[string]wecom_chat2.ChatRecordTransformer{
 						wecom_chat2.MessageTypeText: transformer.NewWeComTextMessageTransformer(ctx, f.logger),
