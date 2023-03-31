@@ -11,7 +11,8 @@ import (
 	"github.com/yrosukedev/chat_record_sync/chat_sync/reader/pagination"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/retry_writer"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/use_case"
-	wecom_chat2 "github.com/yrosukedev/chat_record_sync/chat_sync/wecom_chat"
+	wecom_chat2 "github.com/yrosukedev/chat_record_sync/chat_sync/wecom"
+	"github.com/yrosukedev/chat_record_sync/chat_sync/wecom/transformer"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/wecom_chat_adapter"
 	"github.com/yrosukedev/chat_record_sync/config"
 	logproxy "github.com/yrosukedev/chat_record_sync/logger/proxy"
@@ -35,13 +36,13 @@ func RunCLIApp(ctx context.Context) error {
 	useCase := use_case.NewChatSyncUseCase(
 		buffer.NewReader(
 			pagination.NewBatchReaderAdapter(
-				wecom_chat2.NewPaginatedBufferedReaderAdapter(
+				wecom_chat2.NewPaginatedReaderAdapter(
 					wecom_chat_adapter.NewWeComChatRecordServiceAdapter(ctx, client, "", "", config.WeComChatRecordSDKTimeout, logger),
 					nil,
-					wecom_chat2.NewWeComMessageTransformerFactory(map[string]wecom_chat2.ChatRecordTransformer{
-						wecom_chat2.WeComMessageTypeText: wecom_chat2.NewWeComTextMessageTransformer(ctx, logger),
+					transformer.NewWeComMessageTransformerFactory(map[string]wecom_chat2.ChatRecordTransformer{
+						wecom_chat2.MessageTypeText: transformer.NewWeComTextMessageTransformer(ctx, logger),
 					},
-						wecom_chat2.NewWeComDefaultMessageTransformer(ctx, logger))),
+						transformer.NewWeComDefaultMessageTransformer(ctx, logger))),
 				pagination_bitable_storage.NewPaginationStorageAdapter(ctx, larkClient, "DLSbbQIcEa0KyIsetHWcg3PDnNh", "tblLJY5YSoEkV3G3", logger),
 				pageSize)),
 		retry_writer.NewRetryWriterAdapter(

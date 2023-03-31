@@ -7,7 +7,7 @@ import (
 	"context"
 	"github.com/golang/mock/gomock"
 	"github.com/xen0n/go-workwx"
-	"github.com/yrosukedev/chat_record_sync/chat_sync/wecom_chat"
+	"github.com/yrosukedev/chat_record_sync/chat_sync/wecom"
 	"github.com/yrosukedev/chat_record_sync/config"
 	"reflect"
 	"testing"
@@ -24,7 +24,7 @@ func TestWeComOpenAPIAdapter_GetUserInfoByID(t *testing.T) {
 
 	openAPI := NewWeComOpenAPIAdapter(ctx, wecomApp, logger)
 	userId := "WangHuan"
-	expectedUserInfo := &wecom_chat.WeComUserInfo{
+	expectedUserInfo := &wecom.UserInfo{
 		UserID: userId,
 		Name:   "王欢",
 	}

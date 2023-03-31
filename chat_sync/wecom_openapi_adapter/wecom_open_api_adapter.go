@@ -3,7 +3,7 @@ package wecom_openapi_adapter
 import (
 	"context"
 	"github.com/xen0n/go-workwx"
-	wecom_chat2 "github.com/yrosukedev/chat_record_sync/chat_sync/wecom_chat"
+	wecom_chat2 "github.com/yrosukedev/chat_record_sync/chat_sync/wecom"
 	"github.com/yrosukedev/chat_record_sync/logger"
 )
 
@@ -22,7 +22,7 @@ func NewWeComOpenAPIAdapter(ctx context.Context, wecomApp *workwx.WorkwxApp, log
 	}
 }
 
-func (w *WeComOpenAPIAdapter) GetUserInfoByID(id string) (userInfo *wecom_chat2.WeComUserInfo, err error) {
+func (w *WeComOpenAPIAdapter) GetUserInfoByID(id string) (userInfo *wecom_chat2.UserInfo, err error) {
 	w.logger.Info(w.ctx, "[wecom open api] will get user info, user id: %v", id)
 
 	rawUserInfo, err := w.wecomApp.GetUser(id)
@@ -31,7 +31,7 @@ func (w *WeComOpenAPIAdapter) GetUserInfoByID(id string) (userInfo *wecom_chat2.
 		return nil, err
 	}
 
-	userInfo = &wecom_chat2.WeComUserInfo{
+	userInfo = &wecom_chat2.UserInfo{
 		UserID: rawUserInfo.UserID,
 		Name:   rawUserInfo.Name,
 	}
@@ -41,7 +41,7 @@ func (w *WeComOpenAPIAdapter) GetUserInfoByID(id string) (userInfo *wecom_chat2.
 	return userInfo, nil
 }
 
-func (w *WeComOpenAPIAdapter) GetExternalContactByID(externalId string) (contact *wecom_chat2.WeComExternalContact, err error) {
+func (w *WeComOpenAPIAdapter) GetExternalContactByID(externalId string) (contact *wecom_chat2.ExternalContact, err error) {
 	//TODO implement me
 	panic("implement me")
 }

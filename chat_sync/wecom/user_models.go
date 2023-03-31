@@ -1,11 +1,11 @@
-package wecom_chat
+package wecom
 
-type WeComExternalContact struct {
+type ExternalContact struct {
 	ExternalUserID string
 	Name           string
 }
 
-type WeComUserInfo struct {
+type UserInfo struct {
 	UserID string
 	Name   string
 }

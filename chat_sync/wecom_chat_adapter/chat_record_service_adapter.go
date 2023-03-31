@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/yrosukedev/WeWorkFinanceSDK"
-	wecom_chat2 "github.com/yrosukedev/chat_record_sync/chat_sync/wecom_chat"
+	wecom_chat2 "github.com/yrosukedev/chat_record_sync/chat_sync/wecom"
 	"github.com/yrosukedev/chat_record_sync/logger"
 	"strings"
 	"time"
@@ -36,7 +36,7 @@ func NewWeComChatRecordServiceAdapter(
 	}
 }
 
-func (w *WeComChatRecordServiceAdapter) Read(seq uint64, pageSize uint64) (records []*wecom_chat2.WeComChatRecord, err error) {
+func (w *WeComChatRecordServiceAdapter) Read(seq uint64, pageSize uint64) (records []*wecom_chat2.ChatRecord, err error) {
 	w.logger.Info(w.ctx, "[wecom chat record service adapter] will read records, seq: %v, page size: %v", seq, pageSize)
 	chatDataList, err := w.client.GetChatData(seq, pageSize, w.proxy, w.passwd, int(w.timeout.Seconds()))
 	if err != nil {
@@ -59,11 +59,11 @@ func (w *WeComChatRecordServiceAdapter) Read(seq uint64, pageSize uint64) (recor
 	return records, nil
 }
 
-func (w *WeComChatRecordServiceAdapter) transformChatRecordsFrom(chatDataAndMessages []chatDataAndMessage) []*wecom_chat2.WeComChatRecord {
-	var records []*wecom_chat2.WeComChatRecord
+func (w *WeComChatRecordServiceAdapter) transformChatRecordsFrom(chatDataAndMessages []chatDataAndMessage) []*wecom_chat2.ChatRecord {
+	var records []*wecom_chat2.ChatRecord
 	for _, chatDataAndMessage := range chatDataAndMessages {
 		switch chatDataAndMessage.ChatMessage.Type {
-		case wecom_chat2.WeComMessageTypeText:
+		case wecom_chat2.MessageTypeText:
 			records = append(records, w.textMessageFrom(chatDataAndMessage.ChatMessage, chatDataAndMessage.ChatData.Seq))
 		default:
 			records = append(records, w.otherMessageFrom(chatDataAndMessage.ChatMessage, chatDataAndMessage.ChatData.Seq))
@@ -94,9 +94,9 @@ func (w *WeComChatRecordServiceAdapter) summarizeChatDataList(chatDataList []WeW
 	return strings.Join(result, ",")
 }
 
-func (w *WeComChatRecordServiceAdapter) textMessageFrom(chatMessage WeWorkFinanceSDK.ChatMessage, messageSeq uint64) *wecom_chat2.WeComChatRecord {
+func (w *WeComChatRecordServiceAdapter) textMessageFrom(chatMessage WeWorkFinanceSDK.ChatMessage, messageSeq uint64) *wecom_chat2.ChatRecord {
 	textMsg := chatMessage.GetTextMessage()
-	record := &wecom_chat2.WeComChatRecord{
+	record := &wecom_chat2.ChatRecord{
 		Seq:     messageSeq,
 		MsgID:   textMsg.MsgID,
 		Action:  textMsg.Action,
@@ -113,8 +113,8 @@ func (w *WeComChatRecordServiceAdapter) textMessageFrom(chatMessage WeWorkFinanc
 	return record
 }
 
-func (w *WeComChatRecordServiceAdapter) otherMessageFrom(chatMessage WeWorkFinanceSDK.ChatMessage, messageSeq uint64) *wecom_chat2.WeComChatRecord {
-	record := &wecom_chat2.WeComChatRecord{
+func (w *WeComChatRecordServiceAdapter) otherMessageFrom(chatMessage WeWorkFinanceSDK.ChatMessage, messageSeq uint64) *wecom_chat2.ChatRecord {
+	record := &wecom_chat2.ChatRecord{
 		Seq:           messageSeq,
 		MsgID:         chatMessage.Id,
 		Action:        chatMessage.Action,

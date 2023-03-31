@@ -1,4 +1,4 @@
-package wecom_chat
+package wecom
 
 import (
 	"github.com/yrosukedev/chat_record_sync/chat_sync/business"
@@ -6,24 +6,24 @@ import (
 	"math"
 )
 
-type PaginatedBufferedReaderAdapter struct {
+type PaginatedReaderAdapter struct {
 	chatRecordService ChatRecordService
 	openAPIService    OpenAPIService
 	transformer       ChatRecordTransformer
 }
 
-func NewPaginatedBufferedReaderAdapter(
+func NewPaginatedReaderAdapter(
 	chatRecordService ChatRecordService,
 	openAPIService OpenAPIService,
-	transformer ChatRecordTransformer) *PaginatedBufferedReaderAdapter {
-	return &PaginatedBufferedReaderAdapter{
+	transformer ChatRecordTransformer) *PaginatedReaderAdapter {
+	return &PaginatedReaderAdapter{
 		chatRecordService: chatRecordService,
 		openAPIService:    openAPIService,
 		transformer:       transformer,
 	}
 }
 
-func (p *PaginatedBufferedReaderAdapter) Read(inPageToken *pagination.PageToken, pageSize uint64) (records []*business.ChatRecord, outPageToken *pagination.PageToken, err error) {
+func (p *PaginatedReaderAdapter) Read(inPageToken *pagination.PageToken, pageSize uint64) (records []*business.ChatRecord, outPageToken *pagination.PageToken, err error) {
 	outPageToken = inPageToken
 
 	seq := p.seqFrom(inPageToken)
@@ -43,7 +43,7 @@ func (p *PaginatedBufferedReaderAdapter) Read(inPageToken *pagination.PageToken,
 	return records, outPageToken, nil
 }
 
-func (p *PaginatedBufferedReaderAdapter) seqFrom(inPageToken *pagination.PageToken) uint64 {
+func (p *PaginatedReaderAdapter) seqFrom(inPageToken *pagination.PageToken) uint64 {
 	seq := uint64(0)
 	if inPageToken != nil {
 		seq = inPageToken.Value
@@ -51,7 +51,7 @@ func (p *PaginatedBufferedReaderAdapter) seqFrom(inPageToken *pagination.PageTok
 	return seq
 }
 
-func (p *PaginatedBufferedReaderAdapter) transformWecomRecords(wecomRecords []*WeComChatRecord) (records []*business.ChatRecord, err error) {
+func (p *PaginatedReaderAdapter) transformWecomRecords(wecomRecords []*ChatRecord) (records []*business.ChatRecord, err error) {
 	for _, wecomRecord := range wecomRecords {
 		user, err := p.getUserInfo(wecomRecord)
 		if err != nil {
@@ -73,7 +73,7 @@ func (p *PaginatedBufferedReaderAdapter) transformWecomRecords(wecomRecords []*W
 	return records, nil
 }
 
-func (p *PaginatedBufferedReaderAdapter) getUserInfo(wecomRecord *WeComChatRecord) (*WeComUserInfo, error) {
+func (p *PaginatedReaderAdapter) getUserInfo(wecomRecord *ChatRecord) (*UserInfo, error) {
 	if p.openAPIService == nil {
 		return nil, nil
 	}
@@ -85,12 +85,12 @@ func (p *PaginatedBufferedReaderAdapter) getUserInfo(wecomRecord *WeComChatRecor
 	return user, nil
 }
 
-func (p *PaginatedBufferedReaderAdapter) getContacts(contactIds []string) ([]*WeComExternalContact, error) {
+func (p *PaginatedReaderAdapter) getContacts(contactIds []string) ([]*ExternalContact, error) {
 	if p.openAPIService == nil {
 		return nil, nil
 	}
 
-	var contacts []*WeComExternalContact
+	var contacts []*ExternalContact
 	for _, contactId := range contactIds {
 		contact, err := p.openAPIService.GetExternalContactByID(contactId)
 		if err != nil {
@@ -101,7 +101,7 @@ func (p *PaginatedBufferedReaderAdapter) getContacts(contactIds []string) ([]*We
 	return contacts, nil
 }
 
-func (p *PaginatedBufferedReaderAdapter) updatePageToken(inPageToken *pagination.PageToken, wecomRecords []*WeComChatRecord) *pagination.PageToken {
+func (p *PaginatedReaderAdapter) updatePageToken(inPageToken *pagination.PageToken, wecomRecords []*ChatRecord) *pagination.PageToken {
 	result := uint64(0)
 	if inPageToken != nil {
 		result = inPageToken.Value

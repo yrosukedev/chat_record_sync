@@ -1,4 +1,4 @@
-package wecom_chat
+package wecom
 
 import (
 	"github.com/golang/mock/gomock"
@@ -15,7 +15,7 @@ func TestZeroRecord(t *testing.T) {
 	chatRecordService := NewMockChatRecordService(ctrl)
 	openAPIService := NewMockOpenAPIService(ctrl)
 	transformer := NewMockChatRecordTransformer(ctrl)
-	readerAdapter := NewPaginatedBufferedReaderAdapter(chatRecordService, openAPIService, transformer)
+	readerAdapter := NewPaginatedReaderAdapter(chatRecordService, openAPIService, transformer)
 
 	// Then
 	chatRecordService.EXPECT().Read(gomock.Eq(uint64(345)), gomock.Eq(uint64(10))).Return(nil, nil).Times(1)
@@ -45,7 +45,7 @@ func TestZeroRecord_nilInputPageToken(t *testing.T) {
 	chatRecordService := NewMockChatRecordService(ctrl)
 	openAPIService := NewMockOpenAPIService(ctrl)
 	transformer := NewMockChatRecordTransformer(ctrl)
-	readerAdapter := NewPaginatedBufferedReaderAdapter(chatRecordService, openAPIService, transformer)
+	readerAdapter := NewPaginatedReaderAdapter(chatRecordService, openAPIService, transformer)
 
 	// Then
 	chatRecordService.EXPECT().Read(gomock.Eq(uint64(0)), gomock.Eq(uint64(10))).Return(nil, nil).Times(1)
@@ -75,21 +75,21 @@ func TestOneRecord_oneReceiver(t *testing.T) {
 	chatRecordService := NewMockChatRecordService(ctrl)
 	openAPIService := NewMockOpenAPIService(ctrl)
 	transformer := NewMockChatRecordTransformer(ctrl)
-	readerAdapter := NewPaginatedBufferedReaderAdapter(chatRecordService, openAPIService, transformer)
+	readerAdapter := NewPaginatedReaderAdapter(chatRecordService, openAPIService, transformer)
 
 	// Then
-	wecomRecords := []*WeComChatRecord{
+	wecomRecords := []*ChatRecord{
 		{
 			Seq:    890,
 			From:   "ID_xiaoming",
 			ToList: []string{"ID_xiaowang"},
 		},
 	}
-	user := &WeComUserInfo{
+	user := &UserInfo{
 		UserID: "ID_xiaoming",
 		Name:   "Xiao Ming",
 	}
-	contacts := []*WeComExternalContact{
+	contacts := []*ExternalContact{
 		{
 			ExternalUserID: "ID_xiaowang",
 			Name:           "Xiao Wang",
@@ -137,16 +137,16 @@ func TestOneRecord_zeroReceiver(t *testing.T) {
 	chatRecordService := NewMockChatRecordService(ctrl)
 	openAPIService := NewMockOpenAPIService(ctrl)
 	transformer := NewMockChatRecordTransformer(ctrl)
-	readerAdapter := NewPaginatedBufferedReaderAdapter(chatRecordService, openAPIService, transformer)
+	readerAdapter := NewPaginatedReaderAdapter(chatRecordService, openAPIService, transformer)
 
 	// Then
-	wecomRecords := []*WeComChatRecord{
+	wecomRecords := []*ChatRecord{
 		{
 			Seq:  375,
 			From: "ID_xiaoming",
 		},
 	}
-	user := &WeComUserInfo{
+	user := &UserInfo{
 		UserID: "ID_xiaoming",
 		Name:   "Xiao Ming",
 	}
@@ -186,10 +186,10 @@ func TestOneRecord_manyReceivers(t *testing.T) {
 	chatRecordService := NewMockChatRecordService(ctrl)
 	openAPIService := NewMockOpenAPIService(ctrl)
 	transformer := NewMockChatRecordTransformer(ctrl)
-	readerAdapter := NewPaginatedBufferedReaderAdapter(chatRecordService, openAPIService, transformer)
+	readerAdapter := NewPaginatedReaderAdapter(chatRecordService, openAPIService, transformer)
 
 	// Then
-	wecomRecords := []*WeComChatRecord{
+	wecomRecords := []*ChatRecord{
 		{
 			Seq:  1334,
 			From: "ID_xiaoming",
@@ -200,11 +200,11 @@ func TestOneRecord_manyReceivers(t *testing.T) {
 			},
 		},
 	}
-	user := &WeComUserInfo{
+	user := &UserInfo{
 		UserID: "ID_xiaoming",
 		Name:   "Xiao Ming",
 	}
-	contacts := []*WeComExternalContact{
+	contacts := []*ExternalContact{
 		{
 			ExternalUserID: "ID_xiaowang",
 			Name:           "Xiao Wang",
@@ -270,10 +270,10 @@ func TestManyRecords(t *testing.T) {
 	chatRecordService := NewMockChatRecordService(ctrl)
 	openAPIService := NewMockOpenAPIService(ctrl)
 	transformer := NewMockChatRecordTransformer(ctrl)
-	readerAdapter := NewPaginatedBufferedReaderAdapter(chatRecordService, openAPIService, transformer)
+	readerAdapter := NewPaginatedReaderAdapter(chatRecordService, openAPIService, transformer)
 
 	// Then
-	wecomRecords := []*WeComChatRecord{
+	wecomRecords := []*ChatRecord{
 		{
 			Seq:    890,
 			From:   "ID_xiaoming",
@@ -290,23 +290,23 @@ func TestManyRecords(t *testing.T) {
 			ToList: []string{"ID_xiaozhang"},
 		},
 	}
-	userXiaoming := &WeComUserInfo{
+	userXiaoming := &UserInfo{
 		UserID: "ID_xiaoming",
 		Name:   "Xiao Ming",
 	}
-	userXiaohuang := &WeComUserInfo{
+	userXiaohuang := &UserInfo{
 		UserID: "ID_xiaohuang",
 		Name:   "Xiao Huang",
 	}
-	contactXiaowang := &WeComExternalContact{
+	contactXiaowang := &ExternalContact{
 		ExternalUserID: "ID_xiaowang",
 		Name:           "Xiao Wang",
 	}
-	contactXiaoli := &WeComExternalContact{
+	contactXiaoli := &ExternalContact{
 		ExternalUserID: "ID_xiaoli",
 		Name:           "Xiao Li",
 	}
-	contactXiaozhang := &WeComExternalContact{
+	contactXiaozhang := &ExternalContact{
 		ExternalUserID: "ID_xiaozhang",
 		Name:           "Xiao Zhang",
 	}
@@ -355,9 +355,9 @@ func TestManyRecords(t *testing.T) {
 	openAPIService.EXPECT().GetExternalContactByID(gomock.Eq("ID_xiaowang")).Return(contactXiaowang, nil).Times(1)
 	openAPIService.EXPECT().GetExternalContactByID(gomock.Eq("ID_xiaozhang")).Return(contactXiaozhang, nil).Times(1)
 	openAPIService.EXPECT().GetExternalContactByID(gomock.Eq("ID_xiaoli")).Return(contactXiaoli, nil).Times(1)
-	transformer.EXPECT().Transform(gomock.Eq(wecomRecords[0]), gomock.Eq(userXiaoming), gomock.Eq([]*WeComExternalContact{contactXiaowang})).Return(expectedRecords[0], nil).Times(1)
-	transformer.EXPECT().Transform(gomock.Eq(wecomRecords[1]), gomock.Eq(userXiaohuang), gomock.Eq([]*WeComExternalContact{contactXiaoli})).Return(expectedRecords[1], nil).Times(1)
-	transformer.EXPECT().Transform(gomock.Eq(wecomRecords[2]), gomock.Eq(userXiaoming), gomock.Eq([]*WeComExternalContact{contactXiaozhang})).Return(expectedRecords[2], nil).Times(1)
+	transformer.EXPECT().Transform(gomock.Eq(wecomRecords[0]), gomock.Eq(userXiaoming), gomock.Eq([]*ExternalContact{contactXiaowang})).Return(expectedRecords[0], nil).Times(1)
+	transformer.EXPECT().Transform(gomock.Eq(wecomRecords[1]), gomock.Eq(userXiaohuang), gomock.Eq([]*ExternalContact{contactXiaoli})).Return(expectedRecords[1], nil).Times(1)
+	transformer.EXPECT().Transform(gomock.Eq(wecomRecords[2]), gomock.Eq(userXiaoming), gomock.Eq([]*ExternalContact{contactXiaozhang})).Return(expectedRecords[2], nil).Times(1)
 
 	// When
 	records, outPageToken, err := readerAdapter.Read(pagination.NewPageToken(15), 30)
@@ -381,10 +381,10 @@ func TestManyRecords_nilInputPageToken(t *testing.T) {
 	chatRecordService := NewMockChatRecordService(ctrl)
 	openAPIService := NewMockOpenAPIService(ctrl)
 	transformer := NewMockChatRecordTransformer(ctrl)
-	readerAdapter := NewPaginatedBufferedReaderAdapter(chatRecordService, openAPIService, transformer)
+	readerAdapter := NewPaginatedReaderAdapter(chatRecordService, openAPIService, transformer)
 
 	// Then
-	wecomRecords := []*WeComChatRecord{
+	wecomRecords := []*ChatRecord{
 		{
 			Seq:    890,
 			From:   "ID_xiaoming",
@@ -401,23 +401,23 @@ func TestManyRecords_nilInputPageToken(t *testing.T) {
 			ToList: []string{"ID_xiaozhang"},
 		},
 	}
-	userXiaoming := &WeComUserInfo{
+	userXiaoming := &UserInfo{
 		UserID: "ID_xiaoming",
 		Name:   "Xiao Ming",
 	}
-	userXiaohuang := &WeComUserInfo{
+	userXiaohuang := &UserInfo{
 		UserID: "ID_xiaohuang",
 		Name:   "Xiao Huang",
 	}
-	contactXiaowang := &WeComExternalContact{
+	contactXiaowang := &ExternalContact{
 		ExternalUserID: "ID_xiaowang",
 		Name:           "Xiao Wang",
 	}
-	contactXiaoli := &WeComExternalContact{
+	contactXiaoli := &ExternalContact{
 		ExternalUserID: "ID_xiaoli",
 		Name:           "Xiao Li",
 	}
-	contactXiaozhang := &WeComExternalContact{
+	contactXiaozhang := &ExternalContact{
 		ExternalUserID: "ID_xiaozhang",
 		Name:           "Xiao Zhang",
 	}
@@ -466,9 +466,9 @@ func TestManyRecords_nilInputPageToken(t *testing.T) {
 	openAPIService.EXPECT().GetExternalContactByID(gomock.Eq("ID_xiaowang")).Return(contactXiaowang, nil).Times(1)
 	openAPIService.EXPECT().GetExternalContactByID(gomock.Eq("ID_xiaozhang")).Return(contactXiaozhang, nil).Times(1)
 	openAPIService.EXPECT().GetExternalContactByID(gomock.Eq("ID_xiaoli")).Return(contactXiaoli, nil).Times(1)
-	transformer.EXPECT().Transform(gomock.Eq(wecomRecords[0]), gomock.Eq(userXiaoming), gomock.Eq([]*WeComExternalContact{contactXiaowang})).Return(expectedRecords[0], nil).Times(1)
-	transformer.EXPECT().Transform(gomock.Eq(wecomRecords[1]), gomock.Eq(userXiaohuang), gomock.Eq([]*WeComExternalContact{contactXiaoli})).Return(expectedRecords[1], nil).Times(1)
-	transformer.EXPECT().Transform(gomock.Eq(wecomRecords[2]), gomock.Eq(userXiaoming), gomock.Eq([]*WeComExternalContact{contactXiaozhang})).Return(expectedRecords[2], nil).Times(1)
+	transformer.EXPECT().Transform(gomock.Eq(wecomRecords[0]), gomock.Eq(userXiaoming), gomock.Eq([]*ExternalContact{contactXiaowang})).Return(expectedRecords[0], nil).Times(1)
+	transformer.EXPECT().Transform(gomock.Eq(wecomRecords[1]), gomock.Eq(userXiaohuang), gomock.Eq([]*ExternalContact{contactXiaoli})).Return(expectedRecords[1], nil).Times(1)
+	transformer.EXPECT().Transform(gomock.Eq(wecomRecords[2]), gomock.Eq(userXiaoming), gomock.Eq([]*ExternalContact{contactXiaozhang})).Return(expectedRecords[2], nil).Times(1)
 
 	// When
 	records, outPageToken, err := readerAdapter.Read(nil, 30)
@@ -492,7 +492,7 @@ func TestChatRecordServiceError(t *testing.T) {
 	chatRecordService := NewMockChatRecordService(ctrl)
 	openAPIService := NewMockOpenAPIService(ctrl)
 	transformer := NewMockChatRecordTransformer(ctrl)
-	readerAdapter := NewPaginatedBufferedReaderAdapter(chatRecordService, openAPIService, transformer)
+	readerAdapter := NewPaginatedReaderAdapter(chatRecordService, openAPIService, transformer)
 
 	// Then
 	chatRecordService.EXPECT().Read(gomock.Any(), gomock.Any()).Return(nil, io.ErrShortBuffer).Times(1)
@@ -514,10 +514,10 @@ func TestOpenAPIServiceError_getUserInfo(t *testing.T) {
 	chatRecordService := NewMockChatRecordService(ctrl)
 	openAPIService := NewMockOpenAPIService(ctrl)
 	transformer := NewMockChatRecordTransformer(ctrl)
-	readerAdapter := NewPaginatedBufferedReaderAdapter(chatRecordService, openAPIService, transformer)
+	readerAdapter := NewPaginatedReaderAdapter(chatRecordService, openAPIService, transformer)
 
 	// Then
-	wecomRecords := []*WeComChatRecord{
+	wecomRecords := []*ChatRecord{
 		{
 			Seq:    890,
 			From:   "ID_xiaoming",
@@ -544,17 +544,17 @@ func TestOpenAPIServiceError_getContact(t *testing.T) {
 	chatRecordService := NewMockChatRecordService(ctrl)
 	openAPIService := NewMockOpenAPIService(ctrl)
 	transformer := NewMockChatRecordTransformer(ctrl)
-	readerAdapter := NewPaginatedBufferedReaderAdapter(chatRecordService, openAPIService, transformer)
+	readerAdapter := NewPaginatedReaderAdapter(chatRecordService, openAPIService, transformer)
 
 	// Then
-	wecomRecords := []*WeComChatRecord{
+	wecomRecords := []*ChatRecord{
 		{
 			Seq:    890,
 			From:   "ID_xiaoming",
 			ToList: []string{"ID_xiaowang"},
 		},
 	}
-	user := &WeComUserInfo{
+	user := &UserInfo{
 		UserID: "ID_xiaoming",
 		Name:   "Xiao Ming",
 	}
@@ -577,10 +577,10 @@ func TestOpenAPIService_nil(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	chatRecordService := NewMockChatRecordService(ctrl)
 	transformer := NewMockChatRecordTransformer(ctrl)
-	readerAdapter := NewPaginatedBufferedReaderAdapter(chatRecordService, nil, transformer)
+	readerAdapter := NewPaginatedReaderAdapter(chatRecordService, nil, transformer)
 
 	// Then
-	wecomRecords := []*WeComChatRecord{
+	wecomRecords := []*ChatRecord{
 		{
 			Seq:    890,
 			From:   "ID_xiaoming",
@@ -627,21 +627,21 @@ func TestTransformerError(t *testing.T) {
 	chatRecordService := NewMockChatRecordService(ctrl)
 	openAPIService := NewMockOpenAPIService(ctrl)
 	transformer := NewMockChatRecordTransformer(ctrl)
-	readerAdapter := NewPaginatedBufferedReaderAdapter(chatRecordService, openAPIService, transformer)
+	readerAdapter := NewPaginatedReaderAdapter(chatRecordService, openAPIService, transformer)
 
 	// Then
-	wecomRecords := []*WeComChatRecord{
+	wecomRecords := []*ChatRecord{
 		{
 			Seq:    890,
 			From:   "ID_xiaoming",
 			ToList: []string{"ID_xiaowang"},
 		},
 	}
-	user := &WeComUserInfo{
+	user := &UserInfo{
 		UserID: "ID_xiaoming",
 		Name:   "Xiao Ming",
 	}
-	contacts := []*WeComExternalContact{
+	contacts := []*ExternalContact{
 		{
 			ExternalUserID: "ID_xiaowang",
 			Name:           "Xiao Wang",

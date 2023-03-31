@@ -1,9 +1,10 @@
-package wecom_chat
+package transformer
 
 import (
 	"context"
 	"github.com/golang/mock/gomock"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/business"
+	"github.com/yrosukedev/chat_record_sync/chat_sync/wecom"
 	"reflect"
 	"testing"
 	"time"
@@ -13,9 +14,9 @@ func TestTextMessage_Content(t *testing.T) {
 	// Given
 	ctx := context.Background()
 	ctrl := gomock.NewController(t)
-	logger := NewMockLogger(ctrl)
+	logger := wecom.NewMockLogger(ctrl)
 	transformer := NewWeComTextMessageTransformer(ctx, logger)
-	wecomChatRecord := &WeComChatRecord{
+	wecomChatRecord := &wecom.ChatRecord{
 		Seq:    10,
 		MsgID:  "CAQQluDa4QUY0On2rYSAgAMgzPrShAE=",
 		Action: "send",
@@ -26,15 +27,15 @@ func TestTextMessage_Content(t *testing.T) {
 		RoomID:  "",
 		MsgTime: 1547087894783,
 		MsgType: "text",
-		Text: &TextMessage{
+		Text: &wecom.TextMessage{
 			Content: "Hello, there!",
 		},
 	}
-	user := &WeComUserInfo{
+	user := &wecom.UserInfo{
 		UserID: "id_XuJinSheng",
 		Name:   "Xu Jin Sheng",
 	}
-	contacts := []*WeComExternalContact{
+	contacts := []*wecom.ExternalContact{
 		{
 			ExternalUserID: "id_icefog",
 			Name:           "icefog",
@@ -79,10 +80,10 @@ func TestOtherMessage_Content(t *testing.T) {
 	// Given
 	ctx := context.Background()
 	ctrl := gomock.NewController(t)
-	logger := NewMockLogger(ctrl)
+	logger := wecom.NewMockLogger(ctrl)
 	transformer := NewWeComDefaultMessageTransformer(ctx, logger)
 	originMessage := "{\"msgid\":\"2641513858500683770_1603876152\",\"action\":\"send\",\"from\":\"icefog\",\"tolist\":[\"wmN6etBgAA0sbJ3invMvRxPQDFoq9uWA\"],\"roomid\":\"\",\"msgtime\":1603876152141,\"msgtype\":\"location\",\"location\":{\"longitude\":116.586285899,\"latitude\":39.911125799,\"address\":\"北京市xxx区xxx路xxx大厦x座\",\"title\":\"xxx管理中心\",\"zoom\":15}}"
-	wecomChatRecord := &WeComChatRecord{
+	wecomChatRecord := &wecom.ChatRecord{
 		Seq:    10,
 		MsgID:  "CAQQluDa4QUY0On2rYSAgAMgzPrShAE=",
 		Action: "send",
@@ -95,11 +96,11 @@ func TestOtherMessage_Content(t *testing.T) {
 		MsgType:       "location",
 		OriginMessage: []byte(originMessage),
 	}
-	user := &WeComUserInfo{
+	user := &wecom.UserInfo{
 		UserID: "id_XuJinSheng",
 		Name:   "Xu Jin Sheng",
 	}
-	contacts := []*WeComExternalContact{
+	contacts := []*wecom.ExternalContact{
 		{
 			ExternalUserID: "id_icefog",
 			Name:           "icefog",
@@ -144,9 +145,9 @@ func TestTextMessage_Content_nilText(t *testing.T) {
 	// Given
 	ctx := context.Background()
 	ctrl := gomock.NewController(t)
-	logger := NewMockLogger(ctrl)
+	logger := wecom.NewMockLogger(ctrl)
 	transformer := NewWeComTextMessageTransformer(ctx, logger)
-	wecomChatRecord := &WeComChatRecord{
+	wecomChatRecord := &wecom.ChatRecord{
 		Seq:    10,
 		MsgID:  "CAQQluDa4QUY0On2rYSAgAMgzPrShAE=",
 		Action: "send",
@@ -158,11 +159,11 @@ func TestTextMessage_Content_nilText(t *testing.T) {
 		MsgTime: 1547087894783,
 		MsgType: "text",
 	}
-	user := &WeComUserInfo{
+	user := &wecom.UserInfo{
 		UserID: "id_XuJinSheng",
 		Name:   "Xu Jin Sheng",
 	}
-	contacts := []*WeComExternalContact{
+	contacts := []*wecom.ExternalContact{
 		{
 			ExternalUserID: "id_icefog",
 			Name:           "icefog",
@@ -207,9 +208,9 @@ func TestOtherMessage_Content_nilOriginMessage(t *testing.T) {
 	// Given
 	ctx := context.Background()
 	ctrl := gomock.NewController(t)
-	logger := NewMockLogger(ctrl)
+	logger := wecom.NewMockLogger(ctrl)
 	transformer := NewWeComDefaultMessageTransformer(ctx, logger)
-	wecomChatRecord := &WeComChatRecord{
+	wecomChatRecord := &wecom.ChatRecord{
 		Seq:    10,
 		MsgID:  "CAQQluDa4QUY0On2rYSAgAMgzPrShAE=",
 		Action: "send",
@@ -221,11 +222,11 @@ func TestOtherMessage_Content_nilOriginMessage(t *testing.T) {
 		MsgTime: 1547087894783,
 		MsgType: "location",
 	}
-	user := &WeComUserInfo{
+	user := &wecom.UserInfo{
 		UserID: "id_XuJinSheng",
 		Name:   "Xu Jin Sheng",
 	}
-	contacts := []*WeComExternalContact{
+	contacts := []*wecom.ExternalContact{
 		{
 			ExternalUserID: "id_icefog",
 			Name:           "icefog",
@@ -237,8 +238,8 @@ func TestOtherMessage_Content_nilOriginMessage(t *testing.T) {
 	logger.EXPECT().Error(gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes()
 
 	_, err := transformer.Transform(wecomChatRecord, user, contacts)
-	if !reflect.DeepEqual(err, NewTransformerEmptyContentError(wecomChatRecord)) {
-		t.Errorf("error should happen here, expected: %v, actual: %v", NewTransformerEmptyContentError(wecomChatRecord), err)
+	if !reflect.DeepEqual(err, wecom.NewTransformerEmptyContentError(wecomChatRecord)) {
+		t.Errorf("error should happen here, expected: %v, actual: %v", wecom.NewTransformerEmptyContentError(wecomChatRecord), err)
 		return
 	}
 }
@@ -247,9 +248,9 @@ func TestUserMissmatched_notFound(t *testing.T) {
 	// Given
 	ctx := context.Background()
 	ctrl := gomock.NewController(t)
-	logger := NewMockLogger(ctrl)
+	logger := wecom.NewMockLogger(ctrl)
 	transformer := NewWeComTextMessageTransformer(ctx, logger)
-	wecomChatRecord := &WeComChatRecord{
+	wecomChatRecord := &wecom.ChatRecord{
 		Seq:    10,
 		MsgID:  "CAQQluDa4QUY0On2rYSAgAMgzPrShAE=",
 		Action: "send",
@@ -260,15 +261,15 @@ func TestUserMissmatched_notFound(t *testing.T) {
 		RoomID:  "",
 		MsgTime: 1547087894783,
 		MsgType: "text",
-		Text: &TextMessage{
+		Text: &wecom.TextMessage{
 			Content: "Hello, there!",
 		},
 	}
-	user := &WeComUserInfo{
+	user := &wecom.UserInfo{
 		UserID: "id_xiaowang",
 		Name:   "xiao wang",
 	}
-	contacts := []*WeComExternalContact{
+	contacts := []*wecom.ExternalContact{
 		{
 			ExternalUserID: "id_icefog",
 			Name:           "icefog",
@@ -313,9 +314,9 @@ func TestUserMissmatched_nilUser(t *testing.T) {
 	// Given
 	ctx := context.Background()
 	ctrl := gomock.NewController(t)
-	logger := NewMockLogger(ctrl)
+	logger := wecom.NewMockLogger(ctrl)
 	transformer := NewWeComTextMessageTransformer(ctx, logger)
-	wecomChatRecord := &WeComChatRecord{
+	wecomChatRecord := &wecom.ChatRecord{
 		Seq:    10,
 		MsgID:  "CAQQluDa4QUY0On2rYSAgAMgzPrShAE=",
 		Action: "send",
@@ -326,11 +327,11 @@ func TestUserMissmatched_nilUser(t *testing.T) {
 		RoomID:  "",
 		MsgTime: 1547087894783,
 		MsgType: "text",
-		Text: &TextMessage{
+		Text: &wecom.TextMessage{
 			Content: "Hello, there!",
 		},
 	}
-	contacts := []*WeComExternalContact{
+	contacts := []*wecom.ExternalContact{
 		{
 			ExternalUserID: "id_icefog",
 			Name:           "icefog",
@@ -375,9 +376,9 @@ func TestContactsMissmatched_contactNotFound(t *testing.T) {
 	// Given
 	ctx := context.Background()
 	ctrl := gomock.NewController(t)
-	logger := NewMockLogger(ctrl)
+	logger := wecom.NewMockLogger(ctrl)
 	transformer := NewWeComTextMessageTransformer(ctx, logger)
-	wecomChatRecord := &WeComChatRecord{
+	wecomChatRecord := &wecom.ChatRecord{
 		Seq:    10,
 		MsgID:  "CAQQluDa4QUY0On2rYSAgAMgzPrShAE=",
 		Action: "send",
@@ -389,15 +390,15 @@ func TestContactsMissmatched_contactNotFound(t *testing.T) {
 		RoomID:  "",
 		MsgTime: 1547087894783,
 		MsgType: "text",
-		Text: &TextMessage{
+		Text: &wecom.TextMessage{
 			Content: "Hello, there!",
 		},
 	}
-	user := &WeComUserInfo{
+	user := &wecom.UserInfo{
 		UserID: "id_XuJinSheng",
 		Name:   "Xu Jin Sheng",
 	}
-	contacts := []*WeComExternalContact{
+	contacts := []*wecom.ExternalContact{
 		{
 			ExternalUserID: "id_xiaohuang",
 			Name:           "Xiao Huang",
@@ -450,9 +451,9 @@ func TestContactsMissmatched_nilContact(t *testing.T) {
 	// Given
 	ctx := context.Background()
 	ctrl := gomock.NewController(t)
-	logger := NewMockLogger(ctrl)
+	logger := wecom.NewMockLogger(ctrl)
 	transformer := NewWeComTextMessageTransformer(ctx, logger)
-	wecomChatRecord := &WeComChatRecord{
+	wecomChatRecord := &wecom.ChatRecord{
 		Seq:    10,
 		MsgID:  "CAQQluDa4QUY0On2rYSAgAMgzPrShAE=",
 		Action: "send",
@@ -464,11 +465,11 @@ func TestContactsMissmatched_nilContact(t *testing.T) {
 		RoomID:  "",
 		MsgTime: 1547087894783,
 		MsgType: "text",
-		Text: &TextMessage{
+		Text: &wecom.TextMessage{
 			Content: "Hello, there!",
 		},
 	}
-	user := &WeComUserInfo{
+	user := &wecom.UserInfo{
 		UserID: "id_XuJinSheng",
 		Name:   "Xu Jin Sheng",
 	}
@@ -515,7 +516,7 @@ func TestNilWeComChatRecord(t *testing.T) {
 	// Given
 	ctx := context.Background()
 	ctrl := gomock.NewController(t)
-	logger := NewMockLogger(ctrl)
+	logger := wecom.NewMockLogger(ctrl)
 	transformer := NewWeComTextMessageTransformer(ctx, logger)
 
 	// When

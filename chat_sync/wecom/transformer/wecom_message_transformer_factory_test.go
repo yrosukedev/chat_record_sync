@@ -1,8 +1,9 @@
-package wecom_chat
+package transformer
 
 import (
 	"github.com/golang/mock/gomock"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/business"
+	"github.com/yrosukedev/chat_record_sync/chat_sync/wecom"
 	"reflect"
 	"testing"
 	"time"
@@ -11,12 +12,12 @@ import (
 func TestTransformerFactory_transformerFound(t *testing.T) {
 	// Given
 	ctrl := gomock.NewController(t)
-	transformer1 := NewMockChatRecordTransformer(ctrl)
-	transformerForTextMsg := NewMockChatRecordTransformer(ctrl)
-	transformer3 := NewMockChatRecordTransformer(ctrl)
-	messageTypeToTransformers := map[string]ChatRecordTransformer{
+	transformer1 := wecom.NewMockChatRecordTransformer(ctrl)
+	transformerForTextMsg := wecom.NewMockChatRecordTransformer(ctrl)
+	transformer3 := wecom.NewMockChatRecordTransformer(ctrl)
+	messageTypeToTransformers := map[string]wecom.ChatRecordTransformer{
 		"::any type but text 1::": transformer1,
-		WeComMessageTypeText:      transformerForTextMsg,
+		wecom.MessageTypeText:     transformerForTextMsg,
 		"::any type but text 2::": transformer3,
 	}
 	factory := NewWeComMessageTransformerFactory(messageTypeToTransformers, nil)
@@ -43,11 +44,11 @@ func TestTransformerFactory_transformerFound(t *testing.T) {
 func TestTransformerFactory_transformerNotFound(t *testing.T) {
 	// Given
 	ctrl := gomock.NewController(t)
-	transformer1 := NewMockChatRecordTransformer(ctrl)
-	transformer2 := NewMockChatRecordTransformer(ctrl)
-	transformer3 := NewMockChatRecordTransformer(ctrl)
-	defaultTransformer := NewMockChatRecordTransformer(ctrl)
-	messageTypeToTransformers := map[string]ChatRecordTransformer{
+	transformer1 := wecom.NewMockChatRecordTransformer(ctrl)
+	transformer2 := wecom.NewMockChatRecordTransformer(ctrl)
+	transformer3 := wecom.NewMockChatRecordTransformer(ctrl)
+	defaultTransformer := wecom.NewMockChatRecordTransformer(ctrl)
+	messageTypeToTransformers := map[string]wecom.ChatRecordTransformer{
 		"::any type but text 1::": transformer1,
 		"::any type but text 2::": transformer2,
 		"::any type but text 3::": transformer3,
@@ -91,8 +92,8 @@ func TestTransformerFactory_nilParameters(t *testing.T) {
 	}
 }
 
-func makeSUTForTransformerFactory() (*WeComChatRecord, *WeComUserInfo, []*WeComExternalContact, *business.ChatRecord) {
-	wecomChatRecord := &WeComChatRecord{
+func makeSUTForTransformerFactory() (*wecom.ChatRecord, *wecom.UserInfo, []*wecom.ExternalContact, *business.ChatRecord) {
+	wecomChatRecord := &wecom.ChatRecord{
 		Seq:    10,
 		MsgID:  "CAQQluDa4QUY0On2rYSAgAMgzPrShAE=",
 		Action: "send",
@@ -103,15 +104,15 @@ func makeSUTForTransformerFactory() (*WeComChatRecord, *WeComUserInfo, []*WeComE
 		RoomID:  "",
 		MsgTime: 1547087894783,
 		MsgType: "text",
-		Text: &TextMessage{
+		Text: &wecom.TextMessage{
 			Content: "Hello, there!",
 		},
 	}
-	user := &WeComUserInfo{
+	user := &wecom.UserInfo{
 		UserID: "id_XuJinSheng",
 		Name:   "Xu Jin Sheng",
 	}
-	contacts := []*WeComExternalContact{
+	contacts := []*wecom.ExternalContact{
 		{
 			ExternalUserID: "id_icefog",
 			Name:           "icefog",

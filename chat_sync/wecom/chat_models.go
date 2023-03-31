@@ -1,13 +1,13 @@
-package wecom_chat
+package wecom
 
 const (
-	WeComMessageTypeText  = "text"
-	WeComMessageTypeImage = "image"
-	WeComMessageTypeVoice = "voice"
-	WeComMessageTypeVideo = "video"
+	MessageTypeText  = "text"
+	MessageTypeImage = "image"
+	MessageTypeVoice = "voice"
+	MessageTypeVideo = "video"
 )
 
-type WeComChatRecord struct {
+type ChatRecord struct {
 	Seq     uint64   `json:"seq,omitempty"`
 	MsgID   string   `json:"msgid,omitempty"`
 	Action  string   `json:"action,omitempty"`

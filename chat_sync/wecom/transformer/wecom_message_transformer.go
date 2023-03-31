@@ -1,25 +1,26 @@
-package wecom_chat
+package transformer
 
 import (
 	"context"
 	"fmt"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/business"
+	"github.com/yrosukedev/chat_record_sync/chat_sync/wecom"
 	"github.com/yrosukedev/chat_record_sync/logger"
 	"strings"
 	"time"
 )
 
 type WeComMessageTransformer struct {
-	contentTransformer func(wecomChatRecord *WeComChatRecord) (content string, err error)
+	contentTransformer func(wecomChatRecord *wecom.ChatRecord) (content string, err error)
 	logger             logger.Logger
 	ctx                context.Context
 }
 
-func NewWeComTextMessageTransformer(ctx context.Context, logger logger.Logger) ChatRecordTransformer {
+func NewWeComTextMessageTransformer(ctx context.Context, logger logger.Logger) wecom.ChatRecordTransformer {
 	return &WeComMessageTransformer{
-		contentTransformer: func(wecomChatRecord *WeComChatRecord) (content string, err error) {
-			if wecomChatRecord.MsgType != WeComMessageTypeText {
-				panic(fmt.Sprintf("missmatched message type, expected: %v, actual: %v", WeComMessageTypeText, wecomChatRecord.MsgType))
+		contentTransformer: func(wecomChatRecord *wecom.ChatRecord) (content string, err error) {
+			if wecomChatRecord.MsgType != wecom.MessageTypeText {
+				panic(fmt.Sprintf("missmatched message type, expected: %v, actual: %v", wecom.MessageTypeText, wecomChatRecord.MsgType))
 			}
 
 			content = ""
@@ -33,16 +34,16 @@ func NewWeComTextMessageTransformer(ctx context.Context, logger logger.Logger) C
 	}
 }
 
-func NewWeComDefaultMessageTransformer(ctx context.Context, logger logger.Logger) ChatRecordTransformer {
+func NewWeComDefaultMessageTransformer(ctx context.Context, logger logger.Logger) wecom.ChatRecordTransformer {
 	return &WeComMessageTransformer{
-		contentTransformer: func(wecomChatRecord *WeComChatRecord) (content string, err error) {
+		contentTransformer: func(wecomChatRecord *wecom.ChatRecord) (content string, err error) {
 			content = ""
 			if wecomChatRecord.OriginMessage != nil {
 				content = string(wecomChatRecord.OriginMessage)
 			}
 
 			if content == "" {
-				return "", NewTransformerEmptyContentError(wecomChatRecord)
+				return "", wecom.NewTransformerEmptyContentError(wecomChatRecord)
 			}
 
 			return content, nil
@@ -52,7 +53,7 @@ func NewWeComDefaultMessageTransformer(ctx context.Context, logger logger.Logger
 	}
 }
 
-func (w *WeComMessageTransformer) Transform(wecomChatRecord *WeComChatRecord, userInfo *WeComUserInfo, externalContacts []*WeComExternalContact) (record *business.ChatRecord, err error) {
+func (w *WeComMessageTransformer) Transform(wecomChatRecord *wecom.ChatRecord, userInfo *wecom.UserInfo, externalContacts []*wecom.ExternalContact) (record *business.ChatRecord, err error) {
 	if wecomChatRecord == nil {
 		w.logger.Info(w.ctx, "[message transformer] message is nil, nothing to do")
 		return nil, nil
@@ -86,7 +87,7 @@ func (w *WeComMessageTransformer) Transform(wecomChatRecord *WeComChatRecord, us
 	return record, nil
 }
 
-func (w *WeComMessageTransformer) receiversFrom(wecomChatRecord *WeComChatRecord, externalContacts []*WeComExternalContact) []*business.User {
+func (w *WeComMessageTransformer) receiversFrom(wecomChatRecord *wecom.ChatRecord, externalContacts []*wecom.ExternalContact) []*business.User {
 	contactIdToNames := make(map[string]string, len(externalContacts))
 	for _, contact := range externalContacts {
 		contactIdToNames[contact.ExternalUserID] = contact.Name
@@ -114,7 +115,7 @@ func (w *WeComMessageTransformer) receiversFrom(wecomChatRecord *WeComChatRecord
 	return results
 }
 
-func (w *WeComMessageTransformer) senderFrom(wecomChatRecord *WeComChatRecord, userInfo *WeComUserInfo) *business.User {
+func (w *WeComMessageTransformer) senderFrom(wecomChatRecord *wecom.ChatRecord, userInfo *wecom.UserInfo) *business.User {
 	userName := w.senderNameFrom(wecomChatRecord, userInfo)
 
 	fromUser := &business.User{
@@ -124,7 +125,7 @@ func (w *WeComMessageTransformer) senderFrom(wecomChatRecord *WeComChatRecord, u
 	return fromUser
 }
 
-func (w *WeComMessageTransformer) senderNameFrom(wecomChatRecord *WeComChatRecord, userInfo *WeComUserInfo) string {
+func (w *WeComMessageTransformer) senderNameFrom(wecomChatRecord *wecom.ChatRecord, userInfo *wecom.UserInfo) string {
 	if userInfo == nil {
 		w.logger.Error(w.ctx, "[message transformer] fails to transform user id to user name, seq: %v, msgId: %v, error: %v", wecomChatRecord.Seq, wecomChatRecord.MsgID, "user info is nil")
 		return "<unknown>"

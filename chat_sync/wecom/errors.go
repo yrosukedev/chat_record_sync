@@ -1,14 +1,14 @@
-package wecom_chat
+package wecom
 
 import (
 	"fmt"
 )
 
 type TransformerEmptyContentError struct {
-	record *WeComChatRecord
+	record *ChatRecord
 }
 
-func NewTransformerEmptyContentError(record *WeComChatRecord) *TransformerEmptyContentError {
+func NewTransformerEmptyContentError(record *ChatRecord) *TransformerEmptyContentError {
 	return &TransformerEmptyContentError{
 		record: record,
 	}
