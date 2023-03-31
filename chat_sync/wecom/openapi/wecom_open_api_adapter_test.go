@@ -1,7 +1,7 @@
 //go:build integration
 // +build integration
 
-package wecom_openapi_adapter
+package openapi
 
 import (
 	"context"
@@ -22,7 +22,7 @@ func TestWeComOpenAPIAdapter_GetUserInfoByID(t *testing.T) {
 
 	logger := NewMockLogger(ctrl)
 
-	openAPI := NewWeComOpenAPIAdapter(ctx, wecomApp, logger)
+	openAPI := NewAdapter(ctx, wecomApp, logger)
 	userId := "WangHuan"
 	expectedUserInfo := &wecom.UserInfo{
 		UserID: userId,
