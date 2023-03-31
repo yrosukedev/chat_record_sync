@@ -1,4 +1,4 @@
-package pagination_bitable_storage
+package pagination
 
 import (
 	"context"
@@ -12,7 +12,7 @@ import (
 	"strconv"
 )
 
-type PaginationStorageAdapter struct {
+type StorageAdapter struct {
 	ctx        context.Context
 	larkClient *lark.Client
 	appToken   string
@@ -20,8 +20,8 @@ type PaginationStorageAdapter struct {
 	logger     logger.Logger
 }
 
-func NewPaginationStorageAdapter(ctx context.Context, larkClient *lark.Client, appToken string, tableId string, logger logger.Logger) *PaginationStorageAdapter {
-	return &PaginationStorageAdapter{
+func NewStorageAdapter(ctx context.Context, larkClient *lark.Client, appToken string, tableId string, logger logger.Logger) *StorageAdapter {
+	return &StorageAdapter{
 		ctx:        ctx,
 		larkClient: larkClient,
 		appToken:   appToken,
@@ -30,7 +30,7 @@ func NewPaginationStorageAdapter(ctx context.Context, larkClient *lark.Client, a
 	}
 }
 
-func (p *PaginationStorageAdapter) Get() (pageToken *pagination.PageToken, err error) {
+func (p *StorageAdapter) Get() (pageToken *pagination.PageToken, err error) {
 
 	p.logger.Info(p.ctx, "[pagination storage adapter] will get page token, appToken: %v, tableId: %v", p.appToken, p.tableId)
 
@@ -53,7 +53,7 @@ func (p *PaginationStorageAdapter) Get() (pageToken *pagination.PageToken, err e
 	return pageToken, err
 }
 
-func (p *PaginationStorageAdapter) handleResponse(resp *larkbitable.ListAppTableRecordResp) (*pagination.PageToken, error) {
+func (p *StorageAdapter) handleResponse(resp *larkbitable.ListAppTableRecordResp) (*pagination.PageToken, error) {
 	if len(resp.Data.Items) == 0 { // empty
 		return nil, nil
 	}
@@ -66,7 +66,7 @@ func (p *PaginationStorageAdapter) handleResponse(resp *larkbitable.ListAppTable
 	return p.pageTokenFrom(pageTokenField)
 }
 
-func (p *PaginationStorageAdapter) pageTokenFrom(pageTokenField interface{}) (*pagination.PageToken, error) {
+func (p *StorageAdapter) pageTokenFrom(pageTokenField interface{}) (*pagination.PageToken, error) {
 	switch pageTokenValue := pageTokenField.(type) {
 	case string:
 		if pageTokenInt, err := strconv.ParseInt(pageTokenValue, 10, 64); err != nil {
@@ -81,7 +81,7 @@ func (p *PaginationStorageAdapter) pageTokenFrom(pageTokenField interface{}) (*p
 	}
 }
 
-func (p *PaginationStorageAdapter) checkListRecordsErrors(err error, resp *larkbitable.ListAppTableRecordResp) error {
+func (p *StorageAdapter) checkListRecordsErrors(err error, resp *larkbitable.ListAppTableRecordResp) error {
 	if err != nil {
 		return err
 	}
@@ -97,7 +97,7 @@ func (p *PaginationStorageAdapter) checkListRecordsErrors(err error, resp *larkb
 	return nil
 }
 
-func (p *PaginationStorageAdapter) buildRequestOfFetchingLatestRecord() *larkbitable.ListAppTableRecordReq {
+func (p *StorageAdapter) buildRequestOfFetchingLatestRecord() *larkbitable.ListAppTableRecordReq {
 	req := larkbitable.
 		NewListAppTableRecordReqBuilder().
 		AppToken(p.appToken).
@@ -110,7 +110,7 @@ func (p *PaginationStorageAdapter) buildRequestOfFetchingLatestRecord() *larkbit
 	return req
 }
 
-func (p *PaginationStorageAdapter) Set(pageToken *pagination.PageToken) error {
+func (p *StorageAdapter) Set(pageToken *pagination.PageToken) error {
 	p.logger.Info(p.ctx, "[pagination storage adapter] will set page token, appToken: %v, tableId: %v, page token: %v", p.appToken, p.tableId, pageToken)
 
 	if pageToken == nil { // append nothing
@@ -131,7 +131,7 @@ func (p *PaginationStorageAdapter) Set(pageToken *pagination.PageToken) error {
 	return nil
 }
 
-func (p *PaginationStorageAdapter) buildRequestOfAppendingPageToken(pageToken *pagination.PageToken) *larkbitable.CreateAppTableRecordReq {
+func (p *StorageAdapter) buildRequestOfAppendingPageToken(pageToken *pagination.PageToken) *larkbitable.CreateAppTableRecordReq {
 	fields := p.tableFieldsFrom(pageToken)
 
 	tableRecord := larkbitable.NewAppTableRecordBuilder().
@@ -148,7 +148,7 @@ func (p *PaginationStorageAdapter) buildRequestOfAppendingPageToken(pageToken *p
 	return req
 }
 
-func (p *PaginationStorageAdapter) checkCreateRecordErrors(err error, resp *larkbitable.CreateAppTableRecordResp) error {
+func (p *StorageAdapter) checkCreateRecordErrors(err error, resp *larkbitable.CreateAppTableRecordResp) error {
 	if err != nil {
 		return err
 	}
@@ -163,7 +163,7 @@ func (p *PaginationStorageAdapter) checkCreateRecordErrors(err error, resp *lark
 	return nil
 }
 
-func (p *PaginationStorageAdapter) tableFieldsFrom(pageToken *pagination.PageToken) map[string]interface{} {
+func (p *StorageAdapter) tableFieldsFrom(pageToken *pagination.PageToken) map[string]interface{} {
 	return map[string]interface{}{
 		consts.BitableFieldPaginationPageToken: fmt.Sprintf("%d", pageToken.Value),
 	}

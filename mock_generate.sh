@@ -24,11 +24,14 @@ mockgen -source logger/logger.go -package http_controller -destination chat_sync
 mockgen -package tencent_faas_adapter -destination tencent_faas_adapter/mock_handler.go net/http Handler
 mockgen -source logger/logger.go -package tencent_faas_adapter -destination tencent_faas_adapter/mock_logger.go
 
-# package: chat_sync/chat_record_bitable_storage
-mockgen -source logger/logger.go -package chat_record_bitable_storage -destination chat_sync/chat_record_bitable_storage/mock_logger.go
+# package: chat_sync/bitable_storage/chat_record
+mockgen -source logger/logger.go -package chat_record -destination chat_sync/bitable_storage/chat_record/mock_logger.go
 
 # package: chat_sync/wecom/chat_record_service
 mockgen -source logger/logger.go -package chat_record_service -destination chat_sync/wecom/chat_record_service/mock_logger.go
 
 # package: chat_sync/wecom/openapi
 mockgen -source logger/logger.go -package openapi -destination chat_sync/wecom/openapi/mock_logger.go
+
+# package: chat_sync/bitable_storage/pagination
+mockgen -source logger/logger.go -package pagination -destination chat_sync/bitable_storage/pagination/mock_logger.go

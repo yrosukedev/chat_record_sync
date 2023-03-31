@@ -6,7 +6,7 @@ import (
 	lark "github.com/larksuite/oapi-sdk-go/v3"
 	"github.com/yrosukedev/WeWorkFinanceSDK"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/bitable_storage/chat_record"
-	"github.com/yrosukedev/chat_record_sync/chat_sync/pagination_bitable_storage"
+	pagination2 "github.com/yrosukedev/chat_record_sync/chat_sync/bitable_storage/pagination"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/reader/buffer"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/reader/pagination"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/retry_writer"
@@ -43,7 +43,7 @@ func RunCLIApp(ctx context.Context) error {
 						wecom_chat2.MessageTypeText: transformer.NewWeComTextMessageTransformer(ctx, logger),
 					},
 						transformer.NewWeComDefaultMessageTransformer(ctx, logger))),
-				pagination_bitable_storage.NewPaginationStorageAdapter(ctx, larkClient, "DLSbbQIcEa0KyIsetHWcg3PDnNh", "tblLJY5YSoEkV3G3", logger),
+				pagination2.NewStorageAdapter(ctx, larkClient, "DLSbbQIcEa0KyIsetHWcg3PDnNh", "tblLJY5YSoEkV3G3", logger),
 				pageSize)),
 		retry_writer.NewRetryWriterAdapter(
 			chat_record.NewStorageAdapter(ctx, larkClient, "QCBrbzgx4aKRAis9eewcV731n7d", "tblIk692K5LXte8x", logger)),

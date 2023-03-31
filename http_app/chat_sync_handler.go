@@ -3,8 +3,8 @@ package http_app
 import (
 	"context"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/bitable_storage/chat_record"
+	pagination2 "github.com/yrosukedev/chat_record_sync/chat_sync/bitable_storage/pagination"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/http_controller"
-	"github.com/yrosukedev/chat_record_sync/chat_sync/pagination_bitable_storage"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/reader/buffer"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/reader/pagination"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/retry_writer"
@@ -31,7 +31,7 @@ func (f *HTTPApp) createChatSyncUseCase(ctx context.Context) use_case2.UseCase {
 						wecom_chat2.MessageTypeText: transformer.NewWeComTextMessageTransformer(ctx, f.logger),
 					},
 						transformer.NewWeComDefaultMessageTransformer(ctx, f.logger))),
-				pagination_bitable_storage.NewPaginationStorageAdapter(ctx, f.larkClient, config.PaginationStorageBitableAppToken, config.PaginationStorageBitableTableId, f.logger),
+				pagination2.NewStorageAdapter(ctx, f.larkClient, config.PaginationStorageBitableAppToken, config.PaginationStorageBitableTableId, f.logger),
 				config.PaginatedReaderPageSize)),
 		retry_writer.NewRetryWriterAdapter(
 			chat_record.NewStorageAdapter(ctx, f.larkClient, config.ChatStorageBitableAppToken, config.ChatStorageBitableTableId, f.logger)),
