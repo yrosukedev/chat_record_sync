@@ -6,7 +6,7 @@ import (
 	lark "github.com/larksuite/oapi-sdk-go/v3"
 	larkbitable "github.com/larksuite/oapi-sdk-go/v3/service/bitable/v1"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/business"
-	"github.com/yrosukedev/chat_record_sync/chat_sync/retry_writer"
+	"github.com/yrosukedev/chat_record_sync/chat_sync/writer/retry"
 	"github.com/yrosukedev/chat_record_sync/consts"
 	"github.com/yrosukedev/chat_record_sync/logger"
 	"net/http"
@@ -26,7 +26,7 @@ func NewStorageAdapter(
 	larkClient *lark.Client,
 	appToken string,
 	tableId string,
-	logger logger.Logger) retry_writer.RetryWriter {
+	logger logger.Logger) retry.RetryWriter {
 	return &StorageAdapter{
 		ctx:        ctx,
 		larkClient: larkClient,

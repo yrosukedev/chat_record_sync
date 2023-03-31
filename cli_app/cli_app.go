@@ -9,11 +9,11 @@ import (
 	pagination2 "github.com/yrosukedev/chat_record_sync/chat_sync/bitable_storage/pagination"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/reader/buffer"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/reader/pagination"
-	"github.com/yrosukedev/chat_record_sync/chat_sync/retry_writer"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/use_case"
 	wecom_chat2 "github.com/yrosukedev/chat_record_sync/chat_sync/wecom"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/wecom/chat_record_service"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/wecom/transformer"
+	"github.com/yrosukedev/chat_record_sync/chat_sync/writer/retry"
 	"github.com/yrosukedev/chat_record_sync/config"
 	logproxy "github.com/yrosukedev/chat_record_sync/logger/proxy"
 	"strings"
@@ -45,7 +45,7 @@ func RunCLIApp(ctx context.Context) error {
 						transformer.NewWeComDefaultMessageTransformer(ctx, logger))),
 				pagination2.NewStorageAdapter(ctx, larkClient, "DLSbbQIcEa0KyIsetHWcg3PDnNh", "tblLJY5YSoEkV3G3", logger),
 				pageSize)),
-		retry_writer.NewRetryWriterAdapter(
+		retry.NewWriterAdapter(
 			chat_record.NewStorageAdapter(ctx, larkClient, "QCBrbzgx4aKRAis9eewcV731n7d", "tblIk692K5LXte8x", logger)),
 	)
 

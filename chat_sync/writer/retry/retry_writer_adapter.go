@@ -1,4 +1,4 @@
-package retry_writer
+package retry
 
 import (
 	"github.com/google/uuid"
@@ -6,17 +6,17 @@ import (
 	"github.com/yrosukedev/chat_record_sync/chat_sync/use_case"
 )
 
-type RetryWriterAdapter struct {
+type WriterAdapter struct {
 	retryWriter RetryWriter
 }
 
-func NewRetryWriterAdapter(retryWriter RetryWriter) use_case.Writer {
-	return &RetryWriterAdapter{
+func NewWriterAdapter(retryWriter RetryWriter) use_case.Writer {
+	return &WriterAdapter{
 		retryWriter: retryWriter,
 	}
 }
 
-func (r *RetryWriterAdapter) Write(record *business.ChatRecord) error {
+func (r *WriterAdapter) Write(record *business.ChatRecord) error {
 	// TODO: retry many times
 	return r.retryWriter.Write(record, uuid.NewString())
 }
