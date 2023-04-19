@@ -22,6 +22,8 @@ func NewAdapter(ctx context.Context, wecomApp *workwx.WorkwxApp, logger logger.L
 	}
 }
 
+// GetUserInfoByID get user info by user id
+// @param id user id
 func (w *Adapter) GetUserInfoByID(id string) (userInfo *wecom.UserInfo, err error) {
 	w.logger.Info(w.ctx, "[wecom open api] will get user info, user id: %v", id)
 
@@ -42,6 +44,20 @@ func (w *Adapter) GetUserInfoByID(id string) (userInfo *wecom.UserInfo, err erro
 }
 
 func (w *Adapter) GetExternalContactByID(externalId string) (contact *wecom.ExternalContact, err error) {
-	//TODO implement me
-	panic("implement me")
+	w.logger.Info(w.ctx, "[wecom open api] will get external contact info, external id: %v", externalId)
+
+	rawContact, err := w.wecomApp.GetExternalContact(externalId)
+	if err != nil {
+		w.logger.Error(w.ctx, "[wecom open api] fails to get external contact info, external id: %v, error: %v", externalId, err)
+		return nil, err
+	}
+
+	contact = &wecom.ExternalContact{
+		ExternalUserID: rawContact.ExternalContact.ExternalUserid,
+		Name:           rawContact.ExternalContact.Name,
+	}
+
+	w.logger.Info(w.ctx, "[wecom open api] succeeds to get external contact info, external id: %v", externalId)
+
+	return contact, nil
 }
