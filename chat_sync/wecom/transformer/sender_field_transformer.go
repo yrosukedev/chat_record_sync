@@ -24,13 +24,14 @@ func (t *SenderFieldTransformer) Transform(wecomRecord *wecom.ChatRecord, chatRe
 	updatedChatRecord = t.copyInputIfNeeded(chatRecord)
 
 	user, err := t.openAPIService.GetUserInfoByID(wecomRecord.From)
-	if err != nil {
-		return nil, err
-	}
 
-	updatedChatRecord.From = &business.User{
-		UserId: user.UserID,
-		Name:   user.Name,
+	// fatal tolerated
+	// logging is done in openAPIService
+	if err == nil {
+		updatedChatRecord.From = &business.User{
+			UserId: user.UserID,
+			Name:   user.Name,
+		}
 	}
 
 	return updatedChatRecord, nil
