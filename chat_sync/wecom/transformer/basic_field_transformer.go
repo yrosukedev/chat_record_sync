@@ -19,15 +19,21 @@ func (t *BasicFieldTransformer) Transform(wecomRecord *wecom.ChatRecord, chatRec
 		return nil, errors.New("wecomRecord can't be nil")
 	}
 
-	if chatRecord == nil {
-		chatRecord = &business.ChatRecord{}
+	updatedChatRecord = t.copyInputIfNeeded(chatRecord)
+
+	updatedChatRecord.MsgId = wecomRecord.MsgID
+	updatedChatRecord.MsgTime = time.UnixMilli(wecomRecord.MsgTime)
+	updatedChatRecord.Action = wecomRecord.Action
+	updatedChatRecord.MsgType = wecomRecord.MsgType
+	updatedChatRecord.RoomId = wecomRecord.RoomID
+
+	return updatedChatRecord, nil
+}
+
+func (t *BasicFieldTransformer) copyInputIfNeeded(chatRecord *business.ChatRecord) *business.ChatRecord {
+	updatedChatRecord := &business.ChatRecord{}
+	if chatRecord != nil {
+		*updatedChatRecord = *chatRecord
 	}
-
-	chatRecord.MsgId = wecomRecord.MsgID
-	chatRecord.MsgTime = time.UnixMilli(wecomRecord.MsgTime)
-	chatRecord.Action = wecomRecord.Action
-	chatRecord.MsgType = wecomRecord.MsgType
-	chatRecord.RoomId = wecomRecord.RoomID
-
-	return chatRecord, nil
+	return updatedChatRecord
 }

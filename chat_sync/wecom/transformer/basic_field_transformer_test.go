@@ -47,3 +47,43 @@ func TestBasicFieldTransformer_Transform_wecomRecordCantBeNil(t *testing.T) {
 		assert.Nil(t, chatRecord)
 	}
 }
+
+func TestBasicFieldTransformer_Transform_dontChangeInputs(t *testing.T) {
+	// Given
+	transformer := NewBasicFieldTransformer()
+	wecomRecord := &wecom.ChatRecord{
+		MsgID:   "::whatever msg id::",
+		MsgTime: 12345579,
+		Action:  "::whatever action::",
+		MsgType: "::whatever msg type::",
+		RoomID:  "::whatever room id::",
+	}
+	chatRecord := &business.ChatRecord{
+		MsgId:   "::whatever msg id can't be changed::",
+		MsgTime: time.UnixMilli(9876543),
+		Action:  "::whatever action  can't be changed::",
+		MsgType: "::whatever msg type  can't be changed::",
+		RoomId:  "::whatever room id  can't be changed::",
+	}
+	expectedChatRecord := &business.ChatRecord{
+		MsgId:   "::whatever msg id::",
+		MsgTime: time.UnixMilli(12345579),
+		Action:  "::whatever action::",
+		MsgType: "::whatever msg type::",
+		RoomId:  "::whatever room id::",
+	}
+
+	// When
+	updatedChatRecord, err := transformer.Transform(wecomRecord, chatRecord)
+
+	// Then
+	if assert.NoError(t, err) {
+		assert.Equal(t, expectedChatRecord, updatedChatRecord)
+
+		assert.Equal(t, "::whatever msg id can't be changed::", chatRecord.MsgId)
+		assert.Equal(t, time.UnixMilli(9876543), chatRecord.MsgTime)
+		assert.Equal(t, "::whatever action  can't be changed::", chatRecord.Action)
+		assert.Equal(t, "::whatever msg type  can't be changed::", chatRecord.MsgType)
+		assert.Equal(t, "::whatever room id  can't be changed::", chatRecord.RoomId)
+	}
+}
