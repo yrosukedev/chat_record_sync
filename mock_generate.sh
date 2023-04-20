@@ -35,3 +35,6 @@ mockgen -source logger/logger.go -package openapi -destination chat_sync/wecom/o
 
 # package: chat_sync/bitable_storage/pagination
 mockgen -source logger/logger.go -package pagination -destination chat_sync/bitable_storage/pagination/mock_logger.go
+
+# package: chat_sync/wecom/transformer
+mockgen -source chat_sync/wecom/open_api_service.go -package transformer -destination chat_sync/wecom/transformer/mock_open_api_service.go
