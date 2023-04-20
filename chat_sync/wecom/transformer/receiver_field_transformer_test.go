@@ -53,3 +53,38 @@ func TestReceiverFieldTransformer_Transform_wecomRecordCantBeNil(t *testing.T) {
 		assert.Nil(t, chatRecord)
 	}
 }
+
+func TestReceiverFieldTransformer_Transform_dontChangeInputs(t *testing.T) {
+	// Given
+	ctrl := gomock.NewController(t)
+	openAPIService := NewMockOpenAPIService(ctrl)
+	transformer := NewReceiverFieldTransformer(openAPIService)
+	wecomRecord := &wecom.ChatRecord{
+		ToList: []string{"123"},
+	}
+	chatRecord := &business.ChatRecord{}
+	expectedChatRecord := &business.ChatRecord{
+		To: []*business.User{
+			{
+				UserId: "123",
+				Name:   "haary",
+			},
+		},
+	}
+
+	openAPIService.EXPECT().GetExternalContactByID(gomock.Eq("123")).Return(&wecom.ExternalContact{
+		ExternalUserID: "123",
+		Name:           "haary",
+	}, nil).Times(1)
+
+	// When
+	updatedChatRecord, err := transformer.Transform(wecomRecord, chatRecord)
+
+	// Then
+	if assert.NoError(t, err) {
+		assert.Equal(t, expectedChatRecord, updatedChatRecord)
+
+		// Make sure the original chat record is not changed
+		assert.Equal(t, chatRecord, &business.ChatRecord{})
+	}
+}
