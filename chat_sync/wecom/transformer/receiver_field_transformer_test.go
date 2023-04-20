@@ -88,3 +88,20 @@ func TestReceiverFieldTransformer_Transform_dontChangeInputs(t *testing.T) {
 		assert.Equal(t, chatRecord, &business.ChatRecord{})
 	}
 }
+
+func TestReceiverFieldTransformer_Transform_zeroReceiver(t *testing.T) {
+	// Given
+	ctrl := gomock.NewController(t)
+	openAPIService := NewMockOpenAPIService(ctrl)
+	transformer := NewReceiverFieldTransformer(openAPIService)
+	wecomRecord := &wecom.ChatRecord{}
+	expectedChatRecord := &business.ChatRecord{}
+
+	// When
+	chatRecord, err := transformer.Transform(wecomRecord, nil)
+
+	// Then
+	if assert.NoError(t, err) {
+		assert.Equal(t, expectedChatRecord, chatRecord)
+	}
+}
