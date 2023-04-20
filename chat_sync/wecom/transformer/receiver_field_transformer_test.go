@@ -196,3 +196,42 @@ func TestReceiverFieldTransformer_Transform_partialFailure(t *testing.T) {
 		assert.Equal(t, expectedChatRecord, chatRecord)
 	}
 }
+
+func TestReceiverFieldTransformer_Transform_fullFailure(t *testing.T) {
+	// if all the receivers are failed to be fetched,
+	// the contact's name should be fall back to the empty value
+
+	// Given
+	ctrl := gomock.NewController(t)
+	openAPIService := NewMockOpenAPIService(ctrl)
+	transformer := NewReceiverFieldTransformer(openAPIService)
+	wecomRecord := &wecom.ChatRecord{
+		ToList: []string{"123", "456", "789"},
+	}
+	expectedChatRecord := &business.ChatRecord{
+		To: []*business.User{
+			{
+				UserId: "123",
+			},
+			{
+				UserId: "456",
+			},
+			{
+				UserId: "789",
+			},
+		},
+	}
+
+	openAPIService.EXPECT().GetExternalContactByID(gomock.Eq("123")).Return(nil, io.ErrClosedPipe).Times(1)
+	openAPIService.EXPECT().GetExternalContactByID(gomock.Eq("456")).Return(nil, io.ErrClosedPipe).Times(1)
+	openAPIService.EXPECT().GetExternalContactByID(gomock.Eq("789")).Return(nil, io.ErrClosedPipe).Times(1)
+
+	// When
+	chatRecord, err := transformer.Transform(wecomRecord, nil)
+
+	// Then
+	if assert.NoError(t, err) {
+		assert.Equal(t, expectedChatRecord, chatRecord)
+	}
+}
+
