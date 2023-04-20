@@ -36,3 +36,18 @@ func TestSenderFieldTransformer_Transform_nilChatRecord(t *testing.T) {
 		assert.Equal(t, expectedChatRecord, chatRecord)
 	}
 }
+
+func TestSenderFieldTransformer_Transform_wecomRecordCantBeNil(t *testing.T) {
+	// Given
+	ctrl := gomock.NewController(t)
+	openAPIService := NewMockOpenAPIService(ctrl)
+	transformer := NewSenderFieldTransformer(openAPIService)
+
+	// When
+	chatRecord, err := transformer.Transform(nil, &business.ChatRecord{})
+
+	// Then
+	if assert.Error(t, err) {
+		assert.Nil(t, chatRecord)
+	}
+}
