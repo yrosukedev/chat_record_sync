@@ -5,6 +5,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/business"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/wecom"
+	"io"
 	"testing"
 )
 
@@ -139,6 +140,49 @@ func TestReceiverFieldTransformer_Transform_manyReceivers(t *testing.T) {
 		ExternalUserID: "456",
 		Name:           "lucy",
 	}, nil).Times(1)
+	openAPIService.EXPECT().GetExternalContactByID(gomock.Eq("789")).Return(&wecom.ExternalContact{
+		ExternalUserID: "789",
+		Name:           "lily",
+	}, nil).Times(1)
+
+	// When
+	chatRecord, err := transformer.Transform(wecomRecord, nil)
+
+	// Then
+	if assert.NoError(t, err) {
+		assert.Equal(t, expectedChatRecord, chatRecord)
+	}
+}
+
+func TestReceiverFieldTransformer_Transform_partialFailure(t *testing.T) {
+	// Given
+	ctrl := gomock.NewController(t)
+	openAPIService := NewMockOpenAPIService(ctrl)
+	transformer := NewReceiverFieldTransformer(openAPIService)
+	wecomRecord := &wecom.ChatRecord{
+		ToList: []string{"123", "456", "789"},
+	}
+	expectedChatRecord := &business.ChatRecord{
+		To: []*business.User{
+			{
+				UserId: "123",
+				Name:   "haary",
+			},
+			{
+				UserId: "456",
+			},
+			{
+				UserId: "789",
+				Name:   "lily",
+			},
+		},
+	}
+
+	openAPIService.EXPECT().GetExternalContactByID(gomock.Eq("123")).Return(&wecom.ExternalContact{
+		ExternalUserID: "123",
+		Name:           "haary",
+	}, nil).Times(1)
+	openAPIService.EXPECT().GetExternalContactByID(gomock.Eq("456")).Return(nil, io.ErrClosedPipe).Times(1)
 	openAPIService.EXPECT().GetExternalContactByID(gomock.Eq("789")).Return(&wecom.ExternalContact{
 		ExternalUserID: "789",
 		Name:           "lily",
