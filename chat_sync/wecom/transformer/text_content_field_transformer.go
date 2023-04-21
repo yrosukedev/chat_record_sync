@@ -2,6 +2,7 @@ package transformer
 
 import (
 	"errors"
+	"fmt"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/business"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/wecom"
 )
@@ -16,6 +17,10 @@ func NewTextContentFieldTransformer() *TextContentFieldTransformer {
 func (t *TextContentFieldTransformer) Transform(wecomRecord *wecom.ChatRecord, chatRecord *business.ChatRecord) (updatedChatRecord *business.ChatRecord, err error) {
 	if wecomRecord == nil {
 		return nil, errors.New("wecomRecord can't be nil")
+	}
+
+	if wecomRecord.MsgType != wecom.MessageTypeText {
+		panic(fmt.Sprintf("wecomRecord.MsgType must be %v", wecom.MessageTypeText))
 	}
 
 	updatedChatRecord = t.copyInputIfNeeded(chatRecord)

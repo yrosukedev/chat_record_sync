@@ -11,6 +11,7 @@ func TestTextContentFieldTransformer_Transform_nilChatRecord(t *testing.T) {
 	// Given
 	transformer := NewTextContentFieldTransformer()
 	wecomRecord := &wecom.ChatRecord{
+		MsgType: "text",
 		Text: &wecom.TextMessage{
 			Content: "Hello, there!",
 		},
@@ -45,6 +46,7 @@ func TestTextContentFieldTransformer_Transform_dontChangeInputs(t *testing.T) {
 	// Given
 	transformer := NewTextContentFieldTransformer()
 	wecomRecord := &wecom.ChatRecord{
+		MsgType: "text",
 		Text: &wecom.TextMessage{
 			Content: "Hello, there!",
 		},
@@ -64,4 +66,23 @@ func TestTextContentFieldTransformer_Transform_dontChangeInputs(t *testing.T) {
 		assert.Equal(t, expectedChatRecord, updatedChatRecord)
 		assert.Equal(t, "::whatever content::", chatRecord.Content)
 	}
+}
+
+func TestTextContentFieldTransformer_Transform_mismatchedMessageType(t *testing.T) {
+	// if the message type is not "text", the transformer should panic.
+
+	// Given
+	transformer := NewTextContentFieldTransformer()
+	wecomRecord := &wecom.ChatRecord{
+		MsgType: "image",
+		Text: &wecom.TextMessage{
+			Content: "Hello, there!",
+		},
+	}
+
+	// Then
+	assert.Panics(t, func() {
+		// When
+		_, _ = transformer.Transform(wecomRecord, nil)
+	})
 }
