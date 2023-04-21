@@ -40,3 +40,28 @@ func TestTextContentFieldTransformer_Transform_wecomRecordCantBeNil(t *testing.T
 		assert.Nil(t, chatRecord)
 	}
 }
+
+func TestTextContentFieldTransformer_Transform_dontChangeInputs(t *testing.T) {
+	// Given
+	transformer := NewTextContentFieldTransformer()
+	wecomRecord := &wecom.ChatRecord{
+		Text: &wecom.TextMessage{
+			Content: "Hello, there!",
+		},
+	}
+	chatRecord := &business.ChatRecord{
+		Content: "::whatever content::",
+	}
+	expectedChatRecord := &business.ChatRecord{
+		Content: "Hello, there!",
+	}
+
+	// When
+	updatedChatRecord, err := transformer.Transform(wecomRecord, chatRecord)
+
+	// Then
+	if assert.NoError(t, err) {
+		assert.Equal(t, expectedChatRecord, updatedChatRecord)
+		assert.Equal(t, "::whatever content::", chatRecord.Content)
+	}
+}
