@@ -18,6 +18,10 @@ func (t *OtherContentFieldTransformer) Transform(wecomRecord *wecom.ChatRecord, 
 		return nil, errors.New("wecomRecord can't be nil")
 	}
 
+	if wecomRecord.OriginMessage == nil {
+		return nil, wecom.NewTransformerEmptyContentError(wecomRecord)
+	}
+
 	updatedChatRecord = t.copyInputIfNeeded(chatRecord)
 
 	updatedChatRecord.Content = string(wecomRecord.OriginMessage)

@@ -65,3 +65,21 @@ func TestOtherContentFieldTransformer_Transform_dontChangeInputs(t *testing.T) {
 		assert.Equal(t, chatRecord.Content, "::whatever content::")
 	}
 }
+
+func TestOtherContentFieldTransformer_Transform_nilOriginMessage(t *testing.T) {
+	// if the OriginMessage is nil, the transformer should return an error
+
+	// Given
+	transformer := NewOtherContentFieldTransformer()
+	wecomRecord := &wecom.ChatRecord{
+		MsgType: "location",
+	}
+
+	// When
+	chatRecord, err := transformer.Transform(wecomRecord, nil)
+
+	// Then
+	if assert.Error(t, err) {
+		assert.Nil(t, chatRecord)
+	}
+}
