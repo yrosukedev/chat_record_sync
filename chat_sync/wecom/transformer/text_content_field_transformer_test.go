@@ -27,3 +27,16 @@ func TestTextContentFieldTransformer_Transform_nilChatRecord(t *testing.T) {
 		assert.Equal(t, expectedChatRecord, chatRecord)
 	}
 }
+
+func TestTextContentFieldTransformer_Transform_wecomRecordCantBeNil(t *testing.T) {
+	// Given
+	transformer := NewTextContentFieldTransformer()
+
+	// When
+	chatRecord, err := transformer.Transform(nil, &business.ChatRecord{})
+
+	// Then
+	if assert.Error(t, err) {
+		assert.Nil(t, chatRecord)
+	}
+}
