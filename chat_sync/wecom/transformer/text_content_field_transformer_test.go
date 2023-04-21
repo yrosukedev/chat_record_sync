@@ -86,3 +86,25 @@ func TestTextContentFieldTransformer_Transform_mismatchedMessageType(t *testing.
 		_, _ = transformer.Transform(wecomRecord, nil)
 	})
 }
+
+func TestTextContentFieldTransformer_Transform_nilTextMessage(t *testing.T) {
+	// if the message type is "text", but the Text field is nil, treat it as an empty string.
+
+	// Given
+	transformer := NewTextContentFieldTransformer()
+	wecomRecord := &wecom.ChatRecord{
+		MsgType: "text",
+	}
+	expectedChatRecord := &business.ChatRecord{
+		Content: "",
+	}
+
+	// When
+	chatRecord, err := transformer.Transform(wecomRecord, nil)
+
+	// Then
+	if assert.NoError(t, err) {
+		assert.Equal(t, expectedChatRecord, chatRecord)
+	}
+}
+
