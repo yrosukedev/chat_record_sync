@@ -18,14 +18,19 @@ func NewRecordTransformerFactory(messageTypeToTransformer map[string]FieldTransf
 }
 
 func (r *RecordTransformerFactory) Transform(wecomRecord *wecom.ChatRecord) (chatRecord *business.ChatRecord, err error) {
+	transformer := r.transformerFor(wecomRecord)
+	return transformer.Transform(wecomRecord, nil)
+}
+
+func (r *RecordTransformerFactory) transformerFor(wecomRecord *wecom.ChatRecord) (transformer FieldTransformer) {
 	if r.messageTypeToTransformer == nil {
-		return nil, nil
+		return r.defaultTransformer
 	}
 
 	transformer, ok := r.messageTypeToTransformer[wecomRecord.MsgType]
 	if !ok {
-		transformer = r.defaultTransformer
+		return r.defaultTransformer
 	}
 
-	return transformer.Transform(wecomRecord, nil)
+	return transformer
 }

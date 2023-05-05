@@ -81,3 +81,25 @@ func TestRecordTransformerFactory_Transform_TransformerFoundForMessageType(t *te
 		assert.Equal(t, expectedChatRecord, chatRecord)
 	}
 }
+
+func TestRecordTransformerFactory_Transform_TransformersMappingIsEmpty(t *testing.T) {
+	// if the transformers mapping is empty, the default transformer should be used.
+	// only the default transformer should be mocked.
+
+	// Given
+	ctrl := gomock.NewController(t)
+	defaultTransformer := NewMockFieldTransformer(ctrl)
+	factory := NewRecordTransformerFactory(nil, defaultTransformer)
+	wecomRecord := &wecom.ChatRecord{}
+	expectedChatRecord := &business.ChatRecord{}
+
+	defaultTransformer.EXPECT().Transform(gomock.Eq(wecomRecord), gomock.Nil()).Return(expectedChatRecord, nil).Times(1)
+
+	// When
+	chatRecord, err := factory.Transform(wecomRecord)
+
+	// Then
+	if assert.NoError(t, err) {
+		assert.Equal(t, expectedChatRecord, chatRecord)
+	}
+}
