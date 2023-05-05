@@ -11,6 +11,10 @@ type RecordTransformerFactory struct {
 }
 
 func NewRecordTransformerFactory(messageTypeToTransformer map[string]FieldTransformer, defaultTransformer FieldTransformer) *RecordTransformerFactory {
+	if defaultTransformer == nil {
+		panic("defaultTransformer can't be nil")
+	}
+
 	return &RecordTransformerFactory{
 		messageTypeToTransformer: messageTypeToTransformer,
 		defaultTransformer:       defaultTransformer,

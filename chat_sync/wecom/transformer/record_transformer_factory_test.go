@@ -103,3 +103,15 @@ func TestRecordTransformerFactory_Transform_TransformersMappingIsEmpty(t *testin
 		assert.Equal(t, expectedChatRecord, chatRecord)
 	}
 }
+
+func TestRecordTransformerFactory_Transform_DefaultTransformerCantBeNil(t *testing.T) {
+	// if the default transformer is nil, the factory constructor should panic.
+	// we should use assert library to check if the constructor panics.
+
+	// Then
+	assert.Panics(t, func() {
+		// Given
+		// When
+		NewRecordTransformerFactory(nil, nil)
+	})
+}
