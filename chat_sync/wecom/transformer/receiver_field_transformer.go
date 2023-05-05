@@ -7,10 +7,10 @@ import (
 )
 
 type ReceiverFieldTransformer struct {
-	openAPIService wecom.OpenAPIService
+	openAPIService OpenAPIService
 }
 
-func NewReceiverFieldTransformer(openAPIService wecom.OpenAPIService) *ReceiverFieldTransformer {
+func NewReceiverFieldTransformer(openAPIService OpenAPIService) *ReceiverFieldTransformer {
 	return &ReceiverFieldTransformer{
 		openAPIService: openAPIService,
 	}
@@ -45,7 +45,7 @@ func (t *ReceiverFieldTransformer) Transform(wecomRecord *wecom.ChatRecord, chat
 
 		updatedChatRecord.To = append(updatedChatRecord.To, user)
 	}
-	
+
 	return updatedChatRecord, nil
 }
 

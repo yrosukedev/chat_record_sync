@@ -7,10 +7,10 @@ import (
 )
 
 type SenderFieldTransformer struct {
-	openAPIService wecom.OpenAPIService
+	openAPIService OpenAPIService
 }
 
-func NewSenderFieldTransformer(openAPIService wecom.OpenAPIService) *SenderFieldTransformer {
+func NewSenderFieldTransformer(openAPIService OpenAPIService) *SenderFieldTransformer {
 	return &SenderFieldTransformer{
 		openAPIService: openAPIService,
 	}

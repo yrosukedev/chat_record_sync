@@ -3,10 +3,10 @@ package transformer
 import "github.com/yrosukedev/chat_record_sync/chat_sync/wecom"
 
 type RecordTransformerBuilder struct {
-	openAPIService wecom.OpenAPIService
+	openAPIService OpenAPIService
 }
 
-func NewRecordTransformerBuilder(openAPIService wecom.OpenAPIService) *RecordTransformerBuilder {
+func NewRecordTransformerBuilder(openAPIService OpenAPIService) *RecordTransformerBuilder {
 	return &RecordTransformerBuilder{
 		openAPIService: openAPIService,
 	}

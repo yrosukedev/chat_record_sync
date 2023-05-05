@@ -38,11 +38,7 @@ func RunCLIApp(ctx context.Context) error {
 			pagination.NewBatchReaderAdapter(
 				wecom_chat2.NewPaginatedReaderAdapter(
 					chat_record_service.NewAdapter(ctx, client, "", "", config.WeComChatRecordSDKTimeout, logger),
-					nil,
-					transformer.NewWeComMessageTransformerFactory(map[string]wecom_chat2.ChatRecordTransformer{
-						wecom_chat2.MessageTypeText: transformer.NewWeComTextMessageTransformer(ctx, logger),
-					},
-						transformer.NewWeComDefaultMessageTransformer(ctx, logger))),
+					transformer.NewRecordTransformerBuilder(nil).Build()),
 				pagination2.NewStorageAdapter(ctx, larkClient, "DLSbbQIcEa0KyIsetHWcg3PDnNh", "tblLJY5YSoEkV3G3", logger),
 				pageSize)),
 		retry.NewWriterAdapter(

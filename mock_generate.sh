@@ -11,9 +11,8 @@ mockgen -source chat_sync/reader/buffer/batch_reader.go -package buffer -destina
 
 # package: chat_sync/wecom
 mockgen -source chat_sync/wecom/chat_record_service.go -package wecom -destination chat_sync/wecom/mock_chat_record_service.go
-mockgen -source chat_sync/wecom/open_api_service.go -package wecom -destination chat_sync/wecom/mock_open_api_service.go
 mockgen -source logger/logger.go -package wecom -destination chat_sync/wecom/mock_logger.go
-mockgen -source chat_sync/wecom/chat_record_transformer.go -package wecom -destination chat_sync/wecom/mock_chat_record_transformer.go
+mockgen -source chat_sync/wecom/record_transformer.go -package wecom -destination chat_sync/wecom/mock_record_transformer.go
 
 # package: chat_sync/http_controller
 mockgen -source chat_sync/use_case/use_case.go -package http_controller -destination chat_sync/http_controller/mock_use_case.go
@@ -37,5 +36,5 @@ mockgen -source logger/logger.go -package openapi -destination chat_sync/wecom/o
 mockgen -source logger/logger.go -package pagination -destination chat_sync/bitable_storage/pagination/mock_logger.go
 
 # package: chat_sync/wecom/transformer
-mockgen -source chat_sync/wecom/open_api_service.go -package transformer -destination chat_sync/wecom/transformer/mock_open_api_service.go
+mockgen -source chat_sync/wecom/transformer/open_api_service.go -package transformer -destination chat_sync/wecom/transformer/mock_open_api_service.go
 mockgen -source chat_sync/wecom/transformer/field_transformer.go -package transformer -destination chat_sync/wecom/transformer/mock_field_transformer.go

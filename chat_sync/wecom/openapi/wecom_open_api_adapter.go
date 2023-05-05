@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/xen0n/go-workwx"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/wecom"
+	"github.com/yrosukedev/chat_record_sync/chat_sync/wecom/transformer"
 	"github.com/yrosukedev/chat_record_sync/logger"
 )
 
@@ -13,7 +14,7 @@ type Adapter struct {
 	logger   logger.Logger
 }
 
-func NewAdapter(ctx context.Context, wecomApp *workwx.WorkwxApp, logger logger.Logger) wecom.OpenAPIService {
+func NewAdapter(ctx context.Context, wecomApp *workwx.WorkwxApp, logger logger.Logger) transformer.OpenAPIService {
 	wecomApp.SpawnAccessTokenRefresher()
 	return &Adapter{
 		ctx:      ctx,

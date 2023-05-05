@@ -26,8 +26,7 @@ func (f *HTTPApp) createChatSyncUseCase(ctx context.Context) use_case.UseCase {
 			pagination.NewBatchReaderAdapter(
 				wecom.NewPaginatedReaderAdapter(
 					chat_record_service.NewAdapter(ctx, f.wecomClient, "", "", config.WeComChatRecordSDKTimeout, f.logger),
-					nil,
-					f.chatRecordTransformer(ctx)),
+					transformer.NewRecordTransformerBuilder(nil).Build()),
 				pagination_storage.NewStorageAdapter(ctx, f.larkClient, config.PaginationStorageBitableAppToken, config.PaginationStorageBitableTableId, f.logger),
 				config.PaginatedReaderPageSize)),
 		retry.NewWriterAdapter(
@@ -35,14 +34,4 @@ func (f *HTTPApp) createChatSyncUseCase(ctx context.Context) use_case.UseCase {
 	)
 
 	return useCase
-}
-
-func (f *HTTPApp) chatRecordTransformer(ctx context.Context) wecom.ChatRecordTransformer {
-	messageTypeToTransformers := map[string]wecom.ChatRecordTransformer{
-		wecom.MessageTypeText: transformer.NewWeComTextMessageTransformer(ctx, f.logger),
-	}
-
-	defaultTransformer := transformer.NewWeComDefaultMessageTransformer(ctx, f.logger)
-
-	return transformer.NewWeComMessageTransformerFactory(messageTypeToTransformers, defaultTransformer)
 }
