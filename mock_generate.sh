@@ -38,3 +38,4 @@ mockgen -source logger/logger.go -package pagination -destination chat_sync/bita
 
 # package: chat_sync/wecom/transformer
 mockgen -source chat_sync/wecom/open_api_service.go -package transformer -destination chat_sync/wecom/transformer/mock_open_api_service.go
+mockgen -source chat_sync/wecom/transformer/field_transformer.go -package transformer -destination chat_sync/wecom/transformer/mock_field_transformer.go

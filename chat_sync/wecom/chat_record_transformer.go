@@ -7,3 +7,7 @@ import (
 type ChatRecordTransformer interface {
 	Transform(wecomChatRecord *ChatRecord, userInfo *UserInfo, externalContacts []*ExternalContact) (record *business.ChatRecord, err error)
 }
+
+type RecordTransformer interface {
+	Transform(wecomRecord *ChatRecord) (chatRecord *business.ChatRecord, err error)
+}

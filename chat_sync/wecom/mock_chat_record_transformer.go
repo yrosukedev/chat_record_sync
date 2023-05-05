@@ -48,3 +48,41 @@ func (mr *MockChatRecordTransformerMockRecorder) Transform(wecomChatRecord, user
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Transform", reflect.TypeOf((*MockChatRecordTransformer)(nil).Transform), wecomChatRecord, userInfo, externalContacts)
 }
+
+// MockRecordTransformer is a mock of RecordTransformer interface.
+type MockRecordTransformer struct {
+	ctrl     *gomock.Controller
+	recorder *MockRecordTransformerMockRecorder
+}
+
+// MockRecordTransformerMockRecorder is the mock recorder for MockRecordTransformer.
+type MockRecordTransformerMockRecorder struct {
+	mock *MockRecordTransformer
+}
+
+// NewMockRecordTransformer creates a new mock instance.
+func NewMockRecordTransformer(ctrl *gomock.Controller) *MockRecordTransformer {
+	mock := &MockRecordTransformer{ctrl: ctrl}
+	mock.recorder = &MockRecordTransformerMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockRecordTransformer) EXPECT() *MockRecordTransformerMockRecorder {
+	return m.recorder
+}
+
+// Transform mocks base method.
+func (m *MockRecordTransformer) Transform(wecomRecord *ChatRecord) (*business.ChatRecord, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Transform", wecomRecord)
+	ret0, _ := ret[0].(*business.ChatRecord)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Transform indicates an expected call of Transform.
+func (mr *MockRecordTransformerMockRecorder) Transform(wecomRecord interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Transform", reflect.TypeOf((*MockRecordTransformer)(nil).Transform), wecomRecord)
+}
