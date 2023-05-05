@@ -13,20 +13,44 @@ func NewRecordTransformerBuilder(openAPIService wecom.OpenAPIService) *RecordTra
 }
 
 func (b *RecordTransformerBuilder) Build() wecom.RecordTransformer {
-	defaultTransformer := NewFieldTransformerCollection([]FieldTransformer{
-		NewBasicFieldTransformer(),
-		NewSenderFieldTransformer(b.openAPIService),
-		NewReceiverFieldTransformer(b.openAPIService),
-		NewOtherContentFieldTransformer(),
-	})
-	textMessageTransformer := NewFieldTransformerCollection([]FieldTransformer{
+	messageTypeToTransformer := map[string]FieldTransformer{
+		wecom.MessageTypeText: b.textMessageTransformer(),
+	}
+	return NewRecordTransformerFactory(messageTypeToTransformer, b.defaultTransformer())
+}
+
+func (b *RecordTransformerBuilder) textMessageTransformer() *FieldTransformerCollection {
+	// if openAPIService is nil, the sender and receiver field transformers will be excluded
+
+	if b.openAPIService == nil {
+		return NewFieldTransformerCollection([]FieldTransformer{
+			NewBasicFieldTransformer(),
+			NewTextContentFieldTransformer(),
+		})
+	}
+
+	return NewFieldTransformerCollection([]FieldTransformer{
 		NewBasicFieldTransformer(),
 		NewSenderFieldTransformer(b.openAPIService),
 		NewReceiverFieldTransformer(b.openAPIService),
 		NewTextContentFieldTransformer(),
 	})
-	messageTypeToTransformer := map[string]FieldTransformer{
-		wecom.MessageTypeText: textMessageTransformer,
+}
+
+func (b *RecordTransformerBuilder) defaultTransformer() *FieldTransformerCollection {
+	// if openAPIService is nil, the sender and receiver field transformers will be excluded
+
+	if b.openAPIService == nil {
+		return NewFieldTransformerCollection([]FieldTransformer{
+			NewBasicFieldTransformer(),
+			NewOtherContentFieldTransformer(),
+		})
 	}
-	return NewRecordTransformerFactory(messageTypeToTransformer, defaultTransformer)
+
+	return NewFieldTransformerCollection([]FieldTransformer{
+		NewBasicFieldTransformer(),
+		NewSenderFieldTransformer(b.openAPIService),
+		NewReceiverFieldTransformer(b.openAPIService),
+		NewOtherContentFieldTransformer(),
+	})
 }
