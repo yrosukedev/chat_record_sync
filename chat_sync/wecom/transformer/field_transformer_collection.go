@@ -22,9 +22,9 @@ func (c *FieldTransformerCollection) Transform(wecomRecord *wecom.ChatRecord, ch
 
 	updatedChatRecord = chatRecord
 	for _, transformer := range c.transformers {
-		updatedChatRecord, err = transformer.Transform(wecomRecord, updatedChatRecord)
-		if err != nil {
-			return nil, err
+		tmpChatRecord, err := transformer.Transform(wecomRecord, updatedChatRecord)
+		if err == nil {
+			updatedChatRecord = tmpChatRecord
 		}
 	}
 
