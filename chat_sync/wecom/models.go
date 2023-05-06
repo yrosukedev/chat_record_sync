@@ -47,3 +47,13 @@ type VideoMessage struct {
 	PlayLength uint32 `json:"play_length,omitempty"`
 	Md5Sum     string `json:"md5sum,omitempty"`
 }
+
+type ExternalContact struct {
+	ExternalUserID string
+	Name           string
+}
+
+type UserInfo struct {
+	UserID string
+	Name   string
+}
