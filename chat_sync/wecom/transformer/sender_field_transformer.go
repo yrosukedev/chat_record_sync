@@ -27,7 +27,11 @@ func (t *SenderFieldTransformer) Transform(wecomRecord *wecom.ChatRecord, chatRe
 
 	// fatal tolerated
 	// logging is done in openAPIService
-	if err == nil {
+	if err != nil {
+		updatedChatRecord.From = &business.User{
+			UserId: wecomRecord.From,
+		}
+	} else {
 		updatedChatRecord.From = &business.User{
 			UserId: user.UserID,
 			Name:   user.Name,

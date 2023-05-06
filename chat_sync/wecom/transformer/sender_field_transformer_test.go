@@ -99,10 +99,10 @@ func TestSenderFieldTransformer_Transform_TolerateError(t *testing.T) {
 	wecomRecord := &wecom.ChatRecord{
 		From: "123",
 	}
-	chatRecord := &business.ChatRecord{
+	chatRecord := &business.ChatRecord{}
+	expectedChatRecord := &business.ChatRecord{
 		From: &business.User{
-			UserId: "::whatever user id::",
-			Name:   "::whatever user name::",
+			UserId: "123",
 		},
 	}
 
@@ -113,6 +113,6 @@ func TestSenderFieldTransformer_Transform_TolerateError(t *testing.T) {
 
 	// Then
 	if assert.NoError(t, err) {
-		assert.Equal(t, updatedChatRecord, chatRecord)
+		assert.Equal(t, expectedChatRecord, updatedChatRecord)
 	}
 }
