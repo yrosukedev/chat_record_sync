@@ -10,6 +10,7 @@ import (
 	"github.com/yrosukedev/chat_record_sync/chat_sync/use_case"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/wecom"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/wecom/chat_record_service"
+	"github.com/yrosukedev/chat_record_sync/chat_sync/wecom/openapi"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/wecom/transformer"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/writer/retry"
 	"github.com/yrosukedev/chat_record_sync/config"
@@ -26,7 +27,8 @@ func (f *HTTPApp) createChatSyncUseCase(ctx context.Context) use_case.UseCase {
 			pagination.NewBatchReaderAdapter(
 				wecom.NewPaginatedReaderAdapter(
 					chat_record_service.NewAdapter(ctx, f.wecomClient, "", "", config.WeComChatRecordSDKTimeout, f.logger),
-					transformer.NewRecordTransformerBuilder(nil).Build()),
+					transformer.NewRecordTransformerBuilder(
+						openapi.NewAdapter(ctx, f.wecomApp, f.logger)).Build()),
 				pagination_storage.NewStorageAdapter(ctx, f.larkClient, config.PaginationStorageBitableAppToken, config.PaginationStorageBitableTableId, f.logger),
 				config.PaginatedReaderPageSize)),
 		retry.NewWriterAdapter(

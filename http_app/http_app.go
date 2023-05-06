@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	lark "github.com/larksuite/oapi-sdk-go/v3"
+	"github.com/xen0n/go-workwx"
 	"github.com/yrosukedev/WeWorkFinanceSDK"
 	"github.com/yrosukedev/chat_record_sync/config"
 	logproxy "github.com/yrosukedev/chat_record_sync/logger/proxy"
@@ -16,6 +17,7 @@ type HTTPApp struct {
 	larkClient  *lark.Client
 	wecomConfig config.WeComConfig
 	wecomClient WeWorkFinanceSDK.Client
+	wecomApp    *workwx.WorkwxApp
 	logger      log.Logger
 }
 
@@ -36,10 +38,13 @@ func NewHTTPApp(ctx context.Context) *HTTPApp {
 	}
 	logger.Info(ctx, "[http app] wecom client created")
 
+	wecomApp := workwx.New(weComConfig.CorpID).WithApp(weComConfig.AgentSecret, weComConfig.AgentID)
+
 	httpApp := &HTTPApp{
 		larkClient:  larkClient,
 		wecomConfig: weComConfig,
 		wecomClient: wecomClient,
+		wecomApp:    wecomApp,
 		logger:      logger,
 	}
 

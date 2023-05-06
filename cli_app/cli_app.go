@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	lark "github.com/larksuite/oapi-sdk-go/v3"
+	"github.com/xen0n/go-workwx"
 	"github.com/yrosukedev/WeWorkFinanceSDK"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/bitable_storage/chat_record"
 	pagination2 "github.com/yrosukedev/chat_record_sync/chat_sync/bitable_storage/pagination"
@@ -12,6 +13,7 @@ import (
 	"github.com/yrosukedev/chat_record_sync/chat_sync/use_case"
 	wecom_chat2 "github.com/yrosukedev/chat_record_sync/chat_sync/wecom"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/wecom/chat_record_service"
+	"github.com/yrosukedev/chat_record_sync/chat_sync/wecom/openapi"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/wecom/transformer"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/writer/retry"
 	"github.com/yrosukedev/chat_record_sync/config"
@@ -29,7 +31,7 @@ func RunCLIApp(ctx context.Context) error {
 		return err
 	}
 
-	pageSize := uint64(10)
+	wecomApp := workwx.New(weComConfig.CorpID).WithApp(weComConfig.AgentSecret, weComConfig.AgentID)
 
 	logger := logproxy.NewLoggerProxy(config.HttpAppLogLevel, logproxy.NewDefaultLogger())
 
@@ -38,11 +40,12 @@ func RunCLIApp(ctx context.Context) error {
 			pagination.NewBatchReaderAdapter(
 				wecom_chat2.NewPaginatedReaderAdapter(
 					chat_record_service.NewAdapter(ctx, client, "", "", config.WeComChatRecordSDKTimeout, logger),
-					transformer.NewRecordTransformerBuilder(nil).Build()),
-				pagination2.NewStorageAdapter(ctx, larkClient, "DLSbbQIcEa0KyIsetHWcg3PDnNh", "tblLJY5YSoEkV3G3", logger),
-				pageSize)),
+					transformer.NewRecordTransformerBuilder(
+						openapi.NewAdapter(ctx, wecomApp, logger)).Build()),
+				pagination2.NewStorageAdapter(ctx, larkClient, config.PaginationStorageBitableAppToken, config.PaginationStorageBitableTableId, logger),
+				config.PaginatedReaderPageSize)),
 		retry.NewWriterAdapter(
-			chat_record.NewStorageAdapter(ctx, larkClient, "QCBrbzgx4aKRAis9eewcV731n7d", "tblIk692K5LXte8x", logger)),
+			chat_record.NewStorageAdapter(ctx, larkClient, config.ChatStorageBitableAppToken, config.ChatStorageBitableTableId, logger)),
 	)
 
 	// When
