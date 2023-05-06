@@ -89,7 +89,7 @@ func (c *StorageAdapter) tableFieldsFrom(chatRecord *business.ChatRecord) map[st
 		consts.BitableFieldAction:  chatRecord.Action,
 		consts.BitableFieldFrom:    userToTableField(chatRecord.From),
 		consts.BitableFieldTo:      usersToTableField(chatRecord.To),
-		consts.BitableFieldRoomId:  chatRecord.RoomId,
+		consts.BitableFieldRoomId:  chatRecord.Room.RoomId,
 		consts.BitableFieldMsgTime: chatRecord.MsgTime.UnixMilli(),
 		consts.BitableFieldMsgType: chatRecord.MsgType,
 		consts.BitableFieldContent: chatRecord.Content,

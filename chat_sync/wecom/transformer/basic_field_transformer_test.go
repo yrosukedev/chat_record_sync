@@ -23,7 +23,9 @@ func TestBasicFieldTransformer_Transform_nilChatRecord(t *testing.T) {
 		MsgTime: time.UnixMilli(12345579),
 		Action:  "::whatever action::",
 		MsgType: "::whatever msg type::",
-		RoomId:  "::whatever room id::",
+		Room: &business.Room{
+			RoomId: "::whatever room id::",
+		},
 	}
 
 	// When
@@ -63,14 +65,18 @@ func TestBasicFieldTransformer_Transform_dontChangeInputs(t *testing.T) {
 		MsgTime: time.UnixMilli(9876543),
 		Action:  "::whatever action  can't be changed::",
 		MsgType: "::whatever msg type  can't be changed::",
-		RoomId:  "::whatever room id  can't be changed::",
+		Room: &business.Room{
+			RoomId: "::whatever room id can't be changed::",
+		},
 	}
 	expectedChatRecord := &business.ChatRecord{
 		MsgId:   "::whatever msg id::",
 		MsgTime: time.UnixMilli(12345579),
 		Action:  "::whatever action::",
 		MsgType: "::whatever msg type::",
-		RoomId:  "::whatever room id::",
+		Room: &business.Room{
+			RoomId: "::whatever room id::",
+		},
 	}
 
 	// When
@@ -84,6 +90,6 @@ func TestBasicFieldTransformer_Transform_dontChangeInputs(t *testing.T) {
 		assert.Equal(t, time.UnixMilli(9876543), chatRecord.MsgTime)
 		assert.Equal(t, "::whatever action  can't be changed::", chatRecord.Action)
 		assert.Equal(t, "::whatever msg type  can't be changed::", chatRecord.MsgType)
-		assert.Equal(t, "::whatever room id  can't be changed::", chatRecord.RoomId)
+		assert.Equal(t, "::whatever room id can't be changed::", chatRecord.Room.RoomId)
 	}
 }

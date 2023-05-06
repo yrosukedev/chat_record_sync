@@ -25,7 +25,9 @@ func (t *BasicFieldTransformer) Transform(wecomRecord *wecom.ChatRecord, chatRec
 	updatedChatRecord.MsgTime = time.UnixMilli(wecomRecord.MsgTime)
 	updatedChatRecord.Action = wecomRecord.Action
 	updatedChatRecord.MsgType = wecomRecord.MsgType
-	updatedChatRecord.RoomId = wecomRecord.RoomID
+	updatedChatRecord.Room = &business.Room{
+		RoomId: wecomRecord.RoomID,
+	}
 
 	return updatedChatRecord, nil
 }

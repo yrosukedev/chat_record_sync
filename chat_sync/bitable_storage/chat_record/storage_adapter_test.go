@@ -45,7 +45,9 @@ func TestWriteSucceeds(t *testing.T) {
 				Name:   "小黄",
 			},
 		},
-		RoomId:  "wmErxtDgAA9AW32YyyuYRimKr7D1KWlw",
+		Room: &business.Room{
+			RoomId: "wmErxtDgAA9AW32YyyuYRimKr7D1KWlw",
+		},
 		MsgTime: time.Date(2023, time.March, 16, 8, 0, 8, 0, time.Local),
 		MsgType: "text",
 		Content: "Let's go take a dinner.",

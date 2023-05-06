@@ -7,7 +7,7 @@ type ChatRecord struct {
 	Action  string
 	From    *User
 	To      []*User
-	RoomId  string
+	Room    *Room
 	MsgTime time.Time
 	MsgType string
 	Content string
@@ -15,5 +15,10 @@ type ChatRecord struct {
 
 type User struct {
 	UserId string
+	Name   string
+}
+
+type Room struct {
+	RoomId string
 	Name   string
 }
