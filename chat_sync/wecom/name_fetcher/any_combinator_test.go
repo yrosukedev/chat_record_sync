@@ -50,3 +50,23 @@ func TestAnyCombinator_FetchName_OneFetcher_Error(t *testing.T) {
 	// Then
 	assert.Error(t, err)
 }
+
+func TestAnyCombinator_FetchName_MultipleFetchers_FirstFetcherFails(t *testing.T) {
+	// Given
+	ctrl := gomock.NewController(t)
+	fetcher1 := NewMockNameFetcher(ctrl)
+	fetcher1.EXPECT().FetchName("123").Return("", io.EOF).Times(1)
+	fetcher2 := NewMockNameFetcher(ctrl)
+	fetcher2.EXPECT().FetchName("123").Return("haary", nil).Times(1)
+	fetcher3 := NewMockNameFetcher(ctrl)
+	fetcher3.EXPECT().FetchName("123").Return("marry", nil).Times(0)
+	combinator := NewAnyCombinator([]transformer.NameFetcher{fetcher1, fetcher2, fetcher3})
+
+	// When
+	name, err := combinator.FetchName("123")
+
+	// Then
+	if assert.NoError(t, err) {
+		assert.Equal(t, "haary", name)
+	}
+}
