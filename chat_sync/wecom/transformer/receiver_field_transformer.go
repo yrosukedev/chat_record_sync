@@ -7,12 +7,12 @@ import (
 )
 
 type ReceiverFieldTransformer struct {
-	openAPIService OpenAPIService
+	nameFetcher NameFetcher
 }
 
-func NewReceiverFieldTransformer(openAPIService OpenAPIService) *ReceiverFieldTransformer {
+func NewReceiverFieldTransformer(nameFetcher NameFetcher) *ReceiverFieldTransformer {
 	return &ReceiverFieldTransformer{
-		openAPIService: openAPIService,
+		nameFetcher: nameFetcher,
 	}
 }
 
@@ -26,20 +26,20 @@ func (t *ReceiverFieldTransformer) Transform(wecomRecord *wecom.ChatRecord, chat
 	// transform each of the receivers in wecomRecord.ToList to business.User by calling openAPIService
 	// and append the result to updatedChatRecord.To
 	// if any error occurs, the contact's name fall back to empty value and continue
-	for _, receiver := range wecomRecord.ToList {
-		contact, err := t.openAPIService.GetExternalContactByID(receiver)
+	for _, receiverId := range wecomRecord.ToList {
+		name, err := t.nameFetcher.FetchName(receiverId)
 
 		var user *business.User
 		if err != nil {
 			// fatal tolerated
 			// logging is done in openAPIService
 			user = &business.User{
-				UserId: receiver,
+				UserId: receiverId,
 			}
 		} else {
 			user = &business.User{
-				UserId: contact.ExternalUserID,
-				Name:   contact.Name,
+				UserId: receiverId,
+				Name:   name,
 			}
 		}
 

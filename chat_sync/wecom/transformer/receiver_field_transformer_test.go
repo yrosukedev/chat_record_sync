@@ -12,8 +12,8 @@ import (
 func TestReceiverFieldTransformer_Transform_nilChatRecord(t *testing.T) {
 	// Given
 	ctrl := gomock.NewController(t)
-	openAPIService := NewMockOpenAPIService(ctrl)
-	transformer := NewReceiverFieldTransformer(openAPIService)
+	nameFetcher := NewMockNameFetcher(ctrl)
+	transformer := NewReceiverFieldTransformer(nameFetcher)
 	wecomRecord := &wecom.ChatRecord{
 		ToList: []string{"123"},
 	}
@@ -26,10 +26,7 @@ func TestReceiverFieldTransformer_Transform_nilChatRecord(t *testing.T) {
 		},
 	}
 
-	openAPIService.EXPECT().GetExternalContactByID(gomock.Eq("123")).Return(&wecom.ExternalContact{
-		ExternalUserID: "123",
-		Name:           "haary",
-	}, nil).Times(1)
+	nameFetcher.EXPECT().FetchName(gomock.Eq("123")).Return("haary", nil).Times(1)
 
 	// When
 	chatRecord, err := transformer.Transform(wecomRecord, nil)
@@ -43,8 +40,8 @@ func TestReceiverFieldTransformer_Transform_nilChatRecord(t *testing.T) {
 func TestReceiverFieldTransformer_Transform_wecomRecordCantBeNil(t *testing.T) {
 	// Given
 	ctrl := gomock.NewController(t)
-	openAPIService := NewMockOpenAPIService(ctrl)
-	transformer := NewReceiverFieldTransformer(openAPIService)
+	nameFetcher := NewMockNameFetcher(ctrl)
+	transformer := NewReceiverFieldTransformer(nameFetcher)
 
 	// When
 	chatRecord, err := transformer.Transform(nil, &business.ChatRecord{})
@@ -58,8 +55,8 @@ func TestReceiverFieldTransformer_Transform_wecomRecordCantBeNil(t *testing.T) {
 func TestReceiverFieldTransformer_Transform_dontChangeInputs(t *testing.T) {
 	// Given
 	ctrl := gomock.NewController(t)
-	openAPIService := NewMockOpenAPIService(ctrl)
-	transformer := NewReceiverFieldTransformer(openAPIService)
+	nameFetcher := NewMockNameFetcher(ctrl)
+	transformer := NewReceiverFieldTransformer(nameFetcher)
 	wecomRecord := &wecom.ChatRecord{
 		ToList: []string{"123"},
 	}
@@ -73,10 +70,7 @@ func TestReceiverFieldTransformer_Transform_dontChangeInputs(t *testing.T) {
 		},
 	}
 
-	openAPIService.EXPECT().GetExternalContactByID(gomock.Eq("123")).Return(&wecom.ExternalContact{
-		ExternalUserID: "123",
-		Name:           "haary",
-	}, nil).Times(1)
+	nameFetcher.EXPECT().FetchName(gomock.Eq("123")).Return("haary", nil).Times(1)
 
 	// When
 	updatedChatRecord, err := transformer.Transform(wecomRecord, chatRecord)
@@ -93,8 +87,8 @@ func TestReceiverFieldTransformer_Transform_dontChangeInputs(t *testing.T) {
 func TestReceiverFieldTransformer_Transform_zeroReceiver(t *testing.T) {
 	// Given
 	ctrl := gomock.NewController(t)
-	openAPIService := NewMockOpenAPIService(ctrl)
-	transformer := NewReceiverFieldTransformer(openAPIService)
+	nameFetcher := NewMockNameFetcher(ctrl)
+	transformer := NewReceiverFieldTransformer(nameFetcher)
 	wecomRecord := &wecom.ChatRecord{}
 	expectedChatRecord := &business.ChatRecord{}
 
@@ -110,8 +104,8 @@ func TestReceiverFieldTransformer_Transform_zeroReceiver(t *testing.T) {
 func TestReceiverFieldTransformer_Transform_manyReceivers(t *testing.T) {
 	// Given
 	ctrl := gomock.NewController(t)
-	openAPIService := NewMockOpenAPIService(ctrl)
-	transformer := NewReceiverFieldTransformer(openAPIService)
+	nameFetcher := NewMockNameFetcher(ctrl)
+	transformer := NewReceiverFieldTransformer(nameFetcher)
 	wecomRecord := &wecom.ChatRecord{
 		ToList: []string{"123", "456", "789"},
 	}
@@ -132,18 +126,9 @@ func TestReceiverFieldTransformer_Transform_manyReceivers(t *testing.T) {
 		},
 	}
 
-	openAPIService.EXPECT().GetExternalContactByID(gomock.Eq("123")).Return(&wecom.ExternalContact{
-		ExternalUserID: "123",
-		Name:           "haary",
-	}, nil).Times(1)
-	openAPIService.EXPECT().GetExternalContactByID(gomock.Eq("456")).Return(&wecom.ExternalContact{
-		ExternalUserID: "456",
-		Name:           "lucy",
-	}, nil).Times(1)
-	openAPIService.EXPECT().GetExternalContactByID(gomock.Eq("789")).Return(&wecom.ExternalContact{
-		ExternalUserID: "789",
-		Name:           "lily",
-	}, nil).Times(1)
+	nameFetcher.EXPECT().FetchName(gomock.Eq("123")).Return("haary", nil).Times(1)
+	nameFetcher.EXPECT().FetchName(gomock.Eq("456")).Return("lucy", nil).Times(1)
+	nameFetcher.EXPECT().FetchName(gomock.Eq("789")).Return("lily", nil).Times(1)
 
 	// When
 	chatRecord, err := transformer.Transform(wecomRecord, nil)
@@ -157,8 +142,8 @@ func TestReceiverFieldTransformer_Transform_manyReceivers(t *testing.T) {
 func TestReceiverFieldTransformer_Transform_partialFailure(t *testing.T) {
 	// Given
 	ctrl := gomock.NewController(t)
-	openAPIService := NewMockOpenAPIService(ctrl)
-	transformer := NewReceiverFieldTransformer(openAPIService)
+	nameFetcher := NewMockNameFetcher(ctrl)
+	transformer := NewReceiverFieldTransformer(nameFetcher)
 	wecomRecord := &wecom.ChatRecord{
 		ToList: []string{"123", "456", "789"},
 	}
@@ -178,15 +163,9 @@ func TestReceiverFieldTransformer_Transform_partialFailure(t *testing.T) {
 		},
 	}
 
-	openAPIService.EXPECT().GetExternalContactByID(gomock.Eq("123")).Return(&wecom.ExternalContact{
-		ExternalUserID: "123",
-		Name:           "haary",
-	}, nil).Times(1)
-	openAPIService.EXPECT().GetExternalContactByID(gomock.Eq("456")).Return(nil, io.ErrClosedPipe).Times(1)
-	openAPIService.EXPECT().GetExternalContactByID(gomock.Eq("789")).Return(&wecom.ExternalContact{
-		ExternalUserID: "789",
-		Name:           "lily",
-	}, nil).Times(1)
+	nameFetcher.EXPECT().FetchName(gomock.Eq("123")).Return("haary", nil).Times(1)
+	nameFetcher.EXPECT().FetchName(gomock.Eq("456")).Return("", io.ErrClosedPipe).Times(1)
+	nameFetcher.EXPECT().FetchName(gomock.Eq("789")).Return("lily", nil).Times(1)
 
 	// When
 	chatRecord, err := transformer.Transform(wecomRecord, nil)
@@ -203,8 +182,8 @@ func TestReceiverFieldTransformer_Transform_fullFailure(t *testing.T) {
 
 	// Given
 	ctrl := gomock.NewController(t)
-	openAPIService := NewMockOpenAPIService(ctrl)
-	transformer := NewReceiverFieldTransformer(openAPIService)
+	nameFetcher := NewMockNameFetcher(ctrl)
+	transformer := NewReceiverFieldTransformer(nameFetcher)
 	wecomRecord := &wecom.ChatRecord{
 		ToList: []string{"123", "456", "789"},
 	}
@@ -222,9 +201,9 @@ func TestReceiverFieldTransformer_Transform_fullFailure(t *testing.T) {
 		},
 	}
 
-	openAPIService.EXPECT().GetExternalContactByID(gomock.Eq("123")).Return(nil, io.ErrClosedPipe).Times(1)
-	openAPIService.EXPECT().GetExternalContactByID(gomock.Eq("456")).Return(nil, io.ErrClosedPipe).Times(1)
-	openAPIService.EXPECT().GetExternalContactByID(gomock.Eq("789")).Return(nil, io.ErrClosedPipe).Times(1)
+	nameFetcher.EXPECT().FetchName(gomock.Eq("123")).Return("", io.ErrClosedPipe).Times(1)
+	nameFetcher.EXPECT().FetchName(gomock.Eq("456")).Return("", io.ErrClosedPipe).Times(1)
+	nameFetcher.EXPECT().FetchName(gomock.Eq("789")).Return("", io.ErrClosedPipe).Times(1)
 
 	// When
 	chatRecord, err := transformer.Transform(wecomRecord, nil)
@@ -234,4 +213,3 @@ func TestReceiverFieldTransformer_Transform_fullFailure(t *testing.T) {
 		assert.Equal(t, expectedChatRecord, chatRecord)
 	}
 }
-
