@@ -1,9 +1,8 @@
-package name_fetcher
+package transformer
 
 import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
-	"github.com/yrosukedev/chat_record_sync/chat_sync/wecom/transformer"
 	"io"
 	"testing"
 )
@@ -17,7 +16,7 @@ func TestAnyCombinator_FetchName_ZeroFetcher(t *testing.T) {
 	})
 
 	assert.Panics(t, func() {
-		NewAnyCombinator([]transformer.NameFetcher{})
+		NewAnyCombinator([]NameFetcher{})
 	})
 }
 
@@ -26,7 +25,7 @@ func TestAnyCombinator_FetchName_OneFetcher(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	fetcher := NewMockNameFetcher(ctrl)
 	fetcher.EXPECT().FetchName("123").Return("haary", nil).Times(1)
-	combinator := NewAnyCombinator([]transformer.NameFetcher{fetcher})
+	combinator := NewAnyCombinator([]NameFetcher{fetcher})
 
 	// When
 	name, err := combinator.FetchName("123")
@@ -42,7 +41,7 @@ func TestAnyCombinator_FetchName_OneFetcher_Error(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	fetcher := NewMockNameFetcher(ctrl)
 	fetcher.EXPECT().FetchName("123").Return("", io.EOF).Times(1)
-	combinator := NewAnyCombinator([]transformer.NameFetcher{fetcher})
+	combinator := NewAnyCombinator([]NameFetcher{fetcher})
 
 	// When
 	_, err := combinator.FetchName("123")
@@ -60,7 +59,7 @@ func TestAnyCombinator_FetchName_MultipleFetchers_FirstFetcherFails(t *testing.T
 	fetcher2.EXPECT().FetchName("123").Return("haary", nil).Times(1)
 	fetcher3 := NewMockNameFetcher(ctrl)
 	fetcher3.EXPECT().FetchName("123").Return("marry", nil).Times(0)
-	combinator := NewAnyCombinator([]transformer.NameFetcher{fetcher1, fetcher2, fetcher3})
+	combinator := NewAnyCombinator([]NameFetcher{fetcher1, fetcher2, fetcher3})
 
 	// When
 	name, err := combinator.FetchName("123")
@@ -80,7 +79,7 @@ func TestAnyCombinator_FetchName_MultipleFetchers_LastFetcherSucceeds(t *testing
 	fetcher2.EXPECT().FetchName("123").Return("", io.EOF).Times(1)
 	fetcher3 := NewMockNameFetcher(ctrl)
 	fetcher3.EXPECT().FetchName("123").Return("marry", nil).Times(1)
-	combinator := NewAnyCombinator([]transformer.NameFetcher{fetcher1, fetcher2, fetcher3})
+	combinator := NewAnyCombinator([]NameFetcher{fetcher1, fetcher2, fetcher3})
 
 	// When
 	name, err := combinator.FetchName("123")
@@ -100,7 +99,7 @@ func TestAnyCombinator_FetchName_MultipleFetchers_AllFetchersFail(t *testing.T) 
 	fetcher2.EXPECT().FetchName("123").Return("", io.EOF).Times(1)
 	fetcher3 := NewMockNameFetcher(ctrl)
 	fetcher3.EXPECT().FetchName("123").Return("", io.EOF).Times(1)
-	combinator := NewAnyCombinator([]transformer.NameFetcher{fetcher1, fetcher2, fetcher3})
+	combinator := NewAnyCombinator([]NameFetcher{fetcher1, fetcher2, fetcher3})
 
 	// When
 	_, err := combinator.FetchName("123")

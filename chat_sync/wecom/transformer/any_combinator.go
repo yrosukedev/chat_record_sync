@@ -1,14 +1,10 @@
-package name_fetcher
-
-import (
-	"github.com/yrosukedev/chat_record_sync/chat_sync/wecom/transformer"
-)
+package transformer
 
 type AnyCombinator struct {
-	fetchers []transformer.NameFetcher
+	fetchers []NameFetcher
 }
 
-func NewAnyCombinator(fetchers []transformer.NameFetcher) *AnyCombinator {
+func NewAnyCombinator(fetchers []NameFetcher) *AnyCombinator {
 	if len(fetchers) == 0 {
 		panic("fetchers can't be empty")
 	}
