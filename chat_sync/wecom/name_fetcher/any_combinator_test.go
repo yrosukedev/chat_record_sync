@@ -4,6 +4,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/wecom/transformer"
+	"io"
 	"testing"
 )
 
@@ -34,4 +35,18 @@ func TestAnyCombinator_FetchName_OneFetcher(t *testing.T) {
 	if assert.NoError(t, err) {
 		assert.Equal(t, "haary", name)
 	}
+}
+
+func TestAnyCombinator_FetchName_OneFetcher_Error(t *testing.T) {
+	// Given
+	ctrl := gomock.NewController(t)
+	fetcher := NewMockNameFetcher(ctrl)
+	fetcher.EXPECT().FetchName("123").Return("", io.EOF).Times(1)
+	combinator := NewAnyCombinator([]transformer.NameFetcher{fetcher})
+
+	// When
+	_, err := combinator.FetchName("123")
+
+	// Then
+	assert.Error(t, err)
 }
