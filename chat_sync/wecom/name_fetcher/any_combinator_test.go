@@ -1,6 +1,7 @@
 package name_fetcher
 
 import (
+	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/wecom/transformer"
 	"testing"
@@ -17,4 +18,20 @@ func TestAnyCombinator_FetchName_ZeroFetcher(t *testing.T) {
 	assert.Panics(t, func() {
 		NewAnyCombinator([]transformer.NameFetcher{})
 	})
+}
+
+func TestAnyCombinator_FetchName_OneFetcher(t *testing.T) {
+	// Given
+	ctrl := gomock.NewController(t)
+	fetcher := NewMockNameFetcher(ctrl)
+	fetcher.EXPECT().FetchName("123").Return("haary", nil).Times(1)
+	combinator := NewAnyCombinator([]transformer.NameFetcher{fetcher})
+
+	// When
+	name, err := combinator.FetchName("123")
+
+	// Then
+	if assert.NoError(t, err) {
+		assert.Equal(t, "haary", name)
+	}
 }

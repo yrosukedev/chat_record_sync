@@ -19,6 +19,12 @@ func NewAnyCombinator(fetchers []transformer.NameFetcher) *AnyCombinator {
 }
 
 func (c *AnyCombinator) FetchName(id string) (name string, err error) {
-	// TODO: implement me
-	panic("implement me")
+	for _, fetcher := range c.fetchers {
+		name, err = fetcher.FetchName(id)
+		if err == nil {
+			return name, nil
+		}
+	}
+
+	return "", err
 }
