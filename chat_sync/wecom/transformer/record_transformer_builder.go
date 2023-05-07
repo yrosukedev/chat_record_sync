@@ -31,7 +31,7 @@ func (b *RecordTransformerBuilder) textMessageTransformer() *FieldTransformerCol
 
 	return NewFieldTransformerCollection([]FieldTransformer{
 		NewBasicFieldTransformer(),
-		NewSenderFieldTransformer(nil),
+		NewSenderFieldTransformer(b.senderNameFetcher()),
 		NewReceiverFieldTransformer(b.openAPIService),
 		NewTextContentFieldTransformer(),
 	})
@@ -49,8 +49,15 @@ func (b *RecordTransformerBuilder) defaultTransformer() *FieldTransformerCollect
 
 	return NewFieldTransformerCollection([]FieldTransformer{
 		NewBasicFieldTransformer(),
-		NewSenderFieldTransformer(nil),
+		NewSenderFieldTransformer(b.senderNameFetcher()),
 		NewReceiverFieldTransformer(b.openAPIService),
 		NewOtherContentFieldTransformer(),
+	})
+}
+
+func (b *RecordTransformerBuilder) senderNameFetcher() NameFetcher {
+	return NewAnyCombinator([]NameFetcher{
+		NewUserNameFetcher(b.openAPIService),
+		NewContactNameFetcher(b.openAPIService),
 	})
 }
