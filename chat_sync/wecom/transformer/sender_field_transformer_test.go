@@ -12,8 +12,8 @@ import (
 func TestSenderFieldTransformer_Transform_nilChatRecord(t *testing.T) {
 	// Given
 	ctrl := gomock.NewController(t)
-	openAPIService := NewMockOpenAPIService(ctrl)
-	transformer := NewSenderFieldTransformer(openAPIService)
+	nameFetcher := NewMockNameFetcher(ctrl)
+	transformer := NewSenderFieldTransformer(nameFetcher)
 	wecomRecord := &wecom.ChatRecord{
 		From: "123",
 	}
@@ -24,10 +24,7 @@ func TestSenderFieldTransformer_Transform_nilChatRecord(t *testing.T) {
 		},
 	}
 
-	openAPIService.EXPECT().GetUserInfoByID(gomock.Eq("123")).Return(&wecom.UserInfo{
-		UserID: "123",
-		Name:   "haary",
-	}, nil).Times(1)
+	nameFetcher.EXPECT().FetchName(gomock.Eq("123")).Return("haary", nil).Times(1)
 
 	// When
 	chatRecord, err := transformer.Transform(wecomRecord, nil)
@@ -41,8 +38,8 @@ func TestSenderFieldTransformer_Transform_nilChatRecord(t *testing.T) {
 func TestSenderFieldTransformer_Transform_wecomRecordCantBeNil(t *testing.T) {
 	// Given
 	ctrl := gomock.NewController(t)
-	openAPIService := NewMockOpenAPIService(ctrl)
-	transformer := NewSenderFieldTransformer(openAPIService)
+	nameFetcher := NewMockNameFetcher(ctrl)
+	transformer := NewSenderFieldTransformer(nameFetcher)
 
 	// When
 	chatRecord, err := transformer.Transform(nil, &business.ChatRecord{})
@@ -56,8 +53,8 @@ func TestSenderFieldTransformer_Transform_wecomRecordCantBeNil(t *testing.T) {
 func TestSenderFieldTransformer_Transform_dontChangeInputs(t *testing.T) {
 	// Given
 	ctrl := gomock.NewController(t)
-	openAPIService := NewMockOpenAPIService(ctrl)
-	transformer := NewSenderFieldTransformer(openAPIService)
+	nameFetcher := NewMockNameFetcher(ctrl)
+	transformer := NewSenderFieldTransformer(nameFetcher)
 	wecomRecord := &wecom.ChatRecord{
 		From: "123",
 	}
@@ -74,10 +71,7 @@ func TestSenderFieldTransformer_Transform_dontChangeInputs(t *testing.T) {
 		},
 	}
 
-	openAPIService.EXPECT().GetUserInfoByID(gomock.Eq("123")).Return(&wecom.UserInfo{
-		UserID: "123",
-		Name:   "haary",
-	}, nil).Times(1)
+	nameFetcher.EXPECT().FetchName(gomock.Eq("123")).Return("haary", nil).Times(1)
 
 	// When
 	updatedChatRecord, err := transformer.Transform(wecomRecord, chatRecord)
@@ -94,8 +88,8 @@ func TestSenderFieldTransformer_Transform_dontChangeInputs(t *testing.T) {
 func TestSenderFieldTransformer_Transform_TolerateError(t *testing.T) {
 	// Given
 	ctrl := gomock.NewController(t)
-	openAPIService := NewMockOpenAPIService(ctrl)
-	transformer := NewSenderFieldTransformer(openAPIService)
+	nameFetcher := NewMockNameFetcher(ctrl)
+	transformer := NewSenderFieldTransformer(nameFetcher)
 	wecomRecord := &wecom.ChatRecord{
 		From: "123",
 	}
@@ -106,7 +100,7 @@ func TestSenderFieldTransformer_Transform_TolerateError(t *testing.T) {
 		},
 	}
 
-	openAPIService.EXPECT().GetUserInfoByID(gomock.Eq("123")).Return(nil, io.ErrShortBuffer).Times(1)
+	nameFetcher.EXPECT().FetchName(gomock.Eq("123")).Return("", io.ErrShortBuffer).Times(1)
 
 	// When
 	updatedChatRecord, err := transformer.Transform(wecomRecord, chatRecord)

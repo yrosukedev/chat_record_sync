@@ -7,12 +7,12 @@ import (
 )
 
 type SenderFieldTransformer struct {
-	openAPIService OpenAPIService
+	nameFetcher NameFetcher
 }
 
-func NewSenderFieldTransformer(openAPIService OpenAPIService) *SenderFieldTransformer {
+func NewSenderFieldTransformer(nameFetcher NameFetcher) *SenderFieldTransformer {
 	return &SenderFieldTransformer{
-		openAPIService: openAPIService,
+		nameFetcher: nameFetcher,
 	}
 }
 
@@ -23,7 +23,7 @@ func (t *SenderFieldTransformer) Transform(wecomRecord *wecom.ChatRecord, chatRe
 
 	updatedChatRecord = t.copyInputIfNeeded(chatRecord)
 
-	user, err := t.openAPIService.GetUserInfoByID(wecomRecord.From)
+	name, err := t.nameFetcher.FetchName(wecomRecord.From)
 
 	// fatal tolerated
 	// logging is done in openAPIService
@@ -33,8 +33,8 @@ func (t *SenderFieldTransformer) Transform(wecomRecord *wecom.ChatRecord, chatRe
 		}
 	} else {
 		updatedChatRecord.From = &business.User{
-			UserId: user.UserID,
-			Name:   user.Name,
+			UserId: wecomRecord.From,
+			Name:   name,
 		}
 	}
 
