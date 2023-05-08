@@ -51,4 +51,36 @@ func TestRoomFieldTransformer_Transform_WecomRecordCantBeNil(t *testing.T) {
 	}
 }
 
+func TestRoomFieldTransformer_Transform_DontChangeInputs(t *testing.T) {
+	// Given
+	ctrl := gomock.NewController(t)
+	nameFetcher := NewMockNameFetcher(ctrl)
+	transformer := NewRoomFieldTransformer(nameFetcher)
+	wecomRecord := &wecom.ChatRecord{
+		RoomID: "123",
+	}
+	expectedChatRecord := &business.ChatRecord{
+		Room: &business.Room{
+			RoomId: "123",
+			Name:   "room123",
+		},
+	}
+	chatRecord := &business.ChatRecord{
+		Room: &business.Room{
+			RoomId: "::whatever room id that can't be changed::",
+			Name:   "::whatever room name that can't be changed::",
+		},
+	}
 
+	nameFetcher.EXPECT().FetchName(gomock.Eq("123")).Return("room123", nil).Times(1)
+
+	// When
+	updatedChatRecord, err := transformer.Transform(wecomRecord, chatRecord)
+
+	// Then
+	if assert.NoError(t, err) {
+		assert.Equal(t, expectedChatRecord, updatedChatRecord)
+		assert.Equal(t, "::whatever room id that can't be changed::", chatRecord.Room.RoomId, "chatRecord.Room.RoomId should not be changed")
+		assert.Equal(t, "::whatever room name that can't be changed::", chatRecord.Room.Name, "chatRecord.Room.Name should not be changed")
+	}
+}
