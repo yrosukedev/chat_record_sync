@@ -14,11 +14,12 @@ import (
 )
 
 type HTTPApp struct {
-	larkClient  *lark.Client
-	wecomConfig config.WeComConfig
-	wecomClient WeWorkFinanceSDK.Client
-	wecomApp    *workwx.WorkwxApp
-	logger      log.Logger
+	larkClient       *lark.Client
+	wecomConfig      config.WeComConfig
+	wecomClient      WeWorkFinanceSDK.Client
+	wecomApp         *workwx.WorkwxApp
+	msgAuditWecomApp *workwx.WorkwxApp
+	logger           log.Logger
 }
 
 func NewHTTPApp(ctx context.Context) *HTTPApp {
@@ -39,13 +40,15 @@ func NewHTTPApp(ctx context.Context) *HTTPApp {
 	logger.Info(ctx, "[http app] wecom client created")
 
 	wecomApp := workwx.New(weComConfig.CorpID).WithApp(weComConfig.AgentSecret, weComConfig.AgentID)
+	msgAuditWecomApp := workwx.New(weComConfig.CorpID).WithApp(weComConfig.ChatSyncSecret, config.WeComMsgAuditAgentID)
 
 	httpApp := &HTTPApp{
-		larkClient:  larkClient,
-		wecomConfig: weComConfig,
-		wecomClient: wecomClient,
-		wecomApp:    wecomApp,
-		logger:      logger,
+		larkClient:       larkClient,
+		wecomConfig:      weComConfig,
+		wecomClient:      wecomClient,
+		wecomApp:         wecomApp,
+		msgAuditWecomApp: msgAuditWecomApp,
+		logger:           logger,
 	}
 
 	logger.Info(ctx, "[http app] http app created")

@@ -27,8 +27,7 @@ func (f *HTTPApp) createChatSyncUseCase(ctx context.Context) use_case.UseCase {
 			pagination.NewBatchReaderAdapter(
 				wecom.NewPaginatedReaderAdapter(
 					chat_record_service.NewAdapter(ctx, f.wecomClient, "", "", config.WeComChatRecordSDKTimeout, f.logger),
-					transformer.NewRecordTransformerBuilder(
-						openapi.NewAdapter(ctx, f.wecomApp, f.logger)).Build()),
+					f.buildRecordTransformer(ctx)),
 				pagination_storage.NewStorageAdapter(ctx, f.larkClient, config.PaginationStorageBitableAppToken, config.PaginationStorageBitableTableId, f.logger),
 				config.PaginatedReaderPageSize)),
 		retry.NewWriterAdapter(
@@ -36,4 +35,10 @@ func (f *HTTPApp) createChatSyncUseCase(ctx context.Context) use_case.UseCase {
 	)
 
 	return useCase
+}
+
+func (f *HTTPApp) buildRecordTransformer(ctx context.Context) wecom.RecordTransformer {
+	return transformer.NewRecordTransformerBuilder(
+		openapi.NewAdapter(ctx, f.wecomApp, f.logger),
+		openapi.NewMsgAuditOpenAPIAdapter(ctx, f.msgAuditWecomApp, f.logger)).Build()
 }

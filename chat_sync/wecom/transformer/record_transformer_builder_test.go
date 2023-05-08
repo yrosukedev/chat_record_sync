@@ -10,7 +10,7 @@ func TestRecordTransformerBuilder_Build_OpenAPIServiceMayBeNil(t *testing.T) {
 	// we should use assert library to check the panic
 
 	// Given
-	builder := NewRecordTransformerBuilder(nil)
+	builder := NewRecordTransformerBuilder(nil, nil)
 
 	// Then
 	assert.NotPanics(t, func() {
@@ -18,4 +18,3 @@ func TestRecordTransformerBuilder_Build_OpenAPIServiceMayBeNil(t *testing.T) {
 		builder.Build()
 	})
 }
-
