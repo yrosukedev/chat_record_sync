@@ -1,6 +1,7 @@
 package transformer
 
 import (
+	"errors"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/business"
@@ -84,3 +85,32 @@ func TestRoomFieldTransformer_Transform_DontChangeInputs(t *testing.T) {
 		assert.Equal(t, "::whatever room name that can't be changed::", chatRecord.Room.Name, "chatRecord.Room.Name should not be changed")
 	}
 }
+
+func TestRoomFieldTransformer_Transform_FetchNameError(t *testing.T) {
+	// if the nameFetcher returns error, only populate the RoomId field and leave the Name field untouched,
+	// and return nil error
+
+	// Given
+	ctrl := gomock.NewController(t)
+	nameFetcher := NewMockNameFetcher(ctrl)
+	transformer := NewRoomFieldTransformer(nameFetcher)
+	wecomRecord := &wecom.ChatRecord{
+		RoomID: "123",
+	}
+	expectedChatRecord := &business.ChatRecord{
+		Room: &business.Room{
+			RoomId: "123",
+		},
+	}
+
+	nameFetcher.EXPECT().FetchName(gomock.Eq("123")).Return("", errors.New("some error")).Times(1)
+
+	// When
+	updatedChatRecord, err := transformer.Transform(wecomRecord, nil)
+
+	// Then
+	if assert.NoError(t, err) {
+		assert.Equal(t, expectedChatRecord, updatedChatRecord)
+	}
+}
+
