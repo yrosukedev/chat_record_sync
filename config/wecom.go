@@ -18,6 +18,7 @@ const (
 
 const (
 	WeComChatRecordSDKTimeout = 30 * time.Second
+	WeComMsgAuditAgentID      = 2000004
 )
 
 type WeComConfig struct {

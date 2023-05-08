@@ -57,3 +57,8 @@ type UserInfo struct {
 	UserID string
 	Name   string
 }
+
+type InternalRoom struct {
+	RoomID string
+	Name   string
+}
