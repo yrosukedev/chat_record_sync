@@ -62,3 +62,22 @@ func (w *Adapter) GetExternalContactByID(externalId string) (contact *wecom.Exte
 
 	return contact, nil
 }
+
+func (w *Adapter) GetExternalRoomByID(roomId string) (room *wecom.ExternalRoom, err error) {
+	w.logger.Info(w.ctx, "[wecom open api] will get external room info, room id: %v", roomId)
+
+	chatInfo, err := w.wecomApp.GetAppChatInfo(roomId)
+	if err != nil {
+		w.logger.Error(w.ctx, "[wecom open api] fails to get external room info, room id: %v, error: %v", roomId, err)
+		return nil, err
+	}
+
+	room = &wecom.ExternalRoom{
+		RoomID: roomId,
+		Name:   chatInfo.Name,
+	}
+
+	w.logger.Info(w.ctx, "[wecom open api] succeeds to get external room info, room id: %v", roomId)
+
+	return room, nil
+}

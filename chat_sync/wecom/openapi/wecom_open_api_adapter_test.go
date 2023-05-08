@@ -115,3 +115,31 @@ func TestWeComOpenAPIAdapter_GetExternalContactByID_Failure(t *testing.T) {
 
 	// Then
 }
+
+// test external room success case
+func TestWeComOpenAPIAdapter_GetExternalRoomByID_Success(t *testing.T) {
+	// Given
+	ctx := context.Background()
+	ctrl := gomock.NewController(t)
+	wecomConfig := config.NewWeComConfig()
+	wecomApp := workwx.New(wecomConfig.CorpID).WithApp(wecomConfig.AgentSecret, wecomConfig.AgentID)
+	logger := NewMockLogger(ctrl)
+	openAPI := NewAdapter(ctx, wecomApp, logger)
+
+	roomId := "wrsrtEBgAANfNIS5R-b8uWKPkS3S0Y6w"
+	expectedExternalRoom := &wecom.ExternalRoom{
+		RoomID: roomId,
+		Name:   "会话存档测试群",
+	}
+
+	logger.EXPECT().Info(gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes()
+	logger.EXPECT().Error(gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes()
+
+	// When
+	room, err := openAPI.GetExternalRoomByID(roomId)
+
+	// Then
+	if assert.NoError(t, err) {
+		assert.Equal(t, expectedExternalRoom, room)
+	}
+}

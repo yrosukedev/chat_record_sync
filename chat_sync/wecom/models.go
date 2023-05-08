@@ -62,3 +62,8 @@ type InternalRoom struct {
 	RoomID string
 	Name   string
 }
+
+type ExternalRoom struct {
+	RoomID string
+	Name   string
+}
