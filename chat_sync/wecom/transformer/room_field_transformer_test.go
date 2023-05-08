@@ -34,3 +34,21 @@ func TestRoomFieldTransformer_Transform_NilChatRecord(t *testing.T) {
 	}
 }
 
+func TestRoomFieldTransformer_Transform_WecomRecordCantBeNil(t *testing.T) {
+	// if the wecomRecord is nil, return error
+
+	// Given
+	ctrl := gomock.NewController(t)
+	nameFetcher := NewMockNameFetcher(ctrl)
+	transformer := NewRoomFieldTransformer(nameFetcher)
+
+	// When
+	chatRecord, err := transformer.Transform(nil, &business.ChatRecord{})
+
+	// Then
+	if assert.Error(t, err) {
+		assert.Nil(t, chatRecord)
+	}
+}
+
+

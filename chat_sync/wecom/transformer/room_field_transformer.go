@@ -1,6 +1,7 @@
 package transformer
 
 import (
+	"errors"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/business"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/wecom"
 )
@@ -16,6 +17,10 @@ func NewRoomFieldTransformer(nameFetcher NameFetcher) *RoomFieldTransformer {
 }
 
 func (t *RoomFieldTransformer) Transform(wecomRecord *wecom.ChatRecord, chatRecord *business.ChatRecord) (updatedChatRecord *business.ChatRecord, err error) {
+	if wecomRecord == nil {
+		return nil, errors.New("wecomRecord can't be nil")
+	}
+
 	updatedChatRecord = t.copyInputIfNeeded(chatRecord)
 
 	name, err := t.nameFetcher.FetchName(wecomRecord.RoomID)
