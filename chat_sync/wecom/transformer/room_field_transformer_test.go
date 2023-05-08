@@ -114,3 +114,32 @@ func TestRoomFieldTransformer_Transform_FetchNameError(t *testing.T) {
 	}
 }
 
+func TestRoomFieldTransformer_Transform_EmptyRoomId(t *testing.T) {
+	// if the wecomRecord.RoomID is empty, populate the RoomId field with empty string,
+	// populate the Name field with empty string, don't call the nameFetcher,
+	// and return nil error
+
+	// Given
+	ctrl := gomock.NewController(t)
+	nameFetcher := NewMockNameFetcher(ctrl)
+	transformer := NewRoomFieldTransformer(nameFetcher)
+	wecomRecord := &wecom.ChatRecord{
+		RoomID: "",
+	}
+	expectedChatRecord := &business.ChatRecord{
+		Room: &business.Room{
+			RoomId: "",
+			Name:   "",
+		},
+	}
+
+	nameFetcher.EXPECT().FetchName(gomock.Any()).Times(0)
+
+	// When
+	updatedChatRecord, err := transformer.Transform(wecomRecord, nil)
+
+	// Then
+	if assert.NoError(t, err) {
+		assert.Equal(t, expectedChatRecord, updatedChatRecord)
+	}
+}

@@ -23,7 +23,10 @@ func (t *RoomFieldTransformer) Transform(wecomRecord *wecom.ChatRecord, chatReco
 
 	updatedChatRecord = t.copyInputIfNeeded(chatRecord)
 
-	name, err := t.nameFetcher.FetchName(wecomRecord.RoomID)
+	name := ""
+	if wecomRecord.RoomID != "" {
+		name, err = t.nameFetcher.FetchName(wecomRecord.RoomID)
+	}
 
 	// fatal tolerated
 	// logging is done in openAPIService
