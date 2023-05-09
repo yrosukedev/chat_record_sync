@@ -43,6 +43,7 @@ mockgen -source chat_sync/wecom/transformer/name_fetcher.go -package transformer
 # package: chat_sync/writer/chat_record
 mockgen -source chat_sync/writer/chat_record/fields_formatter.go -package chat_record -destination chat_sync/writer/chat_record/mock_fields_formatter.go
 mockgen -source chat_sync/writer/chat_record/fields_storage.go -package chat_record -destination chat_sync/writer/chat_record/mock_fields_storage.go
+mockgen -source logger/logger.go -package chat_record -destination chat_sync/writer/chat_record/mock_logger.go
 
 # package: chat_sync/bitable_storage
 mockgen -source logger/logger.go -package bitable_storage -destination chat_sync/bitable_storage/mock_logger.go
