@@ -29,6 +29,9 @@ func (b *BitableFieldsFormatter) Format(record *business.ChatRecord) (fields map
 }
 
 func (b *BitableFieldsFormatter) userToTableField(user *business.User) string {
+	if user == nil {
+		return ""
+	}
 	return fmt.Sprintf("%v(ID:%v)", user.Name, user.UserId)
 }
 
