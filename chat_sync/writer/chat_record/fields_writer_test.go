@@ -49,3 +49,23 @@ func TestFieldsWriter_Write_NilField(t *testing.T) {
 	// Then
 	assert.NoError(t, err)
 }
+
+func TestFieldsWriter_Write_NilChatRecord(t *testing.T) {
+	// if the chatRecord is nil, neither the formatter nor the storage should be called,
+	// and the writer should return an error.
+
+	// Given
+	ctrl := gomock.NewController(t)
+	fieldsFormatter := NewMockFieldsFormatter(ctrl)
+	fieldsStorage := NewMockFieldsStorage(ctrl)
+	fieldsWriter := NewFieldsWriter(fieldsFormatter, fieldsStorage)
+
+	fieldsFormatter.EXPECT().Format(gomock.Any()).Times(0)
+	fieldsStorage.EXPECT().Write(gomock.Any(), gomock.Any()).Times(0)
+
+	// When
+	err := fieldsWriter.Write(nil, "26df9a5c-55d8-4c52-b6ce-203325568178")
+
+	// Then
+	assert.Error(t, err)
+}

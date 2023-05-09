@@ -1,6 +1,9 @@
 package chat_record
 
-import "github.com/yrosukedev/chat_record_sync/chat_sync/business"
+import (
+	"errors"
+	"github.com/yrosukedev/chat_record_sync/chat_sync/business"
+)
 
 type FieldsWriter struct {
 	fieldsFormatter FieldsFormatter
@@ -15,6 +18,10 @@ func NewFieldsWriter(fieldsFormatter FieldsFormatter, fieldsStorage FieldsStorag
 }
 
 func (w *FieldsWriter) Write(chatRecord *business.ChatRecord, requestUUID string) error {
+	if chatRecord == nil {
+		return errors.New("chatRecord can't be nil")
+	}
+
 	fields, err := w.fieldsFormatter.Format(chatRecord)
 	if err != nil {
 		return err
