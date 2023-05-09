@@ -49,6 +49,21 @@ func (mr *MockOpenAPIServiceMockRecorder) GetExternalContactByID(externalId inte
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetExternalContactByID", reflect.TypeOf((*MockOpenAPIService)(nil).GetExternalContactByID), externalId)
 }
 
+// GetExternalRoomByID mocks base method.
+func (m *MockOpenAPIService) GetExternalRoomByID(roomId string) (*wecom.ExternalRoom, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetExternalRoomByID", roomId)
+	ret0, _ := ret[0].(*wecom.ExternalRoom)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetExternalRoomByID indicates an expected call of GetExternalRoomByID.
+func (mr *MockOpenAPIServiceMockRecorder) GetExternalRoomByID(roomId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetExternalRoomByID", reflect.TypeOf((*MockOpenAPIService)(nil).GetExternalRoomByID), roomId)
+}
+
 // GetUserInfoByID mocks base method.
 func (m *MockOpenAPIService) GetUserInfoByID(id string) (*wecom.UserInfo, error) {
 	m.ctrl.T.Helper()
@@ -62,4 +77,42 @@ func (m *MockOpenAPIService) GetUserInfoByID(id string) (*wecom.UserInfo, error)
 func (mr *MockOpenAPIServiceMockRecorder) GetUserInfoByID(id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserInfoByID", reflect.TypeOf((*MockOpenAPIService)(nil).GetUserInfoByID), id)
+}
+
+// MockMsgAuditOpenAPIService is a mock of MsgAuditOpenAPIService interface.
+type MockMsgAuditOpenAPIService struct {
+	ctrl     *gomock.Controller
+	recorder *MockMsgAuditOpenAPIServiceMockRecorder
+}
+
+// MockMsgAuditOpenAPIServiceMockRecorder is the mock recorder for MockMsgAuditOpenAPIService.
+type MockMsgAuditOpenAPIServiceMockRecorder struct {
+	mock *MockMsgAuditOpenAPIService
+}
+
+// NewMockMsgAuditOpenAPIService creates a new mock instance.
+func NewMockMsgAuditOpenAPIService(ctrl *gomock.Controller) *MockMsgAuditOpenAPIService {
+	mock := &MockMsgAuditOpenAPIService{ctrl: ctrl}
+	mock.recorder = &MockMsgAuditOpenAPIServiceMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockMsgAuditOpenAPIService) EXPECT() *MockMsgAuditOpenAPIServiceMockRecorder {
+	return m.recorder
+}
+
+// GetInternalRoomByID mocks base method.
+func (m *MockMsgAuditOpenAPIService) GetInternalRoomByID(roomId string) (*wecom.InternalRoom, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetInternalRoomByID", roomId)
+	ret0, _ := ret[0].(*wecom.InternalRoom)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetInternalRoomByID indicates an expected call of GetInternalRoomByID.
+func (mr *MockMsgAuditOpenAPIServiceMockRecorder) GetInternalRoomByID(roomId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetInternalRoomByID", reflect.TypeOf((*MockMsgAuditOpenAPIService)(nil).GetInternalRoomByID), roomId)
 }

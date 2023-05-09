@@ -39,3 +39,7 @@ mockgen -source logger/logger.go -package pagination -destination chat_sync/bita
 mockgen -source chat_sync/wecom/transformer/open_api_service.go -package transformer -destination chat_sync/wecom/transformer/mock_open_api_service.go
 mockgen -source chat_sync/wecom/transformer/field_transformer.go -package transformer -destination chat_sync/wecom/transformer/mock_field_transformer.go
 mockgen -source chat_sync/wecom/transformer/name_fetcher.go -package transformer -destination chat_sync/wecom/transformer/mock_name_fetcher.go
+
+# package: chat_sync/writer/chat_record
+mockgen -source chat_sync/writer/chat_record/fields_formatter.go -package chat_record -destination chat_sync/writer/chat_record/mock_fields_formatter.go
+mockgen -source chat_sync/writer/chat_record/fields_storage.go -package chat_record -destination chat_sync/writer/chat_record/mock_fields_storage.go
