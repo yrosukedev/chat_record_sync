@@ -20,12 +20,20 @@ func (b *BitableFieldsFormatter) Format(record *business.ChatRecord) (fields map
 		consts.BitableFieldChatRecordAction:  record.Action,
 		consts.BitableFieldChatRecordFrom:    b.userToTableField(record.From),
 		consts.BitableFieldChatRecordTo:      b.usersToTableField(record.To),
-		consts.BitableFieldChatRecordRoomId:  record.Room.RoomId,
+		consts.BitableFieldChatRecordRoomId:  b.roomToTableField(record.Room),
 		consts.BitableFieldChatRecordMsgTime: record.MsgTime.UnixMilli(),
 		consts.BitableFieldChatRecordMsgType: record.MsgType,
 		consts.BitableFieldChatRecordContent: record.Content,
 	}
 	return fields, nil
+}
+
+func (b *BitableFieldsFormatter) roomToTableField(room *business.Room) string {
+	if room == nil {
+		return ""
+	}
+
+	return room.RoomId
 }
 
 func (b *BitableFieldsFormatter) userToTableField(user *business.User) string {
