@@ -83,12 +83,13 @@ func TestFieldsWriter_Write_OneField(t *testing.T) {
 	fields := map[string]interface{}{
 		"field1": "value1",
 	}
+	requestUUID := "26df9a5c-55d8-4c52-b6ce-203325568178"
 
 	fieldsFormatter.EXPECT().Format(gomock.Eq(chatRecord)).Return(fields, nil).Times(1)
-	fieldsStorage.EXPECT().Write(gomock.Any(), gomock.Any()).Times(1)
+	fieldsStorage.EXPECT().Write(gomock.Eq(fields), gomock.Eq(requestUUID)).Times(1)
 
 	// When
-	err := fieldsWriter.Write(chatRecord, "26df9a5c-55d8-4c52-b6ce-203325568178")
+	err := fieldsWriter.Write(chatRecord, requestUUID)
 
 	// Then
 	assert.NoError(t, err)
@@ -109,12 +110,13 @@ func TestFieldsWriter_Write_MultipleFields(t *testing.T) {
 		"field2": "value2",
 		"field3": "value3",
 	}
+	requestUUID := "26df9a5c-55d8-4c52-b6ce-203325568178"
 
 	fieldsFormatter.EXPECT().Format(gomock.Eq(chatRecord)).Return(fields, nil).Times(1)
-	fieldsStorage.EXPECT().Write(gomock.Any(), gomock.Any()).Times(1)
+	fieldsStorage.EXPECT().Write(gomock.Eq(fields), gomock.Eq(requestUUID)).Times(1)
 
 	// When
-	err := fieldsWriter.Write(chatRecord, "26df9a5c-55d8-4c52-b6ce-203325568178")
+	err := fieldsWriter.Write(chatRecord, requestUUID)
 
 	// Then
 	assert.NoError(t, err)
@@ -136,6 +138,31 @@ func TestFieldsWriter_Write_FormatterError(t *testing.T) {
 
 	// When
 	err := fieldsWriter.Write(chatRecord, "26df9a5c-55d8-4c52-b6ce-203325568178")
+
+	// Then
+	assert.Error(t, err)
+}
+
+func TestFieldsWriter_Write_StorageError(t *testing.T) {
+	// if the storage returns an error, the writer should return an error.
+
+	// Given
+	ctrl := gomock.NewController(t)
+	fieldsFormatter := NewMockFieldsFormatter(ctrl)
+	fieldsStorage := NewMockFieldsStorage(ctrl)
+	fieldsWriter := NewFieldsWriter(fieldsFormatter, fieldsStorage)
+
+	chatRecord := &business.ChatRecord{}
+	fields := map[string]interface{}{
+		"field1": "value1",
+	}
+	requestUUID := "26df9a5c-55d8-4c52-b6ce-203325568178"
+
+	fieldsFormatter.EXPECT().Format(gomock.Eq(chatRecord)).Return(fields, nil).Times(1)
+	fieldsStorage.EXPECT().Write(gomock.Eq(fields), gomock.Eq(requestUUID)).Return(assert.AnError).Times(1)
+
+	// When
+	err := fieldsWriter.Write(chatRecord, requestUUID)
 
 	// Then
 	assert.Error(t, err)
