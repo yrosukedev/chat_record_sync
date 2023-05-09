@@ -85,14 +85,14 @@ func (c *StorageAdapter) Write(chatRecord *business.ChatRecord, requestUUID stri
 
 func (c *StorageAdapter) tableFieldsFrom(chatRecord *business.ChatRecord) map[string]interface{} {
 	fields := map[string]interface{}{
-		consts.BitableFieldMsgId:   chatRecord.MsgId,
-		consts.BitableFieldAction:  chatRecord.Action,
-		consts.BitableFieldFrom:    userToTableField(chatRecord.From),
-		consts.BitableFieldTo:      usersToTableField(chatRecord.To),
-		consts.BitableFieldRoomId:  chatRecord.Room.RoomId,
-		consts.BitableFieldMsgTime: chatRecord.MsgTime.UnixMilli(),
-		consts.BitableFieldMsgType: chatRecord.MsgType,
-		consts.BitableFieldContent: chatRecord.Content,
+		consts.BitableFieldChatRecordMsgId:   chatRecord.MsgId,
+		consts.BitableFieldChatRecordAction:  chatRecord.Action,
+		consts.BitableFieldChatRecordFrom:    userToTableField(chatRecord.From),
+		consts.BitableFieldChatRecordTo:      usersToTableField(chatRecord.To),
+		consts.BitableFieldChatRecordRoomId:  chatRecord.Room.RoomId,
+		consts.BitableFieldChatRecordMsgTime: chatRecord.MsgTime.UnixMilli(),
+		consts.BitableFieldChatRecordMsgType: chatRecord.MsgType,
+		consts.BitableFieldChatRecordContent: chatRecord.Content,
 	}
 	return fields
 }
