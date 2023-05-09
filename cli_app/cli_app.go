@@ -6,7 +6,7 @@ import (
 	lark "github.com/larksuite/oapi-sdk-go/v3"
 	"github.com/xen0n/go-workwx"
 	"github.com/yrosukedev/WeWorkFinanceSDK"
-	"github.com/yrosukedev/chat_record_sync/chat_sync/bitable_storage/chat_record"
+	"github.com/yrosukedev/chat_record_sync/chat_sync/bitable_storage"
 	pagination2 "github.com/yrosukedev/chat_record_sync/chat_sync/bitable_storage/pagination"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/reader/buffer"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/reader/pagination"
@@ -15,6 +15,8 @@ import (
 	"github.com/yrosukedev/chat_record_sync/chat_sync/wecom/chat_record_service"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/wecom/openapi"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/wecom/transformer"
+	"github.com/yrosukedev/chat_record_sync/chat_sync/writer/chat_record"
+	"github.com/yrosukedev/chat_record_sync/chat_sync/writer/chat_record/formatter"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/writer/retry"
 	"github.com/yrosukedev/chat_record_sync/config"
 	"github.com/yrosukedev/chat_record_sync/logger"
@@ -42,8 +44,7 @@ func RunCLIApp(ctx context.Context) error {
 					buildRecordTransformer(ctx, weComConfig, logger)),
 				pagination2.NewStorageAdapter(ctx, larkClient, config.PaginationStorageBitableAppToken, config.PaginationStorageBitableTableId, logger),
 				config.PaginatedReaderPageSize)),
-		retry.NewWriterAdapter(
-			chat_record.NewStorageAdapter(ctx, larkClient, config.ChatStorageBitableAppToken, config.ChatStorageBitableTableId, logger)),
+		buildWriter(ctx, larkClient, logger),
 	)
 
 	// When
@@ -59,6 +60,15 @@ func RunCLIApp(ctx context.Context) error {
 	}
 
 	return nil
+}
+
+func buildWriter(ctx context.Context, larkClient *lark.Client, logger logger.Logger) use_case.Writer {
+	return retry.NewWriterAdapter(
+		chat_record.NewFieldsWriter(
+			ctx,
+			formatter.NewBitableFieldsFormatter(),
+			bitable_storage.NewStorageAdapter(ctx, larkClient, config.ChatStorageBitableAppToken, config.ChatStorageBitableTableId, logger),
+			logger))
 }
 
 func buildRecordTransformer(ctx context.Context, weComConfig config.WeComConfig, logger logger.Logger) wecom.RecordTransformer {
