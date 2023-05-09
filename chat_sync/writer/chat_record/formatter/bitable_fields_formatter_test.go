@@ -38,14 +38,15 @@ func TestBitableFieldsFormatter_Format(t *testing.T) {
 		},
 	}
 	expectedFields := map[string]interface{}{
-		consts.BitableFieldChatRecordMsgId:   "::whatever MsgId::",
-		consts.BitableFieldChatRecordAction:  "::whatever Action::",
-		consts.BitableFieldChatRecordMsgType: "::whatever MsgType::",
-		consts.BitableFieldChatRecordMsgTime: int64(1610000000000),
-		consts.BitableFieldChatRecordContent: "::whatever Content::",
-		consts.BitableFieldChatRecordFrom:    "::whatever UserName::(ID:::whatever UserId::)",
-		consts.BitableFieldChatRecordTo:      "::whatever Contact Name A::(ID:::whatever Contact Id A::),::whatever Contact Name B::(ID:::whatever Contact Id B::)",
-		consts.BitableFieldChatRecordRoomId:  "::whatever RoomId::",
+		consts.BitableFieldChatRecordMsgId:    "::whatever MsgId::",
+		consts.BitableFieldChatRecordAction:   "::whatever Action::",
+		consts.BitableFieldChatRecordMsgType:  "::whatever MsgType::",
+		consts.BitableFieldChatRecordMsgTime:  int64(1610000000000),
+		consts.BitableFieldChatRecordContent:  "::whatever Content::",
+		consts.BitableFieldChatRecordFrom:     "::whatever UserName::(ID:::whatever UserId::)",
+		consts.BitableFieldChatRecordTo:       "::whatever Contact Name A::(ID:::whatever Contact Id A::),::whatever Contact Name B::(ID:::whatever Contact Id B::)",
+		consts.BitableFieldChatRecordRoomId:   "::whatever RoomId::",
+		consts.BitableFieldChatRecordRoomName: "::whatever RoomName::",
 	}
 
 	// When
@@ -83,14 +84,15 @@ func TestBitableFieldsFormatter_Format_NilSender(t *testing.T) {
 		},
 	}
 	expectedFields := map[string]interface{}{
-		consts.BitableFieldChatRecordMsgId:   "::whatever MsgId::",
-		consts.BitableFieldChatRecordAction:  "::whatever Action::",
-		consts.BitableFieldChatRecordMsgType: "::whatever MsgType::",
-		consts.BitableFieldChatRecordMsgTime: int64(1610000000000),
-		consts.BitableFieldChatRecordContent: "::whatever Content::",
-		consts.BitableFieldChatRecordFrom:    "",
-		consts.BitableFieldChatRecordTo:      "::whatever Contact Name A::(ID:::whatever Contact Id A::),::whatever Contact Name B::(ID:::whatever Contact Id B::)",
-		consts.BitableFieldChatRecordRoomId:  "::whatever RoomId::",
+		consts.BitableFieldChatRecordMsgId:    "::whatever MsgId::",
+		consts.BitableFieldChatRecordAction:   "::whatever Action::",
+		consts.BitableFieldChatRecordMsgType:  "::whatever MsgType::",
+		consts.BitableFieldChatRecordMsgTime:  int64(1610000000000),
+		consts.BitableFieldChatRecordContent:  "::whatever Content::",
+		consts.BitableFieldChatRecordFrom:     "",
+		consts.BitableFieldChatRecordTo:       "::whatever Contact Name A::(ID:::whatever Contact Id A::),::whatever Contact Name B::(ID:::whatever Contact Id B::)",
+		consts.BitableFieldChatRecordRoomId:   "::whatever RoomId::",
+		consts.BitableFieldChatRecordRoomName: "::whatever RoomName::",
 	}
 
 	// When
@@ -122,14 +124,15 @@ func TestBitableFieldsFormatter_Format_NilReceiver(t *testing.T) {
 		},
 	}
 	expectedFields := map[string]interface{}{
-		consts.BitableFieldChatRecordMsgId:   "::whatever MsgId::",
-		consts.BitableFieldChatRecordAction:  "::whatever Action::",
-		consts.BitableFieldChatRecordMsgType: "::whatever MsgType::",
-		consts.BitableFieldChatRecordMsgTime: int64(1610000000000),
-		consts.BitableFieldChatRecordContent: "::whatever Content::",
-		consts.BitableFieldChatRecordFrom:    "::whatever UserName::(ID:::whatever UserId::)",
-		consts.BitableFieldChatRecordTo:      "",
-		consts.BitableFieldChatRecordRoomId:  "::whatever RoomId::",
+		consts.BitableFieldChatRecordMsgId:    "::whatever MsgId::",
+		consts.BitableFieldChatRecordAction:   "::whatever Action::",
+		consts.BitableFieldChatRecordMsgType:  "::whatever MsgType::",
+		consts.BitableFieldChatRecordMsgTime:  int64(1610000000000),
+		consts.BitableFieldChatRecordContent:  "::whatever Content::",
+		consts.BitableFieldChatRecordFrom:     "::whatever UserName::(ID:::whatever UserId::)",
+		consts.BitableFieldChatRecordTo:       "",
+		consts.BitableFieldChatRecordRoomId:   "::whatever RoomId::",
+		consts.BitableFieldChatRecordRoomName: "::whatever RoomName::",
 	}
 
 	// When
@@ -162,14 +165,15 @@ func TestBitableFieldsFormatter_Format_ZeroReceiver(t *testing.T) {
 		},
 	}
 	expectedFields := map[string]interface{}{
-		consts.BitableFieldChatRecordMsgId:   "::whatever MsgId::",
-		consts.BitableFieldChatRecordAction:  "::whatever Action::",
-		consts.BitableFieldChatRecordMsgType: "::whatever MsgType::",
-		consts.BitableFieldChatRecordMsgTime: int64(1610000000000),
-		consts.BitableFieldChatRecordContent: "::whatever Content::",
-		consts.BitableFieldChatRecordFrom:    "::whatever UserName::(ID:::whatever UserId::)",
-		consts.BitableFieldChatRecordTo:      "",
-		consts.BitableFieldChatRecordRoomId:  "::whatever RoomId::",
+		consts.BitableFieldChatRecordMsgId:    "::whatever MsgId::",
+		consts.BitableFieldChatRecordAction:   "::whatever Action::",
+		consts.BitableFieldChatRecordMsgType:  "::whatever MsgType::",
+		consts.BitableFieldChatRecordMsgTime:  int64(1610000000000),
+		consts.BitableFieldChatRecordContent:  "::whatever Content::",
+		consts.BitableFieldChatRecordFrom:     "::whatever UserName::(ID:::whatever UserId::)",
+		consts.BitableFieldChatRecordTo:       "",
+		consts.BitableFieldChatRecordRoomId:   "::whatever RoomId::",
+		consts.BitableFieldChatRecordRoomName: "::whatever RoomName::",
 	}
 
 	// When
@@ -207,14 +211,15 @@ func TestBitableFieldsFormatter_Format_OneReceiver(t *testing.T) {
 		},
 	}
 	expectedFields := map[string]interface{}{
-		consts.BitableFieldChatRecordMsgId:   "::whatever MsgId::",
-		consts.BitableFieldChatRecordAction:  "::whatever Action::",
-		consts.BitableFieldChatRecordMsgType: "::whatever MsgType::",
-		consts.BitableFieldChatRecordMsgTime: int64(1610000000000),
-		consts.BitableFieldChatRecordContent: "::whatever Content::",
-		consts.BitableFieldChatRecordFrom:    "::whatever UserName::(ID:::whatever UserId::)",
-		consts.BitableFieldChatRecordTo:      "::whatever Contact Name A::(ID:::whatever Contact Id A::)",
-		consts.BitableFieldChatRecordRoomId:  "::whatever RoomId::",
+		consts.BitableFieldChatRecordMsgId:    "::whatever MsgId::",
+		consts.BitableFieldChatRecordAction:   "::whatever Action::",
+		consts.BitableFieldChatRecordMsgType:  "::whatever MsgType::",
+		consts.BitableFieldChatRecordMsgTime:  int64(1610000000000),
+		consts.BitableFieldChatRecordContent:  "::whatever Content::",
+		consts.BitableFieldChatRecordFrom:     "::whatever UserName::(ID:::whatever UserId::)",
+		consts.BitableFieldChatRecordTo:       "::whatever Contact Name A::(ID:::whatever Contact Id A::)",
+		consts.BitableFieldChatRecordRoomId:   "::whatever RoomId::",
+		consts.BitableFieldChatRecordRoomName: "::whatever RoomName::",
 	}
 
 	// When
@@ -252,14 +257,15 @@ func TestBitableFieldsFormatter_Format_NilRoom(t *testing.T) {
 		},
 	}
 	expectedFields := map[string]interface{}{
-		consts.BitableFieldChatRecordMsgId:   "::whatever MsgId::",
-		consts.BitableFieldChatRecordAction:  "::whatever Action::",
-		consts.BitableFieldChatRecordMsgType: "::whatever MsgType::",
-		consts.BitableFieldChatRecordMsgTime: int64(1610000000000),
-		consts.BitableFieldChatRecordContent: "::whatever Content::",
-		consts.BitableFieldChatRecordFrom:    "::whatever UserName::(ID:::whatever UserId::)",
-		consts.BitableFieldChatRecordTo:      "::whatever Contact Name A::(ID:::whatever Contact Id A::),::whatever Contact Name B::(ID:::whatever Contact Id B::)",
-		consts.BitableFieldChatRecordRoomId:  "",
+		consts.BitableFieldChatRecordMsgId:    "::whatever MsgId::",
+		consts.BitableFieldChatRecordAction:   "::whatever Action::",
+		consts.BitableFieldChatRecordMsgType:  "::whatever MsgType::",
+		consts.BitableFieldChatRecordMsgTime:  int64(1610000000000),
+		consts.BitableFieldChatRecordContent:  "::whatever Content::",
+		consts.BitableFieldChatRecordFrom:     "::whatever UserName::(ID:::whatever UserId::)",
+		consts.BitableFieldChatRecordTo:       "::whatever Contact Name A::(ID:::whatever Contact Id A::),::whatever Contact Name B::(ID:::whatever Contact Id B::)",
+		consts.BitableFieldChatRecordRoomId:   "",
+		consts.BitableFieldChatRecordRoomName: "",
 	}
 
 	// When
