@@ -3,6 +3,7 @@ package buffer
 import (
 	"github.com/golang/mock/gomock"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/business"
+	"github.com/yrosukedev/chat_record_sync/chat_sync/use_case"
 	"io"
 	"testing"
 )
@@ -227,25 +228,84 @@ func TestRefill_error(t *testing.T) {
 	}
 }
 
-func givenRecordsToRefill(batchReader *MockBatchReader, recordsGroups [][]*business.ChatRecord) {
-	groupIdx := 0
-	batchReader.EXPECT().Read().DoAndReturn(func() ([]*business.ChatRecord, error) {
-		defer func() { groupIdx += 1 }()
-		return recordsGroups[groupIdx], nil
-	}).Times(len(recordsGroups))
-}
+func TestReader_Read_ManyEOF(t *testing.T) {
+	// Given
+	ctrl := gomock.NewController(t)
+	batchReader := NewMockBatchReader(ctrl)
+	readerAdapter := NewReader(batchReader)
 
-func expectReaderToReadRecords(t *testing.T, reader *Reader, records []*business.ChatRecord) {
-	for _, expected := range records {
-		actual, err := reader.Read()
-		if err != nil {
-			t.Errorf("error should not happen here, expected: %+v, actual: %+v", nil, err)
-			return
-		}
-
-		if expected != actual {
-			t.Errorf("records are not matched, expected: %+v, actual: %+v", expected, actual)
-			return
-		}
+	recordsGroup1 := []*business.ChatRecord{
+		{
+			MsgId: "1",
+		},
+		{
+			MsgId: "2",
+		},
 	}
+	recordsGroup2 := []*business.ChatRecord{
+		{
+			MsgId: "3",
+		},
+		{
+			MsgId: "4",
+		},
+		{
+			MsgId: "5",
+		},
+	}
+	recordsGroup3 := []*business.ChatRecord{
+		{
+			MsgId: "6",
+		},
+	}
+	recordsGroup4 := []*business.ChatRecord{
+		{
+			MsgId: "7",
+		},
+		{
+			MsgId: "8",
+		},
+	}
+	givenRecordsOrErrorsToRefill(batchReader, []recordsOrErr{
+		&recordsWrapper{
+			_records: recordsGroup1,
+		},
+		&errWrapper{
+			_err: io.EOF,
+		},
+		&recordsWrapper{
+			_records: recordsGroup2,
+		},
+		&errWrapper{
+			_err: io.EOF,
+		},
+		&recordsWrapper{
+			_records: recordsGroup3,
+		},
+		&errWrapper{
+			_err: io.EOF,
+		},
+		&recordsWrapper{
+			_records: recordsGroup4,
+		},
+		&errWrapper{
+			_err: io.EOF,
+		},
+	})
+
+	// When
+	expectReaderToReadRecordOrError(t, readerAdapter, []use_case.RecordOrError{
+		use_case.NewRecordOrErrorWithRecord(recordsGroup1[0]),
+		use_case.NewRecordOrErrorWithRecord(recordsGroup1[1]),
+		use_case.NewRecordOrErrorWithError(io.EOF),
+		use_case.NewRecordOrErrorWithRecord(recordsGroup2[0]),
+		use_case.NewRecordOrErrorWithRecord(recordsGroup2[1]),
+		use_case.NewRecordOrErrorWithRecord(recordsGroup2[2]),
+		use_case.NewRecordOrErrorWithError(io.EOF),
+		use_case.NewRecordOrErrorWithRecord(recordsGroup3[0]),
+		use_case.NewRecordOrErrorWithError(io.EOF),
+		use_case.NewRecordOrErrorWithRecord(recordsGroup4[0]),
+		use_case.NewRecordOrErrorWithRecord(recordsGroup4[1]),
+		use_case.NewRecordOrErrorWithError(io.EOF),
+	})
 }
