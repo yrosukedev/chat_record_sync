@@ -3,6 +3,7 @@ package pagination
 import (
 	"fmt"
 	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/business"
 	"io"
 	"reflect"
@@ -233,13 +234,55 @@ func TestForwardResults_EOF(t *testing.T) {
 
 	paginatedReader.EXPECT().Read(gomock.Eq(NewPageToken(10)), gomock.Eq(pageSize)).Return(nil, NewPageToken(3467), io.EOF).Times(1)
 
-	paginationStorage.EXPECT().Set(gomock.Eq(NewPageToken(3467))).Return(nil).Times(1)
+	paginationStorage.EXPECT().Set(gomock.Eq(NewPageToken(3467))).Return(nil).Times(0)
 
 	// When
 	_, err := batchReaderAdapter.Read()
 	if err != io.EOF {
 		t.Errorf("error should happen here, expected: %+v, actual: %+v", io.EOF, err)
 	}
+}
+
+func TestForwardResults_ManyEOF(t *testing.T) {
+	// Given
+	ctrl := gomock.NewController(t)
+	paginatedReader := NewMockPaginatedReader(ctrl)
+	paginationStorage := NewMockPaginationStorage(ctrl)
+	pageSize := uint64(10)
+	batchReaderAdapter := NewBatchReaderAdapter(paginatedReader, paginationStorage, pageSize)
+
+	expectedRecords := []*business.ChatRecord{
+		{},
+		{},
+		{},
+	}
+
+	paginationStorage.EXPECT().Get().Return(NewPageToken(10), nil).Times(1)
+	paginatedReader.EXPECT().Read(gomock.Eq(NewPageToken(10)), gomock.Eq(pageSize)).Return(nil, NewPageToken(20), io.EOF).Times(1)
+	paginationStorage.EXPECT().Set(gomock.Eq(NewPageToken(20))).Return(nil).Times(0)
+
+	paginationStorage.EXPECT().Get().Return(NewPageToken(10), nil).Times(1)
+	paginatedReader.EXPECT().Read(gomock.Eq(NewPageToken(10)), gomock.Eq(pageSize)).Return(expectedRecords, NewPageToken(30), nil).Times(1)
+	paginationStorage.EXPECT().Set(gomock.Eq(NewPageToken(30))).Return(nil).Times(1)
+
+	paginationStorage.EXPECT().Get().Return(NewPageToken(30), nil).Times(1)
+	paginatedReader.EXPECT().Read(gomock.Eq(NewPageToken(30)), gomock.Eq(pageSize)).Return(nil, NewPageToken(40), io.EOF).Times(1)
+	paginationStorage.EXPECT().Set(gomock.Eq(NewPageToken(40))).Return(nil).Times(0)
+
+	// When & Then
+	_, err := batchReaderAdapter.Read()
+	assert.ErrorIs(t, err, io.EOF)
+
+	records, err := batchReaderAdapter.Read()
+	if assert.NoError(t, err) {
+		assert.Equal(t, expectedRecords, records)
+	}
+
+	_, err = batchReaderAdapter.Read()
+	assert.ErrorIs(t, err, io.EOF)
+
+	_, err = batchReaderAdapter.Read()
+	assert.ErrorIs(t, err, io.EOF)
 }
 
 func TestUpdatePageToken_error(t *testing.T) {

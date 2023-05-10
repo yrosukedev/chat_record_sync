@@ -26,6 +26,7 @@ func NewBatchReaderAdapter(
 
 func (r *BatchReaderAdapter) Read() (records []*business.ChatRecord, err error) {
 	if r.noMoreData {
+		r.noMoreData = false // reset
 		return nil, io.EOF
 	}
 
@@ -35,7 +36,7 @@ func (r *BatchReaderAdapter) Read() (records []*business.ChatRecord, err error) 
 	}
 
 	records, outPageToken, err := r.paginatedReader.Read(inPageToken, r.pageSize)
-	if err != nil && err != io.EOF {
+	if err != nil {
 		return nil, err
 	}
 
