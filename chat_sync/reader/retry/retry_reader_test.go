@@ -193,6 +193,7 @@ func TestOneSequenceOfConsecutiveErrors_manyErrors_errorCountsGreaterThanMaxRetr
 		use_case.NewRecordOrErrorWithError(io.ErrUnexpectedEOF),
 		use_case.NewRecordOrErrorWithError(io.ErrClosedPipe),
 		use_case.NewRecordOrErrorWithError(io.ErrShortWrite),
+		use_case.NewRecordOrErrorWithError(io.ErrUnexpectedEOF),
 		use_case.NewRecordOrErrorWithRecord(&business.ChatRecord{}),
 	}
 	use_case.EncounterErrorWhileReadingRecords(reader, records)
@@ -205,8 +206,7 @@ func TestOneSequenceOfConsecutiveErrors_manyErrors_errorCountsGreaterThanMaxRetr
 		use_case.NewRecordOrErrorWithError(io.ErrClosedPipe),
 		use_case.NewRecordOrErrorWithError(io.EOF), // terminated from here
 		use_case.NewRecordOrErrorWithError(io.EOF),
-		use_case.NewRecordOrErrorWithError(io.EOF),
-		use_case.NewRecordOrErrorWithError(io.EOF),
+		use_case.NewRecordOrErrorWithRecord(&business.ChatRecord{}),
 	}
 	expectReaderToReadRecordsOrErrors(t, proxyReader, expectedRecordsOrErrors)
 }
@@ -289,6 +289,7 @@ func TestManySequencesOfConsecutiveErrors_errorCountGreaterThanMaxRetryTimes(t *
 		use_case.NewRecordOrErrorWithError(io.ErrUnexpectedEOF),
 		use_case.NewRecordOrErrorWithError(io.ErrClosedPipe),
 		use_case.NewRecordOrErrorWithError(io.ErrShortWrite),
+		use_case.NewRecordOrErrorWithError(io.ErrNoProgress),
 		use_case.NewRecordOrErrorWithRecord(&business.ChatRecord{}),
 		use_case.NewRecordOrErrorWithRecord(&business.ChatRecord{}),
 	}
@@ -306,9 +307,35 @@ func TestManySequencesOfConsecutiveErrors_errorCountGreaterThanMaxRetryTimes(t *
 		use_case.NewRecordOrErrorWithError(io.ErrShortBuffer),
 		use_case.NewRecordOrErrorWithError(io.ErrUnexpectedEOF),
 		use_case.NewRecordOrErrorWithError(io.ErrClosedPipe),
+		use_case.NewRecordOrErrorWithError(io.EOF), // terminate the reading
 		use_case.NewRecordOrErrorWithError(io.EOF),
+		use_case.NewRecordOrErrorWithRecord(&business.ChatRecord{}),
+		use_case.NewRecordOrErrorWithRecord(&business.ChatRecord{}),
 	}
 	expectReaderToReadRecordsOrErrors(t, proxyReader, expectedRecordsOrErrors)
+}
+
+func TestReader_Read_ResumeReadingManyTimes(t *testing.T) {
+	// Given
+	ctrl := gomock.NewController(t)
+	reader := use_case.NewMockReader(ctrl)
+	maxRetryTimes := uint(3)
+	proxyReader := NewRetryReader(reader, maxRetryTimes)
+
+	firstSequenceOfRecords := []*use_case.RecordOrError{
+		use_case.NewRecordOrErrorWithRecord(&business.ChatRecord{}),
+		use_case.NewRecordOrErrorWithError(io.EOF),
+		use_case.NewRecordOrErrorWithRecord(&business.ChatRecord{}),
+		use_case.NewRecordOrErrorWithError(io.EOF),
+		use_case.NewRecordOrErrorWithRecord(&business.ChatRecord{}),
+		use_case.NewRecordOrErrorWithError(io.EOF),
+	}
+
+	// When
+	use_case.EncounterErrorWhileReadingRecords(reader, firstSequenceOfRecords)
+
+	// Then
+	expectReaderToReadRecordsOrErrors(t, proxyReader, firstSequenceOfRecords)
 }
 
 func expectReaderToReadRecordsOrErrors(t *testing.T, reader use_case.Reader, records []*use_case.RecordOrError) {
