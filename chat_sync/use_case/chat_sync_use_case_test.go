@@ -79,14 +79,14 @@ func TestReaderError_beforeReading(t *testing.T) {
 	writer := NewMockWriter(ctrl)
 	useCase := NewChatSyncUseCase(reader, writer)
 
-	records := []*RecordOrError{
+	records := []RecordOrError{
 		NewRecordOrErrorWithError(io.ErrClosedPipe),
 		NewRecordOrErrorWithRecord(&business.ChatRecord{}),
 	}
 	EncounterErrorWhileReadingRecords(reader, records)
 
 	// Then
-	writer.EXPECT().Write(records[1].Record).Times(1)
+	writer.EXPECT().Write(records[1].Record()).Times(1)
 
 	// When
 	useCase.Run(ctx)
@@ -100,7 +100,7 @@ func TestReaderError_whileReading(t *testing.T) {
 	writer := NewMockWriter(ctrl)
 	useCase := NewChatSyncUseCase(reader, writer)
 
-	records := []*RecordOrError{
+	records := []RecordOrError{
 		NewRecordOrErrorWithRecord(&business.ChatRecord{}),
 		NewRecordOrErrorWithError(io.ErrClosedPipe),
 		NewRecordOrErrorWithRecord(&business.ChatRecord{}),
@@ -108,8 +108,8 @@ func TestReaderError_whileReading(t *testing.T) {
 	EncounterErrorWhileReadingRecords(reader, records)
 
 	// Then
-	writer.EXPECT().Write(gomock.Eq(records[0].Record)).Times(1)
-	writer.EXPECT().Write(gomock.Eq(records[2].Record)).Times(1)
+	writer.EXPECT().Write(gomock.Eq(records[0].Record())).Times(1)
+	writer.EXPECT().Write(gomock.Eq(records[2].Record())).Times(1)
 
 	// When
 	useCase.Run(ctx)
@@ -171,7 +171,7 @@ func TestAccumulateErrors_readerError(t *testing.T) {
 	writer := NewMockWriter(ctrl)
 	useCase := NewChatSyncUseCase(reader, writer)
 
-	records := []*RecordOrError{
+	records := []RecordOrError{
 		NewRecordOrErrorWithError(io.ErrClosedPipe),
 		NewRecordOrErrorWithRecord(&business.ChatRecord{}),
 		NewRecordOrErrorWithError(io.ErrNoProgress),
@@ -179,7 +179,7 @@ func TestAccumulateErrors_readerError(t *testing.T) {
 	EncounterErrorWhileReadingRecords(reader, records)
 
 	// Then
-	writer.EXPECT().Write(gomock.Eq(records[1].Record)).Times(1).Return(nil)
+	writer.EXPECT().Write(gomock.Eq(records[1].Record())).Times(1).Return(nil)
 
 	// When
 	errs := useCase.Run(ctx)
@@ -231,7 +231,7 @@ func TestAccumulateErrors_readAndWriteErrors(t *testing.T) {
 	writer := NewMockWriter(ctrl)
 	useCase := NewChatSyncUseCase(reader, writer)
 
-	records := []*RecordOrError{
+	records := []RecordOrError{
 		NewRecordOrErrorWithError(io.ErrUnexpectedEOF),
 		NewRecordOrErrorWithError(io.ErrShortBuffer),
 		NewRecordOrErrorWithRecord(&business.ChatRecord{}),
@@ -239,14 +239,14 @@ func TestAccumulateErrors_readAndWriteErrors(t *testing.T) {
 	EncounterErrorWhileReadingRecords(reader, records)
 
 	// Then
-	writer.EXPECT().Write(gomock.Eq(records[2].Record)).Times(1).Return(io.ErrNoProgress)
+	writer.EXPECT().Write(gomock.Eq(records[2].Record())).Times(1).Return(io.ErrNoProgress)
 
 	// When
 	errs := useCase.Run(ctx)
 	expectedErrs := []*SyncError{
 		NewReaderError(io.ErrUnexpectedEOF),
 		NewReaderError(io.ErrShortBuffer),
-		NewWriterError(io.ErrNoProgress, records[2].Record),
+		NewWriterError(io.ErrNoProgress, records[2].Record()),
 	}
 	if !reflect.DeepEqual(errs, expectedErrs) {
 		t.Errorf("accumulated errors are not equal, expected: %+v, actual: %+v", expectedErrs, errs)

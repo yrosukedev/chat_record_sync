@@ -6,30 +6,44 @@ import (
 	"io"
 )
 
-type RecordOrErrorInnerType = string
-
-var (
-	RecordOrErrorInnerTypeRecord RecordOrErrorInnerType = "Record"
-	RecordOrErrorInnerTypeError  RecordOrErrorInnerType = "Error"
-)
-
-type RecordOrError struct {
-	InnerType RecordOrErrorInnerType
-	Record    *business.ChatRecord
-	Err       error
+type RecordOrError interface {
+	Record() *business.ChatRecord
+	Error() error
 }
 
-func NewRecordOrErrorWithRecord(record *business.ChatRecord) *RecordOrError {
-	return &RecordOrError{
-		InnerType: RecordOrErrorInnerTypeRecord,
-		Record:    record,
+type RecordWrapper struct {
+	record *business.ChatRecord
+}
+
+func (r RecordWrapper) Record() *business.ChatRecord {
+	return r.record
+}
+
+func (r RecordWrapper) Error() error {
+	return nil
+}
+
+type ErrorWrapper struct {
+	err error
+}
+
+func (e ErrorWrapper) Record() *business.ChatRecord {
+	return nil
+}
+
+func (e ErrorWrapper) Error() error {
+	return e.err
+}
+
+func NewRecordOrErrorWithRecord(record *business.ChatRecord) RecordOrError {
+	return RecordWrapper{
+		record: record,
 	}
 }
 
-func NewRecordOrErrorWithError(err error) *RecordOrError {
-	return &RecordOrError{
-		InnerType: RecordOrErrorInnerTypeError,
-		Err:       err,
+func NewRecordOrErrorWithError(err error) RecordOrError {
+	return ErrorWrapper{
+		err: err,
 	}
 }
 
@@ -57,7 +71,7 @@ func GivenRecordsToRead(reader *MockReader, records []*business.ChatRecord) {
 		AnyTimes()
 }
 
-func EncounterErrorWhileReadingRecords(reader *MockReader, records []*RecordOrError) {
+func EncounterErrorWhileReadingRecords(reader *MockReader, records []RecordOrError) {
 	idx := 0
 	reader.
 		EXPECT().
@@ -69,12 +83,13 @@ func EncounterErrorWhileReadingRecords(reader *MockReader, records []*RecordOrEr
 
 			defer func() { idx += 1 }()
 
-			record := records[idx]
-			switch record.InnerType {
-			case RecordOrErrorInnerTypeError:
-				return nil, record.Err
+			switch record := records[idx].(type) {
+			case ErrorWrapper:
+				return nil, record.Error()
+			case RecordWrapper:
+				return record.Record(), nil
 			default:
-				return record.Record, nil
+				return nil, nil
 			}
 		}).
 		AnyTimes()

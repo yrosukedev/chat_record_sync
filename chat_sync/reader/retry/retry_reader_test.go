@@ -82,7 +82,7 @@ func TestOneSequenceOfConsecutiveErrors_oneError_errorCountsLessThanMaxRetryTime
 	proxyReader := NewRetryReader(reader, maxRetryTimes)
 
 	// When
-	records := []*use_case.RecordOrError{
+	records := []use_case.RecordOrError{
 		use_case.NewRecordOrErrorWithRecord(&business.ChatRecord{}),
 		use_case.NewRecordOrErrorWithError(io.ErrShortBuffer),
 		use_case.NewRecordOrErrorWithRecord(&business.ChatRecord{}),
@@ -101,7 +101,7 @@ func TestOneSequenceOfConsecutiveErrors_oneError_errorCountsEqualToMaxRetryTimes
 	proxyReader := NewRetryReader(reader, maxRetryTimes)
 
 	// When
-	records := []*use_case.RecordOrError{
+	records := []use_case.RecordOrError{
 		use_case.NewRecordOrErrorWithRecord(&business.ChatRecord{}),
 		use_case.NewRecordOrErrorWithError(io.ErrShortBuffer),
 		use_case.NewRecordOrErrorWithRecord(&business.ChatRecord{}),
@@ -120,7 +120,7 @@ func TestOneSequenceOfConsecutiveErrors_oneError_errorCountsGreaterThanMaxRetryT
 	proxyReader := NewRetryReader(reader, maxRetryTimes)
 
 	// When
-	records := []*use_case.RecordOrError{
+	records := []use_case.RecordOrError{
 		use_case.NewRecordOrErrorWithRecord(&business.ChatRecord{}),
 		use_case.NewRecordOrErrorWithError(io.ErrShortBuffer),
 		use_case.NewRecordOrErrorWithRecord(&business.ChatRecord{}),
@@ -128,7 +128,7 @@ func TestOneSequenceOfConsecutiveErrors_oneError_errorCountsGreaterThanMaxRetryT
 	use_case.EncounterErrorWhileReadingRecords(reader, records)
 
 	// Then
-	expectedRecordsOrErrors := []*use_case.RecordOrError{
+	expectedRecordsOrErrors := []use_case.RecordOrError{
 		use_case.NewRecordOrErrorWithRecord(&business.ChatRecord{}),
 		use_case.NewRecordOrErrorWithError(io.ErrShortBuffer),
 		use_case.NewRecordOrErrorWithRecord(&business.ChatRecord{}),
@@ -144,7 +144,7 @@ func TestOneSequenceOfConsecutiveErrors_manyErrors_errorCountsLessThanMaxRetryTi
 	proxyReader := NewRetryReader(reader, maxRetryTimes)
 
 	// When
-	records := []*use_case.RecordOrError{
+	records := []use_case.RecordOrError{
 		use_case.NewRecordOrErrorWithRecord(&business.ChatRecord{}),
 		use_case.NewRecordOrErrorWithError(io.ErrShortBuffer),
 		use_case.NewRecordOrErrorWithError(io.ErrNoProgress),
@@ -165,7 +165,7 @@ func TestOneSequenceOfConsecutiveErrors_manyErrors_errorCountsEqualToMaxRetryTim
 	proxyReader := NewRetryReader(reader, maxRetryTimes)
 
 	// When
-	records := []*use_case.RecordOrError{
+	records := []use_case.RecordOrError{
 		use_case.NewRecordOrErrorWithRecord(&business.ChatRecord{}),
 		use_case.NewRecordOrErrorWithError(io.ErrShortBuffer),
 		use_case.NewRecordOrErrorWithError(io.ErrUnexpectedEOF),
@@ -187,7 +187,7 @@ func TestOneSequenceOfConsecutiveErrors_manyErrors_errorCountsGreaterThanMaxRetr
 	proxyReader := NewRetryReader(reader, maxRetryTimes)
 
 	// When
-	records := []*use_case.RecordOrError{
+	records := []use_case.RecordOrError{
 		use_case.NewRecordOrErrorWithRecord(&business.ChatRecord{}),
 		use_case.NewRecordOrErrorWithError(io.ErrShortBuffer),
 		use_case.NewRecordOrErrorWithError(io.ErrUnexpectedEOF),
@@ -199,7 +199,7 @@ func TestOneSequenceOfConsecutiveErrors_manyErrors_errorCountsGreaterThanMaxRetr
 	use_case.EncounterErrorWhileReadingRecords(reader, records)
 
 	// Then
-	expectedRecordsOrErrors := []*use_case.RecordOrError{
+	expectedRecordsOrErrors := []use_case.RecordOrError{
 		use_case.NewRecordOrErrorWithRecord(&business.ChatRecord{}),
 		use_case.NewRecordOrErrorWithError(io.ErrShortBuffer),
 		use_case.NewRecordOrErrorWithError(io.ErrUnexpectedEOF),
@@ -219,7 +219,7 @@ func TestManySequencesOfConsecutiveErrors_errorCountLessThanMaxRetryTimes(t *tes
 	proxyReader := NewRetryReader(reader, maxRetryTimes)
 
 	// When
-	records := []*use_case.RecordOrError{
+	records := []use_case.RecordOrError{
 		use_case.NewRecordOrErrorWithRecord(&business.ChatRecord{}),
 		use_case.NewRecordOrErrorWithError(io.ErrShortBuffer),
 		use_case.NewRecordOrErrorWithError(io.ErrUnexpectedEOF),
@@ -248,7 +248,7 @@ func TestManySequencesOfConsecutiveErrors_errorCountEqualToMaxRetryTimes(t *test
 	proxyReader := NewRetryReader(reader, maxRetryTimes)
 
 	// When
-	records := []*use_case.RecordOrError{
+	records := []use_case.RecordOrError{
 		use_case.NewRecordOrErrorWithRecord(&business.ChatRecord{}),
 		use_case.NewRecordOrErrorWithRecord(&business.ChatRecord{}),
 		use_case.NewRecordOrErrorWithError(io.ErrUnexpectedEOF),
@@ -277,7 +277,7 @@ func TestManySequencesOfConsecutiveErrors_errorCountGreaterThanMaxRetryTimes(t *
 	proxyReader := NewRetryReader(reader, maxRetryTimes)
 
 	// When
-	records := []*use_case.RecordOrError{
+	records := []use_case.RecordOrError{
 		use_case.NewRecordOrErrorWithRecord(&business.ChatRecord{}),
 		use_case.NewRecordOrErrorWithRecord(&business.ChatRecord{}),
 		use_case.NewRecordOrErrorWithError(io.ErrUnexpectedEOF),
@@ -296,7 +296,7 @@ func TestManySequencesOfConsecutiveErrors_errorCountGreaterThanMaxRetryTimes(t *
 	use_case.EncounterErrorWhileReadingRecords(reader, records)
 
 	// Then
-	expectedRecordsOrErrors := []*use_case.RecordOrError{
+	expectedRecordsOrErrors := []use_case.RecordOrError{
 		use_case.NewRecordOrErrorWithRecord(&business.ChatRecord{}),
 		use_case.NewRecordOrErrorWithRecord(&business.ChatRecord{}),
 		use_case.NewRecordOrErrorWithError(io.ErrUnexpectedEOF),
@@ -322,7 +322,7 @@ func TestReader_Read_ResumeReadingManyTimes(t *testing.T) {
 	maxRetryTimes := uint(3)
 	proxyReader := NewRetryReader(reader, maxRetryTimes)
 
-	firstSequenceOfRecords := []*use_case.RecordOrError{
+	firstSequenceOfRecords := []use_case.RecordOrError{
 		use_case.NewRecordOrErrorWithRecord(&business.ChatRecord{}),
 		use_case.NewRecordOrErrorWithError(io.EOF),
 		use_case.NewRecordOrErrorWithRecord(&business.ChatRecord{}),
@@ -338,14 +338,14 @@ func TestReader_Read_ResumeReadingManyTimes(t *testing.T) {
 	expectReaderToReadRecordsOrErrors(t, proxyReader, firstSequenceOfRecords)
 }
 
-func expectReaderToReadRecordsOrErrors(t *testing.T, reader use_case.Reader, records []*use_case.RecordOrError) {
-	for _, record := range records {
-		switch record.InnerType {
-		case use_case.RecordOrErrorInnerTypeError:
-			if _, err := reader.Read(); err != record.Err {
-				t.Errorf("error should happen here, expected: %+v, actual: %+v", record.Err, err)
+func expectReaderToReadRecordsOrErrors(t *testing.T, reader use_case.Reader, records []use_case.RecordOrError) {
+	for _, r := range records {
+		switch record := r.(type) {
+		case use_case.ErrorWrapper:
+			if _, err := reader.Read(); err != record.Error() {
+				t.Errorf("error should happen here, expected: %+v, actual: %+v", record.Error(), err)
 			}
-		case use_case.RecordOrErrorInnerTypeRecord:
+		case use_case.RecordWrapper:
 			if _, err := reader.Read(); err != nil {
 				t.Errorf("error should not happen here, expected: %+v, actual: %+v", nil, err)
 			}
