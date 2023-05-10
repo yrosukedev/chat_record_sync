@@ -7,6 +7,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/business"
 	"github.com/yrosukedev/chat_record_sync/chat_sync/use_case"
+	"github.com/yrosukedev/chat_record_sync/utils"
 	"io"
 	"net/http"
 	"strings"
@@ -67,7 +68,7 @@ func TestFails(t *testing.T) {
 
 	chatSyncReponse := ChatSyncResponse{
 		Code: ResponseCodeFailure,
-		Msg:  fmt.Sprintf("%v\n%v", ResponseMsgFailure, combineErrors(errs)),
+		Msg:  fmt.Sprintf("%v\n%v", ResponseMsgFailure, utils.CombineErrors(errs)),
 	}
 
 	chatSyncReponseJson, err := json.Marshal(chatSyncReponse)

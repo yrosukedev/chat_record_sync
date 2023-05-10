@@ -1,11 +1,11 @@
-package http_controller
+package utils
 
 import (
 	"errors"
 	"strings"
 )
 
-func combineErrors[E error](errs []E) error {
+func CombineErrors[E error](errs []E) error {
 	var msgs []string
 	for _, err := range errs {
 		msgs = append(msgs, err.Error())

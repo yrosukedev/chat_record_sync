@@ -4,18 +4,19 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	use_case2 "github.com/yrosukedev/chat_record_sync/chat_sync/use_case"
+	"github.com/yrosukedev/chat_record_sync/chat_sync/use_case"
 	"github.com/yrosukedev/chat_record_sync/logger"
+	"github.com/yrosukedev/chat_record_sync/utils"
 	"net/http"
 )
 
 type ChatSyncHTTPController struct {
 	ctx     context.Context
-	useCase use_case2.UseCase
+	useCase use_case.UseCase
 	logger  logger.Logger
 }
 
-func NewChatSyncHTTPController(ctx context.Context, useCase use_case2.UseCase, logger logger.Logger) http.Handler {
+func NewChatSyncHTTPController(ctx context.Context, useCase use_case.UseCase, logger logger.Logger) http.Handler {
 	return &ChatSyncHTTPController{
 		ctx:     ctx,
 		useCase: useCase,
@@ -30,7 +31,7 @@ func (c *ChatSyncHTTPController) ServeHTTP(writer http.ResponseWriter, request *
 	errs := c.useCase.Run(c.ctx)
 
 	if len(errs) != 0 {
-		c.logger.Error(c.ctx, "[chat sync http controller] use case is finished with errors: %v", combineErrors(errs))
+		c.logger.Error(c.ctx, "[chat sync http controller] use case is finished with errors: %v", utils.CombineErrors(errs))
 		c.writeFailureResponse(writer, errs)
 		return
 	}
@@ -40,12 +41,12 @@ func (c *ChatSyncHTTPController) ServeHTTP(writer http.ResponseWriter, request *
 	c.writeSuccessResponse(writer)
 }
 
-func (c *ChatSyncHTTPController) writeFailureResponse(writer http.ResponseWriter, errs []*use_case2.SyncError) {
+func (c *ChatSyncHTTPController) writeFailureResponse(writer http.ResponseWriter, errs []*use_case.SyncError) {
 	writer.WriteHeader(http.StatusInternalServerError)
 
 	response := ChatSyncResponse{
 		Code: ResponseCodeFailure,
-		Msg:  fmt.Sprintf("%v\n%v", ResponseCodeFailure.Msg(), combineErrors(errs)),
+		Msg:  fmt.Sprintf("%v\n%v", ResponseCodeFailure.Msg(), utils.CombineErrors(errs)),
 	}
 	c.writeResponseBody(writer, response)
 }
