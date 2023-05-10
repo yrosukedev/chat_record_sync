@@ -3,6 +3,7 @@ package business
 import "time"
 
 type ChatRecord struct {
+	Seq     uint64
 	MsgId   string
 	Action  string
 	From    *User
@@ -11,6 +12,7 @@ type ChatRecord struct {
 	MsgTime time.Time
 	MsgType string
 	Content string
+	Raw     string
 }
 
 type User struct {

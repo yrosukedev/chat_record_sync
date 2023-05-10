@@ -1,6 +1,7 @@
 package consts
 
 const (
+	BitableFieldChatRecordSeq           = "seq"
 	BitableFieldChatRecordMsgId         = "msg_id"
 	BitableFieldChatRecordAction        = "action"
 	BitableFieldChatRecordFrom          = "from"
@@ -14,4 +15,5 @@ const (
 	BitableFieldChatRecordMsgTime       = "msg_time"
 	BitableFieldChatRecordMsgType       = "msg_type"
 	BitableFieldChatRecordContent       = "content"
+	BitableFieldChatRecordRaw           = "raw"
 )

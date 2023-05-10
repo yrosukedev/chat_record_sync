@@ -92,10 +92,12 @@ func (b *BitableFieldsFormatter) senderFields(record *business.ChatRecord) (map[
 
 func (b *BitableFieldsFormatter) basicFields(record *business.ChatRecord) (map[string]interface{}, error) {
 	return map[string]interface{}{
+		consts.BitableFieldChatRecordSeq:     record.Seq,
 		consts.BitableFieldChatRecordMsgId:   record.MsgId,
 		consts.BitableFieldChatRecordAction:  record.Action,
 		consts.BitableFieldChatRecordMsgTime: record.MsgTime.UnixMilli(),
 		consts.BitableFieldChatRecordMsgType: record.MsgType,
 		consts.BitableFieldChatRecordContent: record.Content,
+		consts.BitableFieldChatRecordRaw:     record.Raw,
 	}, nil
 }

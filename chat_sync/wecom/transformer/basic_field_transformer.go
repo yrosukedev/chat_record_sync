@@ -21,6 +21,7 @@ func (t *BasicFieldTransformer) Transform(wecomRecord *wecom.ChatRecord, chatRec
 
 	updatedChatRecord = t.copyInputIfNeeded(chatRecord)
 
+	updatedChatRecord.Seq = wecomRecord.Seq
 	updatedChatRecord.MsgId = wecomRecord.MsgID
 	updatedChatRecord.MsgTime = time.UnixMilli(wecomRecord.MsgTime)
 	updatedChatRecord.Action = wecomRecord.Action
@@ -28,6 +29,7 @@ func (t *BasicFieldTransformer) Transform(wecomRecord *wecom.ChatRecord, chatRec
 	updatedChatRecord.Room = &business.Room{
 		RoomId: wecomRecord.RoomID,
 	}
+	updatedChatRecord.Raw = string(wecomRecord.OriginMessage)
 
 	return updatedChatRecord, nil
 }

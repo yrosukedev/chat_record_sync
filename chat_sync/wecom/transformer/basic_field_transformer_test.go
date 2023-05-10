@@ -12,13 +12,16 @@ func TestBasicFieldTransformer_Transform_nilChatRecord(t *testing.T) {
 	// Given
 	transformer := NewBasicFieldTransformer()
 	wecomRecord := &wecom.ChatRecord{
-		MsgID:   "::whatever msg id::",
-		MsgTime: 12345579,
-		Action:  "::whatever action::",
-		MsgType: "::whatever msg type::",
-		RoomID:  "::whatever room id::",
+		Seq:           987456321,
+		MsgID:         "::whatever msg id::",
+		MsgTime:       12345579,
+		Action:        "::whatever action::",
+		MsgType:       "::whatever msg type::",
+		RoomID:        "::whatever room id::",
+		OriginMessage: []byte("::whatever origin message::"),
 	}
 	expectedChatRecord := &business.ChatRecord{
+		Seq:     987456321,
 		MsgId:   "::whatever msg id::",
 		MsgTime: time.UnixMilli(12345579),
 		Action:  "::whatever action::",
@@ -26,6 +29,7 @@ func TestBasicFieldTransformer_Transform_nilChatRecord(t *testing.T) {
 		Room: &business.Room{
 			RoomId: "::whatever room id::",
 		},
+		Raw: "::whatever origin message::",
 	}
 
 	// When
@@ -54,13 +58,16 @@ func TestBasicFieldTransformer_Transform_dontChangeInputs(t *testing.T) {
 	// Given
 	transformer := NewBasicFieldTransformer()
 	wecomRecord := &wecom.ChatRecord{
-		MsgID:   "::whatever msg id::",
-		MsgTime: 12345579,
-		Action:  "::whatever action::",
-		MsgType: "::whatever msg type::",
-		RoomID:  "::whatever room id::",
+		Seq:           987456321,
+		MsgID:         "::whatever msg id::",
+		MsgTime:       12345579,
+		Action:        "::whatever action::",
+		MsgType:       "::whatever msg type::",
+		RoomID:        "::whatever room id::",
+		OriginMessage: []byte("::whatever origin message::"),
 	}
 	chatRecord := &business.ChatRecord{
+		Seq:     123456789,
 		MsgId:   "::whatever msg id can't be changed::",
 		MsgTime: time.UnixMilli(9876543),
 		Action:  "::whatever action  can't be changed::",
@@ -68,8 +75,10 @@ func TestBasicFieldTransformer_Transform_dontChangeInputs(t *testing.T) {
 		Room: &business.Room{
 			RoomId: "::whatever room id can't be changed::",
 		},
+		Raw: "::whatever origin message can't be changed::",
 	}
 	expectedChatRecord := &business.ChatRecord{
+		Seq:     987456321,
 		MsgId:   "::whatever msg id::",
 		MsgTime: time.UnixMilli(12345579),
 		Action:  "::whatever action::",
@@ -77,6 +86,7 @@ func TestBasicFieldTransformer_Transform_dontChangeInputs(t *testing.T) {
 		Room: &business.Room{
 			RoomId: "::whatever room id::",
 		},
+		Raw: "::whatever origin message::",
 	}
 
 	// When
@@ -91,5 +101,7 @@ func TestBasicFieldTransformer_Transform_dontChangeInputs(t *testing.T) {
 		assert.Equal(t, "::whatever action  can't be changed::", chatRecord.Action)
 		assert.Equal(t, "::whatever msg type  can't be changed::", chatRecord.MsgType)
 		assert.Equal(t, "::whatever room id can't be changed::", chatRecord.Room.RoomId)
+		assert.Equal(t, "::whatever origin message can't be changed::", chatRecord.Raw)
+		assert.Equal(t, uint64(123456789), chatRecord.Seq)
 	}
 }

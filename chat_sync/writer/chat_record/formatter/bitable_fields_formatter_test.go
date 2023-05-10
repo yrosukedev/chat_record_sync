@@ -13,11 +13,13 @@ func TestBitableFieldsFormatter_Format(t *testing.T) {
 	formatter := NewBitableFieldsFormatter()
 
 	chatRecord := &business.ChatRecord{
+		Seq:     987654321,
 		MsgId:   "::whatever MsgId::",
 		Action:  "::whatever Action::",
 		MsgType: "::whatever MsgType::",
 		MsgTime: time.UnixMilli(1610000000000),
 		Content: "::whatever Content::",
+		Raw:     "::whatever Raw::",
 		From: &business.User{
 			UserId: "::whatever UserId::",
 			Name:   "::whatever UserName::",
@@ -38,11 +40,13 @@ func TestBitableFieldsFormatter_Format(t *testing.T) {
 		},
 	}
 	expectedFields := map[string]interface{}{
+		consts.BitableFieldChatRecordSeq:           uint64(987654321),
 		consts.BitableFieldChatRecordMsgId:         "::whatever MsgId::",
 		consts.BitableFieldChatRecordAction:        "::whatever Action::",
 		consts.BitableFieldChatRecordMsgType:       "::whatever MsgType::",
 		consts.BitableFieldChatRecordMsgTime:       int64(1610000000000),
 		consts.BitableFieldChatRecordContent:       "::whatever Content::",
+		consts.BitableFieldChatRecordRaw:           "::whatever Raw::",
 		consts.BitableFieldChatRecordSenderId:      "::whatever UserId::",
 		consts.BitableFieldChatRecordSenderName:    "::whatever UserName::",
 		consts.BitableFieldChatRecordReceiverIds:   "::whatever Contact Id A::,::whatever Contact Id B::",
@@ -65,11 +69,13 @@ func TestBitableFieldsFormatter_Format_NilSender(t *testing.T) {
 	formatter := NewBitableFieldsFormatter()
 
 	chatRecord := &business.ChatRecord{
+		Seq:     987654321,
 		MsgId:   "::whatever MsgId::",
 		Action:  "::whatever Action::",
 		MsgType: "::whatever MsgType::",
 		MsgTime: time.UnixMilli(1610000000000),
 		Content: "::whatever Content::",
+		Raw:     "::whatever Raw::",
 		To: []*business.User{
 			{
 				UserId: "::whatever Contact Id A::",
@@ -86,11 +92,13 @@ func TestBitableFieldsFormatter_Format_NilSender(t *testing.T) {
 		},
 	}
 	expectedFields := map[string]interface{}{
+		consts.BitableFieldChatRecordSeq:           uint64(987654321),
 		consts.BitableFieldChatRecordMsgId:         "::whatever MsgId::",
 		consts.BitableFieldChatRecordAction:        "::whatever Action::",
 		consts.BitableFieldChatRecordMsgType:       "::whatever MsgType::",
 		consts.BitableFieldChatRecordMsgTime:       int64(1610000000000),
 		consts.BitableFieldChatRecordContent:       "::whatever Content::",
+		consts.BitableFieldChatRecordRaw:           "::whatever Raw::",
 		consts.BitableFieldChatRecordSenderId:      "",
 		consts.BitableFieldChatRecordSenderName:    "",
 		consts.BitableFieldChatRecordReceiverIds:   "::whatever Contact Id A::,::whatever Contact Id B::",
@@ -113,11 +121,13 @@ func TestBitableFieldsFormatter_Format_NilReceiver(t *testing.T) {
 	formatter := NewBitableFieldsFormatter()
 
 	chatRecord := &business.ChatRecord{
+		Seq:     987654321,
 		MsgId:   "::whatever MsgId::",
 		Action:  "::whatever Action::",
 		MsgType: "::whatever MsgType::",
 		MsgTime: time.UnixMilli(1610000000000),
 		Content: "::whatever Content::",
+		Raw:     "::whatever Raw::",
 		From: &business.User{
 			UserId: "::whatever UserId::",
 			Name:   "::whatever UserName::",
@@ -128,11 +138,13 @@ func TestBitableFieldsFormatter_Format_NilReceiver(t *testing.T) {
 		},
 	}
 	expectedFields := map[string]interface{}{
+		consts.BitableFieldChatRecordSeq:           uint64(987654321),
 		consts.BitableFieldChatRecordMsgId:         "::whatever MsgId::",
 		consts.BitableFieldChatRecordAction:        "::whatever Action::",
 		consts.BitableFieldChatRecordMsgType:       "::whatever MsgType::",
 		consts.BitableFieldChatRecordMsgTime:       int64(1610000000000),
 		consts.BitableFieldChatRecordContent:       "::whatever Content::",
+		consts.BitableFieldChatRecordRaw:           "::whatever Raw::",
 		consts.BitableFieldChatRecordSenderId:      "::whatever UserId::",
 		consts.BitableFieldChatRecordSenderName:    "::whatever UserName::",
 		consts.BitableFieldChatRecordReceiverIds:   "",
@@ -155,11 +167,13 @@ func TestBitableFieldsFormatter_Format_ZeroReceiver(t *testing.T) {
 	formatter := NewBitableFieldsFormatter()
 
 	chatRecord := &business.ChatRecord{
+		Seq:     987654321,
 		MsgId:   "::whatever MsgId::",
 		Action:  "::whatever Action::",
 		MsgType: "::whatever MsgType::",
 		MsgTime: time.UnixMilli(1610000000000),
 		Content: "::whatever Content::",
+		Raw:     "::whatever Raw::",
 		From: &business.User{
 			UserId: "::whatever UserId::",
 			Name:   "::whatever UserName::",
@@ -171,11 +185,13 @@ func TestBitableFieldsFormatter_Format_ZeroReceiver(t *testing.T) {
 		},
 	}
 	expectedFields := map[string]interface{}{
+		consts.BitableFieldChatRecordSeq:           uint64(987654321),
 		consts.BitableFieldChatRecordMsgId:         "::whatever MsgId::",
 		consts.BitableFieldChatRecordAction:        "::whatever Action::",
 		consts.BitableFieldChatRecordMsgType:       "::whatever MsgType::",
 		consts.BitableFieldChatRecordMsgTime:       int64(1610000000000),
 		consts.BitableFieldChatRecordContent:       "::whatever Content::",
+		consts.BitableFieldChatRecordRaw:           "::whatever Raw::",
 		consts.BitableFieldChatRecordSenderId:      "::whatever UserId::",
 		consts.BitableFieldChatRecordSenderName:    "::whatever UserName::",
 		consts.BitableFieldChatRecordReceiverIds:   "",
@@ -198,11 +214,13 @@ func TestBitableFieldsFormatter_Format_OneReceiver(t *testing.T) {
 	formatter := NewBitableFieldsFormatter()
 
 	chatRecord := &business.ChatRecord{
+		Seq:     987654321,
 		MsgId:   "::whatever MsgId::",
 		Action:  "::whatever Action::",
 		MsgType: "::whatever MsgType::",
 		MsgTime: time.UnixMilli(1610000000000),
 		Content: "::whatever Content::",
+		Raw:     "::whatever Raw::",
 		From: &business.User{
 			UserId: "::whatever UserId::",
 			Name:   "::whatever UserName::",
@@ -219,11 +237,13 @@ func TestBitableFieldsFormatter_Format_OneReceiver(t *testing.T) {
 		},
 	}
 	expectedFields := map[string]interface{}{
+		consts.BitableFieldChatRecordSeq:           uint64(987654321),
 		consts.BitableFieldChatRecordMsgId:         "::whatever MsgId::",
 		consts.BitableFieldChatRecordAction:        "::whatever Action::",
 		consts.BitableFieldChatRecordMsgType:       "::whatever MsgType::",
 		consts.BitableFieldChatRecordMsgTime:       int64(1610000000000),
 		consts.BitableFieldChatRecordContent:       "::whatever Content::",
+		consts.BitableFieldChatRecordRaw:           "::whatever Raw::",
 		consts.BitableFieldChatRecordSenderId:      "::whatever UserId::",
 		consts.BitableFieldChatRecordSenderName:    "::whatever UserName::",
 		consts.BitableFieldChatRecordReceiverIds:   "::whatever Contact Id A::",
@@ -246,11 +266,13 @@ func TestBitableFieldsFormatter_Format_NilRoom(t *testing.T) {
 	formatter := NewBitableFieldsFormatter()
 
 	chatRecord := &business.ChatRecord{
+		Seq:     987654321,
 		MsgId:   "::whatever MsgId::",
 		Action:  "::whatever Action::",
 		MsgType: "::whatever MsgType::",
 		MsgTime: time.UnixMilli(1610000000000),
 		Content: "::whatever Content::",
+		Raw:     "::whatever Raw::",
 		From: &business.User{
 			UserId: "::whatever UserId::",
 			Name:   "::whatever UserName::",
@@ -267,11 +289,13 @@ func TestBitableFieldsFormatter_Format_NilRoom(t *testing.T) {
 		},
 	}
 	expectedFields := map[string]interface{}{
+		consts.BitableFieldChatRecordSeq:           uint64(987654321),
 		consts.BitableFieldChatRecordMsgId:         "::whatever MsgId::",
 		consts.BitableFieldChatRecordAction:        "::whatever Action::",
 		consts.BitableFieldChatRecordMsgType:       "::whatever MsgType::",
 		consts.BitableFieldChatRecordMsgTime:       int64(1610000000000),
 		consts.BitableFieldChatRecordContent:       "::whatever Content::",
+		consts.BitableFieldChatRecordRaw:           "::whatever Raw::",
 		consts.BitableFieldChatRecordSenderId:      "::whatever UserId::",
 		consts.BitableFieldChatRecordSenderName:    "::whatever UserName::",
 		consts.BitableFieldChatRecordReceiverIds:   "::whatever Contact Id A::,::whatever Contact Id B::",
